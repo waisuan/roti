@@ -1,16 +1,20 @@
 
 import controllers.AuthController
+import controllers.MachineController
 import controllers.UserController
 import dao.UserDao
+import exceptions.RecordNotFoundException
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
+import io.javalin.apibuilder.ApiBuilder.put
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import tables.MachineTable
 
 fun main() {
     init()
@@ -24,6 +28,18 @@ fun main() {
                 post(UserController::loginUser)
             }
         }
+        path("machines") {
+            get(MachineController::getAllMachines)
+            post(MachineController::createMachine)
+            path(":serialNumber") {
+                put(MachineController::updateMachine)
+            }
+        }
+    }
+
+    app.exception(RecordNotFoundException::class.java) { e, ctx ->
+        ctx.result(e.message!!)
+        ctx.status(404)
     }
 }
 
@@ -37,6 +53,6 @@ fun init() {
 
     transaction {
         addLogger(StdOutSqlLogger)
-        SchemaUtils.create(UserDao)
+        SchemaUtils.create(UserDao, MachineTable)
     }
 }

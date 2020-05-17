@@ -28,7 +28,7 @@ class AuthControllerTest {
 
         whenever(context.header(any())).thenReturn("Bearer $token")
         whenever(context.matchedPath()).thenReturn("/some/path")
-        whenever(context.method() ).thenReturn("GET")
+        whenever(context.method()).thenReturn("GET")
         whenever(context.status(any())).thenReturn(context)
         whenever(handler.handle(any())).doAnswer { Unit }
 
@@ -44,7 +44,7 @@ class AuthControllerTest {
 
         whenever(context.header(any())).thenReturn("Bearer BAD_TOKEN")
         whenever(context.matchedPath()).thenReturn("/some/path")
-        whenever(context.method() ).thenReturn("GET")
+        whenever(context.method()).thenReturn("GET")
         whenever(context.status(any())).thenReturn(context)
         whenever(handler.handle(any())).doAnswer { Unit }
 

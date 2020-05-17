@@ -40,7 +40,6 @@ object MachineService {
         transaction {
             val machine = MachineDao.find { MachineTable.serialNumber eq serialNumber }.firstOrNull()
             if (machine != null) {
-                machine.serialNumber = updatedMachine.serialNumber
                 machine.customer = updatedMachine.customer
                 machine.state = updatedMachine.state
                 machine.accountType = updatedMachine.accountType

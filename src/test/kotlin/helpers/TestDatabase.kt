@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import tables.MachineTable
 
 object TestDatabase {
     fun init() {
@@ -18,7 +19,7 @@ object TestDatabase {
 
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.create(UserDao)
+            SchemaUtils.create(UserDao, MachineTable)
         }
     }
 
@@ -26,6 +27,7 @@ object TestDatabase {
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.drop(UserDao)
+            SchemaUtils.drop(MachineTable)
         }
     }
 }

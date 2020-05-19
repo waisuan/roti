@@ -5,6 +5,7 @@ import controllers.UserController
 import dao.UserDao
 import exceptions.RecordNotFoundException
 import io.javalin.Javalin
+import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
@@ -33,6 +34,7 @@ fun main() {
             post(MachineController::createMachine)
             path(":serialNumber") {
                 put(MachineController::updateMachine)
+                delete(MachineController::deleteMachine)
             }
         }
     }

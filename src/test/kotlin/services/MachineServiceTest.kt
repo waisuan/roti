@@ -51,4 +51,14 @@ class MachineServiceTest {
         assertThat(createdMachines).isNotEmpty
         assertThat(createdMachines.size).isEqualTo(3)
     }
+
+    @Test
+    fun `deleteMachine() should delete machine successfully`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+
+        MachineService.deleteMachine("TEST01")
+
+        val createdMachines = MachineService.getAllMachines()
+        assertThat(createdMachines).isEmpty()
+    }
 }

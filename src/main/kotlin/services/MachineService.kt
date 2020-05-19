@@ -58,4 +58,15 @@ object MachineService {
             }
         }
     }
+
+    fun deleteMachine(serialNumber: String) {
+        transaction {
+            val machine = MachineDao.find { MachineTable.serialNumber eq serialNumber }.firstOrNull()
+            if (machine != null) {
+                machine.delete()
+            } else {
+                throw RecordNotFoundException()
+            }
+        }
+    }
 }

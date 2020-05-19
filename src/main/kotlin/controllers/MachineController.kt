@@ -16,4 +16,8 @@ object MachineController {
     fun updateMachine(ctx: Context) {
         MachineService.updateMachine(ctx.pathParam("serialNumber"), ctx.body<Machine>())
     }
+
+    fun deleteMachine(ctx: Context) {
+        MachineService.deleteMachine(ctx.pathParam("serialNumber"))
+    }
 }

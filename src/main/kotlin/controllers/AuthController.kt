@@ -16,6 +16,6 @@ object AuthController {
     }
 
     private fun isExcludedFromAuth(path: String, method: String): Boolean {
-        return path == "/users/:username" && method == "POST"
+        return path == "/users/login" && method == "POST"
     }
 }

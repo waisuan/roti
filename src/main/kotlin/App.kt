@@ -1,6 +1,7 @@
 
 import controllers.AuthController
 import controllers.MachineController
+import controllers.MaintenanceController
 import controllers.UserController
 import dao.UserDao
 import exceptions.RecordNotFoundException
@@ -16,16 +17,24 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
+import tables.MaintenanceTable
 
 fun main() {
     init()
-    val app = Javalin.create { it.accessManager(AuthController::accessManager) }.start(7000)
+    val app = Javalin.create {
+        it.accessManager(AuthController::accessManager)
+    }.apply {
+        ws("/websocket") { ws ->
+            ws.onConnect { }
+            ws.onMessage { }
+        }
+    }.start(7000)
 
     app.routes {
         path("users") {
             get(UserController::getAllUsers)
             post(UserController::createUser)
-            path(":username") {
+            path("login") {
                 post(UserController::loginUser)
             }
         }
@@ -35,6 +44,10 @@ fun main() {
             path(":serialNumber") {
                 put(MachineController::updateMachine)
                 delete(MachineController::deleteMachine)
+                path("history") {
+                    get(MaintenanceController::getMaintenanceHistory)
+                    post(MaintenanceController::createMaintenanceHistory)
+                }
             }
         }
     }
@@ -55,6 +68,10 @@ fun init() {
 
     transaction {
         addLogger(StdOutSqlLogger)
-        SchemaUtils.create(UserDao, MachineTable)
+        SchemaUtils.create(
+            UserDao,
+            MachineTable,
+            MaintenanceTable
+        )
     }
 }

@@ -5,6 +5,7 @@ import helpers.TestDatabase
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -28,6 +29,11 @@ class MachineServiceTest {
         val createdMachine = MachineService.getAllMachines().firstOrNull()
         assertThat(createdMachine).isNotNull
         assertThat(createdMachine!!.serialNumber).isEqualTo("TEST01")
+
+
+        assertThatThrownBy {
+            MachineService.createMachine(newMachine)
+        }.isInstanceOf(ExposedSQLException::class.java)
     }
 
     @Test

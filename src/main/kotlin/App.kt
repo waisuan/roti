@@ -11,6 +11,7 @@ import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import java.lang.Exception
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -59,6 +60,11 @@ fun main() {
     }
 
     app.exception(Exception::class.java) { e, ctx ->
+        ctx.result(e.message!!)
+        ctx.status(404)
+    }
+
+    app.exception(ExposedSQLException::class.java) { e, ctx ->
         ctx.result(e.message!!)
         ctx.status(404)
     }

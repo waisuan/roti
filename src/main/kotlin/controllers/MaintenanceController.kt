@@ -12,4 +12,12 @@ object MaintenanceController {
     fun createMaintenanceHistory(ctx: Context) {
         MaintenanceService.createMaintenanceHistory(ctx.pathParam("serialNumber"), ctx.body<Maintenance>())
     }
+
+    fun updateMaintenanceHistory(ctx: Context) {
+        MaintenanceService.updateMaintenanceHistory(ctx.pathParam("workOrderNumber"), ctx.body<Maintenance>())
+    }
+
+    fun deleteMaintenanceHistory(ctx: Context) {
+        MaintenanceService.deleteMaintenanceHistory(ctx.pathParam("workOrderNumber"))
+    }
 }

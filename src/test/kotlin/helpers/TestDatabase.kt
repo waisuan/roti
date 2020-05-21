@@ -1,12 +1,13 @@
 package helpers
 
-import dao.UserDao
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
+import tables.MaintenanceTable
+import tables.UserTable
 
 object TestDatabase {
     fun init() {
@@ -19,14 +20,15 @@ object TestDatabase {
 
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.create(UserDao, MachineTable)
+            SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
         }
     }
 
     fun purge() {
         transaction {
             addLogger(StdOutSqlLogger)
-            SchemaUtils.drop(UserDao)
+            SchemaUtils.drop(UserTable)
+            SchemaUtils.drop(MaintenanceTable)
             SchemaUtils.drop(MachineTable)
         }
     }

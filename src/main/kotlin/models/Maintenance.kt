@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 
 data class Maintenance(
     val serialNumber: String? = null,
-    val workOrderNumber: String,
+    val workOrderNumber: String? = null,
 
     @JsonDeserialize(using = LocalDateDeserializer::class)
     @JsonSerialize(using = LocalDateSerializer::class)

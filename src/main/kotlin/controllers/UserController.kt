@@ -1,5 +1,6 @@
 package controllers
 
+import exceptions.IllegalUserException
 import io.javalin.http.Context
 import models.User
 import services.UserService
@@ -15,8 +16,9 @@ object UserController {
     }
 
     fun loginUser(ctx: Context) {
-        if (!UserService.loginUser(ctx.body<User>()))
-            ctx.status(401)
+        if (!UserService.loginUser(ctx.body<User>())) {
+            throw IllegalUserException()
+        }
         ctx.json(Validator.generateToken())
     }
 }

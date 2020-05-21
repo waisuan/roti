@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Machine(
-    val serialNumber: String,
+    val serialNumber: String? = null,
     val customer: String? = null,
     val state: String? = null,
     val accountType: String? = null,

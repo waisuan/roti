@@ -17,7 +17,7 @@ object MachineService {
     fun createMachine(newMachine: Machine) {
         transaction {
             MachineDao.new {
-                serialNumber = newMachine.serialNumber
+                serialNumber = newMachine.serialNumber!!
                 customer = newMachine.customer
                 state = newMachine.state
                 accountType = newMachine.accountType

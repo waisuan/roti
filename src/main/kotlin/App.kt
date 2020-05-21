@@ -3,7 +3,7 @@ import controllers.AuthController
 import controllers.MachineController
 import controllers.MaintenanceController
 import controllers.UserController
-import dao.UserDao
+import exceptions.IllegalUserException
 import exceptions.RecordNotFoundException
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
@@ -11,6 +11,7 @@ import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
+import java.lang.Exception
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -18,6 +19,7 @@ import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 import tables.MaintenanceTable
+import tables.UserTable
 
 fun main() {
     init()
@@ -47,12 +49,26 @@ fun main() {
                 path("history") {
                     get(MaintenanceController::getMaintenanceHistory)
                     post(MaintenanceController::createMaintenanceHistory)
+                    path(":workOrderNumber") {
+                        put(MaintenanceController::updateMaintenanceHistory)
+                        delete(MaintenanceController::deleteMaintenanceHistory)
+                    }
                 }
             }
         }
     }
 
+    app.exception(Exception::class.java) { e, ctx ->
+        ctx.result(e.message!!)
+        ctx.status(404)
+    }
+
     app.exception(RecordNotFoundException::class.java) { e, ctx ->
+        ctx.result(e.message!!)
+        ctx.status(404)
+    }
+
+    app.exception(IllegalUserException::class.java) { e, ctx ->
         ctx.result(e.message!!)
         ctx.status(404)
     }
@@ -69,7 +85,7 @@ fun init() {
     transaction {
         addLogger(StdOutSqlLogger)
         SchemaUtils.create(
-            UserDao,
+            UserTable,
             MachineTable,
             MaintenanceTable
         )

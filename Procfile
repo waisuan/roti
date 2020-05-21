@@ -1,0 +1,1 @@
+web: java -jar build/libs/roti-1.0.jar

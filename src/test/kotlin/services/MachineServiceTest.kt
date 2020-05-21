@@ -30,7 +30,6 @@ class MachineServiceTest {
         assertThat(createdMachine).isNotNull
         assertThat(createdMachine!!.serialNumber).isEqualTo("TEST01")
 
-
         assertThatThrownBy {
             MachineService.createMachine(newMachine)
         }.isInstanceOf(ExposedSQLException::class.java)

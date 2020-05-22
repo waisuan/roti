@@ -11,11 +11,12 @@ import tables.UserTable
 
 object TestDatabase {
     fun init() {
+
         Database.connect(
-            "jdbc:postgresql://localhost/roti_test",
+            url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti_test",
             driver = "org.postgresql.Driver",
-            user = "postgres",
-            password = "password"
+            user = System.getenv("DB_USER") ?: "postgres",
+            password = System.getenv("DB_PWD") ?: "password"
         )
 
         transaction {

@@ -13,7 +13,7 @@ object TestDatabase {
     fun init() {
 
         Database.connect(
-            url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti_test",
+            url = System.getenv("TEST_DB_URL") ?: "jdbc:postgresql://localhost/roti_test",
             driver = "org.postgresql.Driver",
             user = System.getenv("DB_USER") ?: "postgres",
             password = System.getenv("DB_PWD") ?: "password"

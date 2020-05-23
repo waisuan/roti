@@ -11,6 +11,13 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.StdOutSqlLogger
+import org.jetbrains.exposed.sql.addLogger
+import org.jetbrains.exposed.sql.transactions.transaction
+import tables.MachineTable
+import tables.MaintenanceTable
+import tables.UserTable
 
 fun main() {
     init()
@@ -75,4 +82,9 @@ fun init() {
         user = System.getenv("DB_USER") ?: "postgres",
         password = System.getenv("DB_PWD") ?: "password"
     )
+
+    transaction {
+        addLogger(StdOutSqlLogger)
+        SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
+    }
 }

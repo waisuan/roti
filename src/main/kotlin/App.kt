@@ -1,17 +1,15 @@
 
 import controllers.AuthController
+import controllers.FileController
 import controllers.MachineController
 import controllers.MaintenanceController
 import controllers.UserController
-import exceptions.IllegalUserException
-import exceptions.RecordNotFoundException
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.delete
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
-import java.lang.Exception
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -26,6 +24,8 @@ fun main() {
     init()
     val app = Javalin.create {
         it.accessManager(AuthController::accessManager)
+        it.enableCorsForAllOrigins()
+        it.enforceSsl = true
     }.apply {
         ws("/websocket") { ws ->
             ws.onConnect { }
@@ -59,6 +59,15 @@ fun main() {
                 }
             }
         }
+        path("files") {
+            path(":ownerId") {
+                post(FileController::saveFile)
+                // get
+                path(":filename") {
+                    get(FileController::getFile)
+                }
+            }
+        }
     }
 
     app.exception(Exception::class.java) { e, ctx ->
@@ -67,16 +76,6 @@ fun main() {
     }
 
     app.exception(ExposedSQLException::class.java) { e, ctx ->
-        ctx.result(e.message!!)
-        ctx.status(404)
-    }
-
-    app.exception(RecordNotFoundException::class.java) { e, ctx ->
-        ctx.result(e.message!!)
-        ctx.status(404)
-    }
-
-    app.exception(IllegalUserException::class.java) { e, ctx ->
         ctx.result(e.message!!)
         ctx.status(404)
     }

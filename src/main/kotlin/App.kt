@@ -74,11 +74,6 @@ fun main() {
         ctx.result(e.message!!)
         ctx.status(404)
     }
-
-    app.exception(ExposedSQLException::class.java) { e, ctx ->
-        ctx.result(e.message!!)
-        ctx.status(404)
-    }
 }
 
 fun init() {
@@ -88,13 +83,4 @@ fun init() {
         user = System.getenv("DB_USER") ?: "postgres",
         password = System.getenv("DB_PWD") ?: "password"
     )
-
-    transaction {
-        addLogger(StdOutSqlLogger)
-        SchemaUtils.create(
-            UserTable,
-            MachineTable,
-            MaintenanceTable
-        )
-    }
 }

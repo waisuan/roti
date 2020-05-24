@@ -36,7 +36,7 @@ object FileService {
         val fullName = "$dir/$fileName"
         // if (!fileMan.checkIfObjectExists(fullName))
         //     throw RecordNotFoundException()
-        //fileMan.deleteObject(fullName)
+        // fileMan.deleteObject(fullName)
     }
 
     private fun isOversizedFile(file: File): Boolean {

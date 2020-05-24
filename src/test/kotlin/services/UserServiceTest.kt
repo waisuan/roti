@@ -23,9 +23,7 @@ class UserServiceTest {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
 
-        val createdUser = UserService.getAllUsers().firstOrNull()
-        assertThat(createdUser).isNotNull()
-        assertThat(createdUser).isEqualTo(user.username)
+        assertThat(UserService.loginUser(user)).isTrue()
     }
 
     @Test

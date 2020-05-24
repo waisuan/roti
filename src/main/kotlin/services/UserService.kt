@@ -11,14 +11,6 @@ import tables.UserTable.password
 import tables.UserTable.username
 
 object UserService {
-    fun getAllUsers(): List<String> {
-        return transaction {
-            UserTable.selectAll().map {
-                it[username]
-            }
-        }
-    }
-
     fun createUser(user: User) {
         transaction {
             UserTable.insert {
@@ -31,6 +23,10 @@ object UserService {
             }
         }
     }
+
+    // fun updateUser
+
+    // fun deleteUser
 
     fun loginUser(user: User): Boolean {
         val foundUser = transaction {

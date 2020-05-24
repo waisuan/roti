@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import exceptions.OversizedFileException
+import exceptions.RecordNotFoundException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import utils.FileMan
@@ -35,5 +36,16 @@ class FileServiceTest {
         assertThatThrownBy {
             FileService.saveFile("TEST", "TEST", fileContent!!)
         }.isInstanceOf(OversizedFileException::class.java)
+    }
+
+    @Test
+    fun `deleteFile() should throw an error if file does not exist`() {
+        val fileMan = mock<FileMan>()
+        whenever(fileMan.checkIfObjectExists(any())).thenReturn(false)
+
+        FileService.fileMan = fileMan
+        assertThatThrownBy {
+            FileService.deleteFile("TEST", "TEST")
+        }.isInstanceOf(RecordNotFoundException::class.java)
     }
 }

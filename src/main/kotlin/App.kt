@@ -34,7 +34,6 @@ fun main() {
 
     app.routes {
         path("users") {
-            get(UserController::getAllUsers)
             path("register") {
                 post(UserController::createUser)
             }

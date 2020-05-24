@@ -10,9 +10,8 @@ object FileController {
     }
 
     fun getFile(ctx: Context) {
-        val ownerId = ctx.pathParam("ownerId")
         val fileName = ctx.pathParam("fileName")
-        ctx.result(FileService.getFile(ownerId, fileName))
+        ctx.result(FileService.getFile(ctx.pathParam("ownerId"), fileName))
         ctx.contentType("application/octet-stream")
         ctx.header("Content-Disposition", "attachment; filename=\"$fileName\"")
     }

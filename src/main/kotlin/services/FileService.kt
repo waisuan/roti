@@ -33,8 +33,10 @@ object FileService {
         }
     }
     fun deleteFile(dir: String, fileName: String) {
-        getFile(dir, fileName)
-        fileMan.deleteObject("$dir/$fileName")
+        val fullName = "$dir/$fileName"
+        if (!fileMan.checkIfObjectExists(fullName))
+            throw RecordNotFoundException()
+        fileMan.deleteObject(fullName)
     }
 
     private fun isOversizedFile(file: File): Boolean {

@@ -6,6 +6,7 @@ import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import java.io.File
 import java.io.InputStream
+import java.lang.Exception
 
 object FileMan {
     private val s3Client = AmazonS3ClientBuilder
@@ -31,6 +32,16 @@ object FileMan {
 
     fun getObject(objectName: String): InputStream? {
         return s3Client.getObject(BUCKET_NAME, objectName).objectContent.delegateStream
+    }
+
+    fun checkIfObjectExists(objectName: String): Boolean {
+        return try {
+            s3Client.getObjectMetadata(BUCKET_NAME, objectName)
+            true
+        } catch (e: Exception) {
+            logger().info(e.message)
+            false
+        }
     }
 
     fun saveObject(objectName: String, objectBody: File) {

@@ -34,8 +34,8 @@ object FileService {
     }
     fun deleteFile(dir: String, fileName: String) {
         val fullName = "$dir/$fileName"
-        if (!fileMan.checkIfObjectExists(fullName))
-            throw RecordNotFoundException()
+        // if (!fileMan.checkIfObjectExists(fullName))
+        //     throw RecordNotFoundException()
         fileMan.deleteObject(fullName)
     }
 

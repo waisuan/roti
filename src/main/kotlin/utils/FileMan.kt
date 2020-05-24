@@ -12,8 +12,8 @@ object FileMan {
         .standard()
         .withCredentials(AWSStaticCredentialsProvider(
             BasicAWSCredentials(
-                System.getenv("S3_ACCESS_KEY"),
-                System.getenv("S3_SECRET_KEY"))
+                System.getenv("S3_ACCESS_KEY") ?: "",
+                System.getenv("S3_SECRET_KEY") ?: "")
         ))
         .withRegion(
             Regions.EU_WEST_2
@@ -21,11 +21,23 @@ object FileMan {
         .build()
     private const val BUCKET_NAME = "roti-api"
 
+    fun getObjects(filter: String): List<String> {
+        return s3Client.listObjects(BUCKET_NAME).objectSummaries.filter {
+            it.key.startsWith("$filter/")
+        }.map {
+            it.key.removePrefix("$filter/")
+        }
+    }
+
     fun getObject(objectName: String): InputStream? {
         return s3Client.getObject(BUCKET_NAME, objectName).objectContent.delegateStream
     }
 
     fun saveObject(objectName: String, objectBody: File) {
         s3Client.putObject(BUCKET_NAME, objectName, objectBody)
+    }
+
+    fun deleteObject(objectName: String) {
+        s3Client.deleteObject(BUCKET_NAME, objectName)
     }
 }

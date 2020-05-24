@@ -60,10 +60,11 @@ fun main() {
         }
         path("files") {
             path(":ownerId") {
+                get(FileController::getFileNames)
                 post(FileController::saveFile)
-                // get
-                path(":filename") {
+                path(":fileName") {
                     get(FileController::getFile)
+                    delete(FileController::deleteFile)
                 }
             }
         }

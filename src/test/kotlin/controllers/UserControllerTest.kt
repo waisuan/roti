@@ -28,7 +28,7 @@ class UserControllerTest {
     @Test
     fun `loginUser() throws an exception if unsuccessful`() {
         val context = mock<Context>()
-        val user = mock<User>()
+        val user = User(username = "TEST", password = "TEST")
 
         whenever(context.json(any())).thenReturn(context)
         whenever(context.body<User>()).thenReturn(user)

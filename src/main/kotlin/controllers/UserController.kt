@@ -1,10 +1,8 @@
 package controllers
 
-import exceptions.IllegalUserException
 import io.javalin.http.Context
 import models.User
 import services.UserService
-import utils.Validator
 
 object UserController {
     fun createUser(ctx: Context) {
@@ -12,9 +10,6 @@ object UserController {
     }
 
     fun loginUser(ctx: Context) {
-        if (!UserService.loginUser(ctx.body<User>())) {
-            throw IllegalUserException()
-        }
-        ctx.json(Validator.generateToken())
+        ctx.json(UserService.loginUser(ctx.body<User>()))
     }
 }

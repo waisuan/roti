@@ -8,7 +8,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import exceptions.OversizedFileException
 import exceptions.RecordNotFoundException
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import utils.FileMan
 
 class FileServiceTest {

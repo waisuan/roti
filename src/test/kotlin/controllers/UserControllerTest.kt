@@ -8,18 +8,19 @@ import helpers.TestDatabase
 import io.javalin.http.Context
 import models.User
 import org.assertj.core.api.Assertions
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
 class UserControllerTest {
-    @Before
+    @BeforeEach
     fun setup() {
         TestDatabase.init()
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Mockito.framework().clearInlineMocks()
         TestDatabase.purge()
@@ -33,7 +34,7 @@ class UserControllerTest {
         whenever(context.json(any())).thenReturn(context)
         whenever(context.body<User>()).thenReturn(user)
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             UserController.loginUser(context)
         }.isInstanceOf(IllegalUserException::class.java)
     }

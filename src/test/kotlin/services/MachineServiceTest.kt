@@ -6,17 +6,17 @@ import java.lang.Exception
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class MachineServiceTest {
-    @Before
+    @BeforeEach
     fun setup() {
         TestDatabase.init()
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         TestDatabase.purge()
     }

@@ -34,6 +34,10 @@ fun main() {
 
     app.routes {
         path("users") {
+            path(":username") {
+                put(UserController::updateUser)
+                delete(UserController::deleteUser)
+            }
             path("register") {
                 post(UserController::createUser)
             }

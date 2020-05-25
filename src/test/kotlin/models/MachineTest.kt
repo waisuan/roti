@@ -4,7 +4,7 @@ import io.javalin.plugin.json.JavalinJson
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class MachineTest {
     @Test

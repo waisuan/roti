@@ -10,19 +10,19 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
 
 class UserServiceTest {
-    @Before
+    @BeforeEach
     fun setup() {
         TestDatabase.init()
     }
 
-    @After
+    @AfterEach
     fun teardown() {
         TestDatabase.purge()
     }

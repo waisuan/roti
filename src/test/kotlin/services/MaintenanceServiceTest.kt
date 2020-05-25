@@ -8,18 +8,18 @@ import models.Machine
 import models.Maintenance
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 class MaintenanceServiceTest {
-    @Before
+    @BeforeEach
     fun setup() {
         TestDatabase.init()
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         TestDatabase.purge()
     }

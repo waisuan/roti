@@ -7,7 +7,6 @@ import exceptions.IllegalUserException
 import helpers.TestDatabase
 import io.javalin.http.Context
 import models.User
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

@@ -2,10 +2,10 @@ package services
 
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
+import java.lang.Exception
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -32,7 +32,8 @@ class MachineServiceTest {
 
         assertThatThrownBy {
             MachineService.createMachine(newMachine)
-        }.isInstanceOf(ExposedSQLException::class.java)
+        }.isInstanceOf(Exception::class.java)
+            .hasMessageContaining("duplicate key")
     }
 
     @Test
@@ -64,7 +65,7 @@ class MachineServiceTest {
     }
 
     @Test
-    fun `deleteMachine() should delete machine successfully`() {
+    fun `deleteMachine() should delete machine record successfully`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
 
         MachineService.deleteMachine("TEST01")

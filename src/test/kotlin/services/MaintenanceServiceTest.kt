@@ -1,5 +1,6 @@
 package services
 
+import exceptions.BadOperationException
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
 import java.lang.Exception
@@ -39,7 +40,7 @@ class MaintenanceServiceTest {
 
     @Test
     fun `createMaintenanceHistory() should create a new maintenance record successfully`() {
-        val newMaintenance = Maintenance(workOrderNumber = "W01")
+        var newMaintenance = Maintenance(workOrderNumber = "W01")
         MaintenanceService.createMaintenanceHistory("TEST01", newMaintenance)
 
         val createdMaintenance = MaintenanceService.getMaintenanceHistory("TEST01").firstOrNull()
@@ -50,6 +51,12 @@ class MaintenanceServiceTest {
             MaintenanceService.createMaintenanceHistory("TEST01", newMaintenance)
         }.isInstanceOf(Exception::class.java)
             .hasMessageContaining("duplicate key")
+
+        newMaintenance = Maintenance()
+        assertThatThrownBy {
+            MaintenanceService.createMaintenanceHistory("TEST01", newMaintenance)
+        }.isInstanceOf(BadOperationException::class.java)
+            .hasMessageContaining("Unable to operate on Maintenance record")
     }
 
     @Test

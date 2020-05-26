@@ -32,4 +32,8 @@ data class Maintenance(
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     val updatedAt: LocalDateTime? = null
-)
+) {
+    fun isValid(): Boolean {
+        return workOrderNumber != null
+    }
+}

@@ -42,4 +42,8 @@ data class Machine(
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     val updatedAt: LocalDateTime? = null
-)
+) {
+    fun isValid(): Boolean {
+        return serialNumber != null
+    }
+}

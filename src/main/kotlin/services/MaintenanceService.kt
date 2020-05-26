@@ -1,6 +1,7 @@
 package services
 
 import dao.MaintenanceDao
+import exceptions.BadOperationException
 import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Maintenance
@@ -15,6 +16,9 @@ object MaintenanceService {
     }
 
     fun createMaintenanceHistory(serialNumber: String, newMaintenance: Maintenance) {
+        if (!newMaintenance.isValid())
+            throw BadOperationException("Maintenance")
+
         transaction {
             MaintenanceDao.new {
                 this.serialNumber = serialNumber

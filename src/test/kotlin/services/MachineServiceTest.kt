@@ -1,5 +1,6 @@
 package services
 
+import exceptions.BadOperationException
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
 import java.lang.Exception
@@ -23,7 +24,7 @@ class MachineServiceTest {
 
     @Test
     fun `createMachine() should create a new machine record successfully`() {
-        val newMachine = Machine(serialNumber = "TEST01")
+        var newMachine = Machine(serialNumber = "TEST01")
         MachineService.createMachine(newMachine)
 
         val createdMachine = MachineService.getAllMachines().firstOrNull()
@@ -34,6 +35,12 @@ class MachineServiceTest {
             MachineService.createMachine(newMachine)
         }.isInstanceOf(Exception::class.java)
             .hasMessageContaining("duplicate key")
+
+        newMachine = Machine()
+        assertThatThrownBy {
+            MachineService.createMachine(newMachine)
+        }.isInstanceOf(BadOperationException::class.java)
+            .hasMessageContaining("Unable to operate on Machine record")
     }
 
     @Test

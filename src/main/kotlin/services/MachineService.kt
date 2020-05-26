@@ -1,6 +1,7 @@
 package services
 
 import dao.MachineDao
+import exceptions.BadOperationException
 import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Machine
@@ -15,6 +16,9 @@ object MachineService {
     }
 
     fun createMachine(newMachine: Machine) {
+        if (!newMachine.isValid())
+            throw BadOperationException("Machine")
+
         transaction {
             MachineDao.new {
                 serialNumber = newMachine.serialNumber!!

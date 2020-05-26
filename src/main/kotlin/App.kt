@@ -20,75 +20,84 @@ import tables.MaintenanceTable
 import tables.UserTable
 
 fun main() {
-    init()
-    val app = Javalin.create {
-        it.accessManager(AuthController::accessManager)
-        it.enableCorsForAllOrigins()
-        it.enforceSsl = true
-    }.apply {
-        ws("/websocket") { ws ->
-            ws.onConnect { }
-            ws.onMessage { }
-        }
-    }.start(System.getenv("PORT")?.toInt() ?: 7000)
+    RotiApp().init()
+}
 
-    app.routes {
-        path("users") {
-            path(":username") {
-                put(UserController::updateUser)
-                delete(UserController::deleteUser)
+class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true) {
+    fun init(): Javalin {
+        if (enableDB)
+            initDB()
+        val app = Javalin.create {
+            it.accessManager(AuthController::accessManager)
+            it.enableCorsForAllOrigins()
+            it.enforceSsl = true
+        }.apply {
+            ws("/websocket") { ws ->
+                ws.onConnect { }
+                ws.onMessage { }
             }
-            path("register") {
-                post(UserController::createUser)
+        }.start(System.getenv("PORT")?.toInt() ?: port)
+
+        app.routes {
+            path("users") {
+                path(":username") {
+                    put(UserController::updateUser)
+                    delete(UserController::deleteUser)
+                }
+                path("register") {
+                    post(UserController::createUser)
+                }
+                path("login") {
+                    post(UserController::loginUser)
+                }
             }
-            path("login") {
-                post(UserController::loginUser)
+            path("machines") {
+                get(MachineController::getAllMachines)
+                post(MachineController::createMachine)
+                path(":serialNumber") {
+                    put(MachineController::updateMachine)
+                    delete(MachineController::deleteMachine)
+                    path("history") {
+                        get(MaintenanceController::getMaintenanceHistory)
+                        post(MaintenanceController::createMaintenanceHistory)
+                        path(":workOrderNumber") {
+                            put(MaintenanceController::updateMaintenanceHistory)
+                            delete(MaintenanceController::deleteMaintenanceHistory)
+                        }
+                    }
+                }
             }
-        }
-        path("machines") {
-            get(MachineController::getAllMachines)
-            post(MachineController::createMachine)
-            path(":serialNumber") {
-                put(MachineController::updateMachine)
-                delete(MachineController::deleteMachine)
-                path("history") {
-                    get(MaintenanceController::getMaintenanceHistory)
-                    post(MaintenanceController::createMaintenanceHistory)
-                    path(":workOrderNumber") {
-                        put(MaintenanceController::updateMaintenanceHistory)
-                        delete(MaintenanceController::deleteMaintenanceHistory)
+            path("files") {
+                path(":ownerId") {
+                    get(FileController::getFileNames)
+                    post(FileController::saveFile)
+                    path(":fileName") {
+                        get(FileController::getFile)
+                        delete(FileController::deleteFile)
                     }
                 }
             }
         }
-        path("files") {
-            path(":ownerId") {
-                get(FileController::getFileNames)
-                post(FileController::saveFile)
-                path(":fileName") {
-                    get(FileController::getFile)
-                    delete(FileController::deleteFile)
-                }
-            }
+
+        app.exception(Exception::class.java) { e, ctx ->
+            ctx.result(e.message!!)
+            ctx.status(404)
         }
+
+        return app
     }
 
-    app.exception(Exception::class.java) { e, ctx ->
-        ctx.result(e.message!!)
-        ctx.status(404)
-    }
-}
+    private fun initDB() {
+        Database.connect(
+            url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti",
+            driver = "org.postgresql.Driver",
+            user = System.getenv("DB_USER") ?: "postgres",
+            password = System.getenv("DB_PWD") ?: "password"
+        )
 
-fun init() {
-    Database.connect(
-        url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti",
-        driver = "org.postgresql.Driver",
-        user = System.getenv("DB_USER") ?: "postgres",
-        password = System.getenv("DB_PWD") ?: "password"
-    )
-
-    transaction {
-        addLogger(StdOutSqlLogger)
-        SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
+        transaction {
+            addLogger(StdOutSqlLogger)
+            SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
+        }
     }
 }

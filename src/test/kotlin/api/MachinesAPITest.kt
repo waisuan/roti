@@ -34,7 +34,6 @@ class MachinesAPITest {
         app.stop()
 
         EnvironmentVariables().set("DEV_MODE", null)
-        EnvironmentVariables().set("DB_URL", null)
     }
 
     @BeforeEach
@@ -100,8 +99,7 @@ class MachinesAPITest {
     @Test
     fun `DELETE machines`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
-        var response = Unirest.delete("/machines/TEST01")
-            .asString()
+        var response = Unirest.delete("/machines/TEST01").asEmpty()
         assertThat(response.status).isEqualTo(200)
         assertThat(MachineService.getAllMachines().firstOrNull())
             .isNull()

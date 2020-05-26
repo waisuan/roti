@@ -36,7 +36,6 @@ class MaintenanceAPITest {
         app.stop()
 
         EnvironmentVariables().set("DEV_MODE", null)
-        EnvironmentVariables().set("DB_URL", null)
     }
 
     @BeforeEach

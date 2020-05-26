@@ -36,6 +36,7 @@ class MaintenanceAPITest {
         app.stop()
 
         EnvironmentVariables().set("DEV_MODE", null)
+        Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
     }
 
     @BeforeEach

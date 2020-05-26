@@ -34,6 +34,7 @@ class MachinesAPITest {
         app.stop()
 
         EnvironmentVariables().set("DEV_MODE", null)
+        Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
     }
 
     @BeforeEach
@@ -104,8 +105,7 @@ class MachinesAPITest {
         assertThat(MachineService.getAllMachines().firstOrNull())
             .isNull()
 
-        response = Unirest.delete("/machines/TEST01")
-            .asString()
+        response = Unirest.delete("/machines/TEST01").asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("Unable to locate record")
     }

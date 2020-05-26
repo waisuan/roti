@@ -9,14 +9,21 @@ import org.apache.commons.io.FileUtils
 import utils.FileMan
 
 object FileService {
-    var fileMan: FileMan = FileMan
+    private var fileMan: FileMan = FileMan
+
+    fun setFileManager(fileMan: FileMan) {
+        this.fileMan = fileMan
+    }
 
     fun getFileNames(dir: String): List<String> {
         return fileMan.getObjects(dir)
     }
 
     fun getFile(dir: String, fileName: String): InputStream {
-        return fileMan.getObject("$dir/$fileName") ?: throw RecordNotFoundException()
+        val fullName = "$dir/$fileName"
+        if (!fileMan.checkIfObjectExists(fullName))
+            throw RecordNotFoundException()
+        return fileMan.getObject("$dir/$fileName")!!
     }
 
     fun saveFile(dir: String, fileName: String, fileContent: InputStream) {
@@ -32,6 +39,7 @@ object FileService {
                 tmpFile.delete()
         }
     }
+
     fun deleteFile(dir: String, fileName: String) {
         val fullName = "$dir/$fileName"
         if (!fileMan.checkIfObjectExists(fullName))

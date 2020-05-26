@@ -3,13 +3,14 @@ package utils
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.regions.Regions
+import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import java.io.File
 import java.io.InputStream
 import java.lang.Exception
 
 object FileMan {
-    private val s3Client = AmazonS3ClientBuilder
+    private var s3Client: AmazonS3 = AmazonS3ClientBuilder
         .standard()
         .withCredentials(AWSStaticCredentialsProvider(
             BasicAWSCredentials(
@@ -21,6 +22,14 @@ object FileMan {
         )
         .build()
     private const val BUCKET_NAME = "roti-api"
+
+    fun setS3Client(s3Client: AmazonS3) {
+        this.s3Client = s3Client
+    }
+
+    fun getDefaultBucket(): String {
+        return BUCKET_NAME
+    }
 
     fun getObjects(filter: String): List<String> {
         return s3Client.listObjects(BUCKET_NAME).objectSummaries.filter {

@@ -19,7 +19,7 @@ class FileServiceTest {
 
         whenever(fileMan.saveObject(any(), any())).doAnswer { Unit }
 
-        FileService.fileMan = fileMan
+        FileService.setFileManager(fileMan)
         FileService.saveFile("TEST", "TEST", fileContent!!)
 
         verify(fileMan).saveObject(any(), any())
@@ -32,7 +32,7 @@ class FileServiceTest {
 
         whenever(fileMan.saveObject(any(), any())).doAnswer { Unit }
 
-        FileService.fileMan = fileMan
+        FileService.setFileManager(fileMan)
         assertThatThrownBy {
             FileService.saveFile("TEST", "TEST", fileContent!!)
         }.isInstanceOf(OversizedFileException::class.java)
@@ -43,7 +43,7 @@ class FileServiceTest {
         val fileMan = mock<FileMan>()
         whenever(fileMan.checkIfObjectExists(any())).thenReturn(false)
 
-        FileService.fileMan = fileMan
+        FileService.setFileManager(fileMan)
         assertThatThrownBy {
             FileService.deleteFile("TEST", "TEST")
         }.isInstanceOf(RecordNotFoundException::class.java)

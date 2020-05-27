@@ -1,5 +1,9 @@
 package models
 
+import io.javalin.core.security.Role
+
+enum class RotiRole : Role { ANYONE, LOGGED_IN }
+
 data class User(
     val username: String? = null,
     val password: String? = null,

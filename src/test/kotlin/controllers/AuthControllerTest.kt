@@ -8,6 +8,7 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
+import models.RotiRole
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterEach
@@ -72,7 +73,7 @@ class AuthControllerTest {
     }
 
     @Test
-    fun `skips auth if path is login`() {
+    fun `skips auth if role is ANYONE`() {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
@@ -80,22 +81,22 @@ class AuthControllerTest {
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
-        AuthController.accessManager(handler, context, HashSet<Role>())
+        AuthController.accessManager(handler, context, setOf(RotiRole.ANYONE))
 
         verify(handler).handle(any())
     }
 
     @Test
-    fun `skips auth if path is register`() {
+    fun `needs auth if role is LOGGED_IN`() {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
-        whenever(context.matchedPath()).thenReturn("/users/register")
+        whenever(context.matchedPath()).thenReturn("/users/login")
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
-        AuthController.accessManager(handler, context, HashSet<Role>())
+        AuthController.accessManager(handler, context, setOf(RotiRole.LOGGED_IN))
 
-        verify(handler).handle(any())
+        verify(context).status(401)
     }
 }

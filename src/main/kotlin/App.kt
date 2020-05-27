@@ -42,7 +42,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             }
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
-        app.get("/", VueComponent("<hello-world></hello-world>"))
+        app.get("/", VueComponent("<hello-world></hello-world>"), roles(RotiRole.ANYONE))
 
         app.routes {
             path("users") {

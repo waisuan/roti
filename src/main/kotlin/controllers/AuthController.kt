@@ -1,7 +1,6 @@
 package controllers
 
 import io.javalin.core.security.Role
-import io.javalin.core.util.Header
 import io.javalin.http.Context
 import io.javalin.http.Handler
 import models.RotiRole
@@ -13,7 +12,6 @@ object AuthController {
         if (isDevMode() || isExcludedFromAuth(permittedRoles) || Validator.verifyToken(token)) {
             handler.handle(ctx)
         } else {
-            ctx.header(Header.WWW_AUTHENTICATE, "Basic")
             ctx.status(401)
         }
     }

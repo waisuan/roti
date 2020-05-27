@@ -46,15 +46,12 @@ class AuthIntegrationTest {
     fun `API requests require authentication`() {
         var response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(401)
-        assertThat(response.headers.get("WWW-Authenticate")).isNotNull()
 
         response = Unirest.get("/machines/TEST/history").asString()
         assertThat(response.status).isEqualTo(401)
-        assertThat(response.headers.get("WWW-Authenticate")).isNotNull()
 
         response = Unirest.get("/files/TEST").asString()
         assertThat(response.status).isEqualTo(401)
-        assertThat(response.headers.get("WWW-Authenticate")).isNotNull()
 
         val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
@@ -69,7 +66,6 @@ class AuthIntegrationTest {
             .header("Authorization", "Bearer BAD_TOKEN")
             .asString()
         assertThat(response.status).isEqualTo(401)
-        assertThat(response.headers.get("WWW-Authenticate")).isNotNull()
     }
 
     @Test

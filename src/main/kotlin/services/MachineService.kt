@@ -2,6 +2,7 @@ package services
 
 import dao.MachineDao
 import exceptions.BadOperationException
+import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Machine
@@ -20,6 +21,9 @@ object MachineService {
             throw BadOperationException("Machine")
 
         transaction {
+            if (MachineDao.find { MachineTable.serialNumber eq newMachine.serialNumber!! }.firstOrNull() != null)
+                throw RecordAlreadyExistsException()
+
             MachineDao.new {
                 serialNumber = newMachine.serialNumber!!
                 customer = newMachine.customer

@@ -58,7 +58,7 @@ class UsersAPITest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
-        assertThat(response.body as String).contains("duplicate key value violates unique constraint")
+        assertThat(response.body as String).contains("Record already exists")
 
         response = Unirest.post("/users/register")
             .header("Content-Type", "application/json")
@@ -72,6 +72,7 @@ class UsersAPITest {
     fun `POST login`() {
         val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
 
         var response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -93,6 +94,14 @@ class UsersAPITest {
             .asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("Incorrect username/password detected")
+
+        UserService.approveUser(user.username!!, false)
+        response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .asString()
+        assertThat(response.status).isEqualTo(404)
+        assertThat(response.body as String).contains("User has not been approved")
     }
 
     @Test
@@ -101,6 +110,7 @@ class UsersAPITest {
 
         var user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
         assertThat(UserService.loginUser(user)).isNotEmpty()
 
         var response = Unirest.put("/users/TEST")
@@ -131,6 +141,7 @@ class UsersAPITest {
 
         var user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
         assertThat(UserService.loginUser(user)).isNotEmpty()
 
         var response = Unirest.delete("/users/TEST").asEmpty()

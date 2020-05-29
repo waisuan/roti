@@ -3,9 +3,11 @@ package services
 import exceptions.BadNewUserException
 import exceptions.BadOperationException
 import exceptions.IllegalUserException
+import exceptions.RecordAlreadyExistsException
+import exceptions.UnapprovedUserException
 import helpers.TestDatabase
-import java.lang.Exception
 import models.User
+import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.exposed.sql.select
@@ -32,7 +34,15 @@ class UserServiceTest {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
 
-        assertThat(UserService.loginUser(user)).isNotEmpty()
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.password]).isNotEmpty()
+            assertThat(BCrypt.checkpw(user.password, foundUser[UserTable.password])).isTrue()
+            assertThat(foundUser[UserTable.salt]).isNotEmpty()
+            assertThat(foundUser[UserTable.is_approved]).isFalse()
+            assertThat(foundUser[UserTable.role]).isEqualTo(UserRole.NON_ADMIN.name)
+        }
     }
 
     @Test
@@ -41,10 +51,12 @@ class UserServiceTest {
         UserService.createUser(user)
 
         transaction {
-            val foundUser = UserTable.select { UserTable.username eq user.username!! }.first()
-            assertThat(foundUser[UserTable.password]).isNotEmpty()
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.password]).isNotEmpty()
             assertThat(foundUser[UserTable.password]).isNotEqualTo(user.password)
             assertThat(foundUser[UserTable.salt]).isNotEmpty()
+            assertThat(BCrypt.checkpw(user.password, foundUser[UserTable.password])).isTrue()
         }
     }
 
@@ -68,13 +80,16 @@ class UserServiceTest {
 
     @Test
     fun `createUser() should throw an exception if new user already exists`() {
-        val user = User("evan.s", "password", "evan.s@test.com")
+        var user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
-
         assertThatThrownBy {
             UserService.createUser(user)
-        }.isInstanceOf(Exception::class.java)
-            .hasMessageContaining("duplicate key")
+        }.isInstanceOf(RecordAlreadyExistsException::class.java)
+
+        user = User("evan.s.2", "password", "evan.s@test.com")
+        assertThatThrownBy {
+            UserService.createUser(user)
+        }.isInstanceOf(RecordAlreadyExistsException::class.java)
     }
 
     @Test
@@ -94,15 +109,14 @@ class UserServiceTest {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
 
-        val updatedUser = User(email = "some_email", password = "new_password")
+        var updatedUser = User(email = "some_email", password = "new_password")
         UserService.updateUser("evan.s", updatedUser)
         transaction {
             val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
             assertThat(foundUser).isNotNull
             assertThat(foundUser!![UserTable.email]).isEqualTo("some_email")
 
-            assertThat(BCrypt.checkpw(updatedUser.password, foundUser[UserTable.password]))
-                .isTrue()
+            assertThat(BCrypt.checkpw(updatedUser.password, foundUser[UserTable.password])).isTrue()
         }
     }
 
@@ -127,6 +141,7 @@ class UserServiceTest {
     fun `loginUser() should validate user appropriately`() {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
         assertThat(UserService.loginUser(user)).isNotEmpty()
 
         val incorrectPwdUser = User("evan.s", "noob", "evan.s@test.com")
@@ -138,5 +153,31 @@ class UserServiceTest {
         assertThatThrownBy {
             UserService.loginUser(badUser)
         }.isInstanceOf(IllegalUserException::class.java)
+
+        val unapprovedUser = User("evan.s_2", "password", "evan.s.2@test.com")
+        UserService.createUser(unapprovedUser)
+        assertThatThrownBy {
+            UserService.loginUser(unapprovedUser)
+        }.isInstanceOf(UnapprovedUserException::class.java)
+    }
+
+    @Test
+    fun `approveUser() sets is_approved flag for user record`() {
+        val user = User("evan.s", "password", "evan.s@test.com")
+        UserService.createUser(user)
+
+        UserService.approveUser(user.username!!, true)
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+        }
+
+        UserService.approveUser(user.username!!, false)
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.is_approved]).isFalse()
+        }
     }
 }

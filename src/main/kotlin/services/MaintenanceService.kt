@@ -2,6 +2,7 @@ package services
 
 import dao.MaintenanceDao
 import exceptions.BadOperationException
+import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Maintenance
@@ -20,6 +21,9 @@ object MaintenanceService {
             throw BadOperationException("Maintenance")
 
         transaction {
+            if (MaintenanceDao.find { MaintenanceTable.workOrderNumber eq newMaintenance.workOrderNumber!! }.firstOrNull() != null)
+                throw RecordAlreadyExistsException()
+
             MaintenanceDao.new {
                 this.serialNumber = serialNumber
                 workOrderNumber = newMaintenance.workOrderNumber!!

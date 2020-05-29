@@ -3,6 +3,8 @@ package services
 import exceptions.BadNewUserException
 import exceptions.BadOperationException
 import exceptions.IllegalUserException
+import exceptions.RecordAlreadyExistsException
+import exceptions.UnapprovedUserException
 import models.User
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
@@ -11,6 +13,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
+import tables.UserTable.email
+import tables.UserTable.is_approved
 import tables.UserTable.password
 import tables.UserTable.username
 import utils.Validator
@@ -21,6 +25,10 @@ object UserService {
             throw BadNewUserException()
 
         transaction {
+            if ((UserTable.select { username eq user.username!! }.firstOrNull() != null) ||
+                (UserTable.select { email eq user.email!! }.firstOrNull() != null))
+                throw RecordAlreadyExistsException()
+
             UserTable.insert {
                 it[username] = user.username!!
                 it[email] = user.email!!
@@ -61,10 +69,23 @@ object UserService {
             UserTable.select { username eq user.username!! }.firstOrNull()
         } ?: throw IllegalUserException()
 
+        if (!foundUser[is_approved])
+            throw UnapprovedUserException()
+
         if (!BCrypt.checkpw(user.password, foundUser[password]))
             throw IllegalUserException()
 
         return Validator.generateToken()
+    }
+
+    fun approveUser(username: String, approveFlag: Boolean) {
+        transaction {
+            val res = UserTable.update({ UserTable.username eq username }) {
+                it[is_approved] = approveFlag
+            }
+            if (res == 0)
+                throw BadOperationException("User")
+        }
     }
 
     private fun generateHashAndSalt(password: String): Pair<String, String> {

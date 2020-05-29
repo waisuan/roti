@@ -75,7 +75,7 @@ class MachinesAPITest {
             .body(JsonNode("{\"serialNumber\":\"TEST02\", \"tncDate\":\"2020-01-01\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
-        assertThat(response.body as String).contains("duplicate key value violates unique constraint")
+        assertThat(response.body as String).contains("Record already exists")
     }
 
     @Test

@@ -1,9 +1,9 @@
 package services
 
 import exceptions.BadOperationException
+import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
-import java.lang.Exception
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -33,8 +33,7 @@ class MachineServiceTest {
 
         assertThatThrownBy {
             MachineService.createMachine(newMachine)
-        }.isInstanceOf(Exception::class.java)
-            .hasMessageContaining("duplicate key")
+        }.isInstanceOf(RecordAlreadyExistsException::class.java)
 
         newMachine = Machine()
         assertThatThrownBy {

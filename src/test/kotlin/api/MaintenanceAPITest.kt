@@ -79,7 +79,7 @@ class MaintenanceAPITest {
             .body(JsonNode("{\"workOrderNumber\":\"W01\", \"workOrderDate\":\"2020-01-01\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
-        assertThat(response.body as String).contains("duplicate key value violates unique constraint")
+        assertThat(response.body as String).contains("Record already exists")
 
         response = Unirest.post("/machines/TEST00000/history")
             .header("Content-Type", "application/json")

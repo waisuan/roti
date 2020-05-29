@@ -1,9 +1,9 @@
 package services
 
 import exceptions.BadOperationException
+import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
-import java.lang.Exception
 import java.time.LocalDate
 import models.Machine
 import models.Maintenance
@@ -49,8 +49,7 @@ class MaintenanceServiceTest {
 
         assertThatThrownBy {
             MaintenanceService.createMaintenanceHistory("TEST01", newMaintenance)
-        }.isInstanceOf(Exception::class.java)
-            .hasMessageContaining("duplicate key")
+        }.isInstanceOf(RecordAlreadyExistsException::class.java)
 
         newMaintenance = Maintenance()
         assertThatThrownBy {

@@ -42,9 +42,11 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             }
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
+        // Views
         app.get("/register", VueComponent("<register-user></register-user>"), roles(RotiRole.ANYONE))
         app.get("/login", VueComponent("<login-user></login-user>"), roles(RotiRole.ANYONE))
 
+        // API
         app.routes {
             path("api") {
                 path("users") {
@@ -88,6 +90,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             }
         }
 
+        // TODO add more exception handling w/ proper status codes
         app.exception(Exception::class.java) { e, ctx ->
             ctx.result(e.message!!)
             ctx.status(404)

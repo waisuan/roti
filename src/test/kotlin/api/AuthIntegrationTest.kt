@@ -56,6 +56,7 @@ class AuthIntegrationTest {
 
         val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
         val token = UserService.loginUser(user)
 
         response = Unirest.get("/machines")
@@ -76,6 +77,8 @@ class AuthIntegrationTest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
+
+        UserService.approveUser("TEST", true)
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")

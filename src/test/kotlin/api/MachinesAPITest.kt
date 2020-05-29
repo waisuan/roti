@@ -26,7 +26,7 @@ class MachinesAPITest {
         EnvironmentVariables().set("DEV_MODE", "1")
 
         app = RotiApp(port = 8000, enableDB = false).init()
-        Unirest.config().defaultBaseUrl("http://localhost:8000")
+        Unirest.config().defaultBaseUrl("http://localhost:8000/api")
     }
 
     @AfterAll

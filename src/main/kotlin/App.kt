@@ -42,44 +42,47 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             }
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
-        app.get("/", VueComponent("<hello-world></hello-world>"), roles(RotiRole.ANYONE))
+        app.get("/register", VueComponent("<register-user></register-user>"), roles(RotiRole.ANYONE))
+        app.get("/login", VueComponent("<login-user></login-user>"), roles(RotiRole.ANYONE))
 
         app.routes {
-            path("users") {
-                path(":username") {
-                    put(UserController::updateUser)
-                    delete(UserController::deleteUser)
+            path("api") {
+                path("users") {
+                    path(":username") {
+                        put(UserController::updateUser)
+                        delete(UserController::deleteUser)
+                    }
+                    path("register") {
+                        post(UserController::createUser, roles(RotiRole.ANYONE))
+                    }
+                    path("login") {
+                        post(UserController::loginUser, roles(RotiRole.ANYONE))
+                    }
                 }
-                path("register") {
-                    post(UserController::createUser, roles(RotiRole.ANYONE))
-                }
-                path("login") {
-                    post(UserController::loginUser, roles(RotiRole.ANYONE))
-                }
-            }
-            path("machines") {
-                get(MachineController::getAllMachines)
-                post(MachineController::createMachine)
-                path(":serialNumber") {
-                    put(MachineController::updateMachine)
-                    delete(MachineController::deleteMachine)
-                    path("history") {
-                        get(MaintenanceController::getMaintenanceHistory)
-                        post(MaintenanceController::createMaintenanceHistory)
-                        path(":workOrderNumber") {
-                            put(MaintenanceController::updateMaintenanceHistory)
-                            delete(MaintenanceController::deleteMaintenanceHistory)
+                path("machines") {
+                    get(MachineController::getAllMachines)
+                    post(MachineController::createMachine)
+                    path(":serialNumber") {
+                        put(MachineController::updateMachine)
+                        delete(MachineController::deleteMachine)
+                        path("history") {
+                            get(MaintenanceController::getMaintenanceHistory)
+                            post(MaintenanceController::createMaintenanceHistory)
+                            path(":workOrderNumber") {
+                                put(MaintenanceController::updateMaintenanceHistory)
+                                delete(MaintenanceController::deleteMaintenanceHistory)
+                            }
                         }
                     }
                 }
-            }
-            path("files") {
-                path(":ownerId") {
-                    get(FileController::getFileNames)
-                    post(FileController::saveFile)
-                    path(":fileName") {
-                        get(FileController::getFile)
-                        delete(FileController::deleteFile)
+                path("files") {
+                    path(":ownerId") {
+                        get(FileController::getFileNames)
+                        post(FileController::saveFile)
+                        path(":fileName") {
+                            get(FileController::getFile)
+                            delete(FileController::deleteFile)
+                        }
                     }
                 }
             }

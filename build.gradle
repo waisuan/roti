@@ -62,7 +62,7 @@ jar {
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
-//DISABLE tests during build.
+//DISABLE tests during Heroku build.
 gradle.taskGraph.whenReady {
     taskGraph ->
         if (taskGraph.hasTask(stage)) {

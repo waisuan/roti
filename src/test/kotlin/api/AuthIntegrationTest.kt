@@ -5,6 +5,7 @@ import helpers.TestDatabase
 import io.javalin.Javalin
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
+import models.Constants
 import models.User
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -22,7 +23,7 @@ class AuthIntegrationTest {
     @BeforeAll
     fun setup() {
         app = RotiApp(port = 8000, enableDB = false).init()
-        Unirest.config().defaultBaseUrl("http://localhost:8000")
+        Unirest.config().defaultBaseUrl("http://localhost:8000/api")
     }
 
     @AfterAll
@@ -58,12 +59,12 @@ class AuthIntegrationTest {
         val token = UserService.loginUser(user)
 
         response = Unirest.get("/machines")
-            .header("Authorization", "Bearer $token")
+            .header("Cookie", "${Constants.USER_TOKEN.name}=$token")
             .asString()
         assertThat(response.status).isEqualTo(200)
 
         response = Unirest.get("/machines")
-            .header("Authorization", "Bearer BAD_TOKEN")
+            .header("Cookie", "${Constants.USER_TOKEN.name}=BAD_TOKEN")
             .asString()
         assertThat(response.status).isEqualTo(401)
     }

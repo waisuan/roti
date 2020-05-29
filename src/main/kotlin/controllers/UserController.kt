@@ -1,6 +1,7 @@
 package controllers
 
 import io.javalin.http.Context
+import models.Constants
 import models.User
 import services.UserService
 
@@ -18,6 +19,6 @@ object UserController {
     }
 
     fun loginUser(ctx: Context) {
-        ctx.json(UserService.loginUser(ctx.body<User>()))
+        ctx.cookie(Constants.USER_TOKEN.name, UserService.loginUser(ctx.body<User>()))
     }
 }

@@ -3,12 +3,13 @@ package controllers
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
+import models.Constants
 import models.RotiRole
 import utils.Validator
 
 object AuthController {
     fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>) {
-        val token = ctx.header("Authorization")?.removePrefix("Bearer ") ?: ""
+        val token = ctx.cookie(Constants.USER_TOKEN.name) ?: ""
         if (isDevMode() || isExcludedFromAuth(permittedRoles) || Validator.verifyToken(token)) {
             handler.handle(ctx)
         } else {

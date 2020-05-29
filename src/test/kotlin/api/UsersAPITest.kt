@@ -25,7 +25,7 @@ class UsersAPITest {
     @BeforeAll
     fun setup() {
         app = RotiApp(port = 8000, enableDB = false).init()
-        Unirest.config().defaultBaseUrl("http://localhost:8000")
+        Unirest.config().defaultBaseUrl("http://localhost:8000/api")
     }
 
     @AfterAll
@@ -76,9 +76,9 @@ class UsersAPITest {
         var response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
-            .asString()
+            .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.body).isNotEmpty()
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")

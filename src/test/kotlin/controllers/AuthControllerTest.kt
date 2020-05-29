@@ -29,7 +29,7 @@ class AuthControllerTest {
         val context = mock<Context>()
         val token = Validator.generateToken()
 
-        whenever(context.header(any())).doAnswer { "Bearer $token" }
+        whenever(context.cookie(any<String>())).doAnswer { token }
         whenever(context.matchedPath()).thenReturn("/some/path")
         whenever(context.method()).thenReturn("GET")
         whenever(context.status(any())).thenReturn(context)
@@ -45,7 +45,7 @@ class AuthControllerTest {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
-        whenever(context.header(any())).doAnswer { "Bearer BAD_TOKEN" }
+        whenever(context.cookie(any<String>())).doAnswer { "BAD_TOKEN" }
         whenever(context.matchedPath()).thenReturn("/some/path")
         whenever(context.method()).thenReturn("GET")
         whenever(context.status(any())).thenReturn(context)

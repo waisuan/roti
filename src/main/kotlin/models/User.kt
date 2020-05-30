@@ -2,16 +2,14 @@ package models
 
 import io.javalin.core.security.Role
 
-enum class RotiRole : Role { ANYONE, LOGGED_IN }
-
-enum class UserRole : Role { ADMIN, NON_ADMIN }
+enum class UserRole : Role { ADMIN, NON_ADMIN, GUEST }
 
 data class User(
     val username: String? = null,
     val password: String? = null,
     val email: String? = null,
-    val is_approved: Boolean = false,
-    val role: String = UserRole.NON_ADMIN.name
+    val is_approved: Boolean? = null,
+    val role: UserRole? = null
 ) {
     fun isValid(): Boolean {
         return username != null &&

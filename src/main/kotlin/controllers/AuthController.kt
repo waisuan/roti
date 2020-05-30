@@ -4,13 +4,15 @@ import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
 import models.Constants
-import models.RotiRole
+import models.UserRole
+import services.UserService
 import utils.Validator
 
 object AuthController {
     fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>) {
         val token = ctx.cookie(Constants.USER_TOKEN.name) ?: ""
-        if (isDevMode() || isExcludedFromAuth(permittedRoles) || Validator.verifyToken(token)) {
+        val username = ctx.cookieStore(Constants.USER_NAME.name) ?: ""
+        if (isDevMode() || isExcludedFromAuth(permittedRoles) || (isAuthorizedRole(username, permittedRoles) && Validator.verifyToken(token))) {
             handler.handle(ctx)
         } else {
             ctx.status(401)
@@ -23,6 +25,13 @@ object AuthController {
     }
 
     private fun isExcludedFromAuth(permittedRoles: Set<Role>): Boolean {
-        return RotiRole.ANYONE in permittedRoles
+        return UserRole.GUEST in permittedRoles
+    }
+
+    private fun isAuthorizedRole(username: String, permittedRoles: Set<Role>): Boolean {
+        if (permittedRoles.isEmpty())
+            return true
+        val user = UserService.getUser(username) ?: return false
+        return user.role!! in permittedRoles
     }
 }

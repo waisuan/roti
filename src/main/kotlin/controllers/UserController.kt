@@ -19,6 +19,9 @@ object UserController {
     }
 
     fun loginUser(ctx: Context) {
-        ctx.cookie(Constants.USER_TOKEN.name, UserService.loginUser(ctx.body<User>()))
+        val user = ctx.body<User>()
+        val userToken = UserService.loginUser(user)
+        ctx.cookie(Constants.USER_TOKEN.name, userToken)
+        ctx.cookieStore(Constants.USER_NAME.name, user.username!!)
     }
 }

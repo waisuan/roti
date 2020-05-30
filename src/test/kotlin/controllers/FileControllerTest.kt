@@ -7,12 +7,12 @@ import com.nhaarman.mockitokotlin2.whenever
 import exceptions.BadFileUploadException
 import io.javalin.http.Context
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 
 class FileControllerTest {
-    @AfterEach
+    @BeforeEach
     fun clearMocks() {
         Mockito.framework().clearInlineMocks()
     }

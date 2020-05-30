@@ -6,6 +6,8 @@ import exceptions.IllegalUserException
 import exceptions.RecordAlreadyExistsException
 import exceptions.UnapprovedUserException
 import models.User
+import models.UserRole
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -16,6 +18,7 @@ import tables.UserTable
 import tables.UserTable.email
 import tables.UserTable.is_approved
 import tables.UserTable.password
+import tables.UserTable.role
 import tables.UserTable.username
 import utils.Validator
 
@@ -50,6 +53,8 @@ object UserService {
                     it[password] = hash
                     it[UserTable.salt] = salt
                 }
+                if (user.role != null)
+                    it[role] = user.role.name
             }
             if (res == 0)
                 throw BadOperationException("User")
@@ -78,7 +83,7 @@ object UserService {
         return Validator.generateToken()
     }
 
-    fun approveUser(username: String, approveFlag: Boolean) {
+    fun approveUser(username: String, approveFlag: Boolean = true) {
         transaction {
             val res = UserTable.update({ UserTable.username eq username }) {
                 it[is_approved] = approveFlag
@@ -86,6 +91,18 @@ object UserService {
             if (res == 0)
                 throw BadOperationException("User")
         }
+    }
+
+    fun getUser(username: String): User? {
+        return transaction {
+            UserTable.select { UserTable.username eq username }.map {
+                toUserModel(it)
+            }
+        }.firstOrNull()
+    }
+
+    private fun toUserModel(row: ResultRow): User {
+        return User(username = row[username], email = row[email], is_approved = row[is_approved], role = UserRole.valueOf(row[role]))
     }
 
     private fun generateHashAndSalt(password: String): Pair<String, String> {

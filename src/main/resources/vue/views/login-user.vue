@@ -49,7 +49,6 @@
                     .post('api/users/login', this.userData)
                     .then(_ => {
                         this.clearUserData()
-                        this.submitSuccess = true
                     })
                     .catch(error => {
                         this.errorMsg = error.response.data

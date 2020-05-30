@@ -7,6 +7,7 @@ import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import models.Constants
 import models.User
+import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
@@ -84,6 +85,49 @@ class AuthIntegrationTest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asString()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `cookie and cookieStore are init after user is logged in`() {
+        var response = Unirest.get("/machines").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "javalin-cookie-store=")
+
+        response = Unirest.get("/machines").asString()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `only permitted roles are allowed access if they're declared`() {
+        var response = Unirest.get("http://localhost:8000/admin").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        var user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+
+        response = Unirest.get("http://localhost:8000/admin").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        user = User(role = UserRole.ADMIN)
+        UserService.updateUser("TEST", user)
+
+        response = Unirest.get("http://localhost:8000/admin").asString()
         assertThat(response.status).isEqualTo(200)
     }
 }

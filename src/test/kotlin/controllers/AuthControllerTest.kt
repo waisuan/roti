@@ -5,22 +5,30 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import helpers.TestDatabase
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
-import models.RotiRole
+import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import utils.Validator
 
 class AuthControllerTest {
 
+    @BeforeEach
+    fun setup() {
+        TestDatabase.init()
+    }
+
     @AfterEach
-    fun clearMocks() {
+    fun tearDown() {
         Mockito.framework().clearInlineMocks()
+        TestDatabase.purge()
     }
 
     @Test
@@ -70,10 +78,12 @@ class AuthControllerTest {
         AuthController.accessManager(handler, context, HashSet<Role>())
 
         verify(handler).handle(any())
+
+        envVar.set("DEV_MODE", null)
     }
 
     @Test
-    fun `skips auth if role is ANYONE`() {
+    fun `skips auth if role is GUEST`() {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
@@ -81,13 +91,13 @@ class AuthControllerTest {
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
-        AuthController.accessManager(handler, context, setOf(RotiRole.ANYONE))
+        AuthController.accessManager(handler, context, setOf(UserRole.GUEST))
 
         verify(handler).handle(any())
     }
 
     @Test
-    fun `needs auth if role is LOGGED_IN`() {
+    fun `needs auth if role is NON_ADMIN`() {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
@@ -95,7 +105,21 @@ class AuthControllerTest {
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
-        AuthController.accessManager(handler, context, setOf(RotiRole.LOGGED_IN))
+        AuthController.accessManager(handler, context, setOf(UserRole.NON_ADMIN))
+
+        verify(context).status(401)
+    }
+
+    @Test
+    fun `needs auth if role is ADMIN`() {
+        val handler = mock<Handler>()
+        val context = mock<Context>()
+
+        whenever(context.matchedPath()).thenReturn("/users/login")
+        whenever(context.method()).thenReturn("POST")
+        whenever(handler.handle(any())).doAnswer { Unit }
+
+        AuthController.accessManager(handler, context, setOf(UserRole.ADMIN))
 
         verify(context).status(401)
     }

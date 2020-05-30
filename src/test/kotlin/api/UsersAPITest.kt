@@ -79,7 +79,7 @@ class UsersAPITest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=")
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "javalin-cookie-store=")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")

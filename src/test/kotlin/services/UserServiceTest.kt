@@ -118,6 +118,14 @@ class UserServiceTest {
 
             assertThat(BCrypt.checkpw(updatedUser.password, foundUser[UserTable.password])).isTrue()
         }
+
+        updatedUser = User(role = UserRole.ADMIN)
+        UserService.updateUser("evan.s", updatedUser)
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.role]).isEqualTo(UserRole.ADMIN.name)
+        }
     }
 
     @Test
@@ -179,5 +187,16 @@ class UserServiceTest {
             assertThat(foundUser).isNotNull
             assertThat(foundUser!![UserTable.is_approved]).isFalse()
         }
+
+        UserService.approveUser(user.username!!)
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+        }
+    }
+
+    @Test
+    fun `getUser()`() {
     }
 }

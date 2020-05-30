@@ -12,7 +12,7 @@ import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.core.security.SecurityUtil.roles
 import io.javalin.plugin.rendering.vue.VueComponent
-import models.RotiRole
+import models.UserRole
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -43,8 +43,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
         // Views
-        app.get("/register", VueComponent("<register-user></register-user>"), roles(RotiRole.ANYONE))
-        app.get("/login", VueComponent("<login-user></login-user>"), roles(RotiRole.ANYONE))
+        app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
+        app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
+        app.get("/admin", VueComponent("<admin-room></admin-room>"), roles(UserRole.ADMIN))
 
         // API
         app.routes {
@@ -55,10 +56,10 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                         delete(UserController::deleteUser)
                     }
                     path("register") {
-                        post(UserController::createUser, roles(RotiRole.ANYONE))
+                        post(UserController::createUser, roles(UserRole.GUEST))
                     }
                     path("login") {
-                        post(UserController::loginUser, roles(RotiRole.ANYONE))
+                        post(UserController::loginUser, roles(UserRole.GUEST))
                     }
                 }
                 path("machines") {

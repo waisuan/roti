@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import services.MachineService
 import services.UserService
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -196,7 +195,7 @@ class UsersAPITest {
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
 
-        response =  Unirest.delete("/users/TEST").asEmpty()
+        response = Unirest.delete("/users/TEST").asEmpty()
         assertThat(response.status).isEqualTo(401)
 
         UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))

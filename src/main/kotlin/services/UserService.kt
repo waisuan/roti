@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.mindrot.jbcrypt.BCrypt
@@ -99,6 +100,12 @@ object UserService {
                 toUserModel(it)
             }
         }.firstOrNull()
+    }
+
+    fun getUsers(): List<User> {
+        return transaction {
+            UserTable.selectAll().map { toUserModel(it) }
+        }
     }
 
     private fun toUserModel(row: ResultRow): User {

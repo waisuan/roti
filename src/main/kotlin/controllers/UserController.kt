@@ -24,4 +24,8 @@ object UserController {
         ctx.cookie(Constants.USER_TOKEN.name, userToken)
         ctx.cookieStore(Constants.USER_NAME.name, user.username!!)
     }
+
+    fun getUsers(ctx: Context) {
+        ctx.json(UserService.getUsers())
+    }
 }

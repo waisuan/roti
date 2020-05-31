@@ -197,6 +197,26 @@ class UserServiceTest {
     }
 
     @Test
-    fun `getUser()`() {
+    fun `getUser() returns user if exists in DB`() {
+        val user = User("evan.s", "password", "evan.s@test.com")
+        UserService.createUser(user)
+
+        assertThat(UserService.getUser(user.username!!)).isNotNull
+    }
+
+    @Test
+    fun `getUser() returns null if does not exist in DB`() {
+        assertThat(UserService.getUser("some_user")).isNull()
+    }
+
+    @Test
+    fun `getUsers() returns a list of users from the DB`() {
+        assertThat(UserService.getUsers()).isEmpty()
+
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+        UserService.createUser(User("evan.s.2", "password", "evan.s.2@test.com"))
+        UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
+
+        assertThat(UserService.getUsers().size).isEqualTo(3)
     }
 }

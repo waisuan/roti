@@ -4,9 +4,11 @@ import RotiApp
 import exceptions.IllegalUserException
 import helpers.TestDatabase
 import io.javalin.Javalin
+import io.javalin.plugin.json.JavalinJson
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import models.User
+import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.contrib.java.lang.system.EnvironmentVariables
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import services.MachineService
 import services.UserService
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -76,21 +79,21 @@ class UsersAPITest {
 
         var response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
-            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "javalin-cookie-store=")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
-            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"BAD_PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"BAD_PASSWORD\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("Incorrect username/password detected")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
-            .body(JsonNode("{\"username\":\"TEST09\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .body(JsonNode("{\"username\":\"TEST09\", \"password\":\"PASSWORD\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("Incorrect username/password detected")
@@ -98,7 +101,7 @@ class UsersAPITest {
         UserService.approveUser(user.username!!, false)
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
-            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("User has not been approved")
@@ -136,6 +139,31 @@ class UsersAPITest {
     }
 
     @Test
+    fun `PUT users is only allowed for ADMIN users`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        response = Unirest.put("/users/TEST")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"password\":\"NEW_PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
+        response = Unirest.put("/users/TEST")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"password\":\"NEW_PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
     fun `DELETE users`() {
         EnvironmentVariables().set("DEV_MODE", "1")
 
@@ -155,5 +183,68 @@ class UsersAPITest {
         assertThat(response.body as String).contains("Unable to operate on User record")
 
         EnvironmentVariables().set("DEV_MODE", null)
+    }
+
+    @Test
+    fun `DELETE users is only allowed for ADMIN users`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        response =  Unirest.delete("/users/TEST").asEmpty()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
+        response = Unirest.delete("/users/TEST").asEmpty()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `GET users`() {
+        EnvironmentVariables().set("DEV_MODE", "1")
+        var response = Unirest.get("/users").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body as String).isEqualTo("[]")
+
+        UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
+        response = Unirest.get("/users").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body as String).isEqualTo(
+            JavalinJson.toJson(
+                UserService.getUsers()
+            )
+        )
+
+        EnvironmentVariables().set("DEV_MODE", null)
+    }
+
+    @Test
+    fun `GET users  is only allowed for ADMIN users`() {
+        var response = Unirest.get("/users").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
+        UserService.approveUser("TEST", true)
+        response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+
+        response = Unirest.get("/users").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.updateUser("TEST", User(role = UserRole.ADMIN))
+        response = Unirest.get("/users").asString()
+        assertThat(response.body as String).isEqualTo(
+            JavalinJson.toJson(
+                UserService.getUsers()
+            )
+        )
     }
 }

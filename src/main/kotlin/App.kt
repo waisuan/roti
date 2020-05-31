@@ -51,9 +51,10 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         app.routes {
             path("api") {
                 path("users") {
+                    get(UserController::getUsers, roles(UserRole.ADMIN))
                     path(":username") {
-                        put(UserController::updateUser)
-                        delete(UserController::deleteUser)
+                        put(UserController::updateUser, roles(UserRole.ADMIN))
+                        delete(UserController::deleteUser, roles(UserRole.ADMIN))
                     }
                     path("register") {
                         post(UserController::createUser, roles(UserRole.GUEST))

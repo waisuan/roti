@@ -28,4 +28,8 @@ object UserController {
     fun getUsers(ctx: Context) {
         ctx.json(UserService.getUsers())
     }
+
+    fun getUserRoles(ctx: Context) {
+        ctx.json(UserService.getUserRoles())
+    }
 }

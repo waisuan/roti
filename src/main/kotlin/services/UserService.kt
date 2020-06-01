@@ -108,6 +108,10 @@ object UserService {
         }
     }
 
+    fun getUserRoles(): List<UserRole> {
+        return UserRole.values().toMutableList()
+    }
+
     private fun toUserModel(row: ResultRow): User {
         return User(username = row[username], email = row[email], is_approved = row[is_approved], role = UserRole.valueOf(row[role]))
     }

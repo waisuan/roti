@@ -223,7 +223,7 @@ class UsersAPITest {
     }
 
     @Test
-    fun `GET users  is only allowed for ADMIN users`() {
+    fun `GET users is only allowed for ADMIN users`() {
         var response = Unirest.get("/users").asString()
         assertThat(response.status).isEqualTo(401)
 

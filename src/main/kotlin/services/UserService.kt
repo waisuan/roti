@@ -22,7 +22,6 @@ import tables.UserTable.password
 import tables.UserTable.role
 import tables.UserTable.username
 import utils.Validator
-import utils.logger
 
 object UserService {
     fun createUser(user: User) {

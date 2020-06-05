@@ -11,7 +11,6 @@ import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -159,9 +158,9 @@ class UserServiceTest {
         ))
         val foundUsers = UserService.getUsers()
         assertThat(foundUsers.size).isEqualTo(3)
-        assertThat(foundUsers.find { it.username.equals("evan.s")  }!!.is_approved).isTrue()
-        assertThat(foundUsers.find { it.username.equals("evan.s.2")  }!!.role).isEqualTo(UserRole.ADMIN)
-        assertThat(foundUsers.find { it.username.equals("evan.s.3")  }!!.email).isEqualTo("new_mail@test.com")
+        assertThat(foundUsers.find { it.username.equals("evan.s") }!!.is_approved).isTrue()
+        assertThat(foundUsers.find { it.username.equals("evan.s.2") }!!.role).isEqualTo(UserRole.ADMIN)
+        assertThat(foundUsers.find { it.username.equals("evan.s.3") }!!.email).isEqualTo("new_mail@test.com")
     }
 
     @Test

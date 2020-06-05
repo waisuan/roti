@@ -1,5 +1,7 @@
 package controllers
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.javalin.http.Context
 import models.Constants
 import models.User
@@ -12,6 +14,10 @@ object UserController {
 
     fun updateUser(ctx: Context) {
         UserService.updateUser(ctx.pathParam("username"), ctx.body<User>())
+    }
+
+    fun updateUsers(ctx: Context) {
+        UserService.updateUsers(ctx.bodyAsClass(Array<User>::class.java).toList())
     }
 
     fun deleteUser(ctx: Context) {

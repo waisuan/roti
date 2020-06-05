@@ -22,6 +22,7 @@ import tables.UserTable.password
 import tables.UserTable.role
 import tables.UserTable.username
 import utils.Validator
+import utils.logger
 
 object UserService {
     fun createUser(user: User) {
@@ -56,9 +57,19 @@ object UserService {
                 }
                 if (user.role != null)
                     it[role] = user.role.name
+                if (user.is_approved != null)
+                    it[is_approved] = user.is_approved
             }
             if (res == 0)
-                throw BadOperationException("User")
+                throw BadOperationException(User::class.java.simpleName)
+        }
+    }
+
+    fun updateUsers(users: List<User>) {
+        users.forEach { user ->
+            if (user.username == null)
+                throw BadOperationException(User::class.java.simpleName)
+            updateUser(user.username, user)
         }
     }
 
@@ -66,7 +77,7 @@ object UserService {
         transaction {
             val res = UserTable.deleteWhere { UserTable.username eq username }
             if (res == 0)
-                throw BadOperationException("User")
+                throw BadOperationException(User::class.java.simpleName)
         }
     }
 
@@ -90,7 +101,7 @@ object UserService {
                 it[is_approved] = approveFlag
             }
             if (res == 0)
-                throw BadOperationException("User")
+                throw BadOperationException(User::class.java.simpleName)
         }
     }
 

@@ -18,7 +18,7 @@ object MaintenanceService {
 
     fun createMaintenanceHistory(serialNumber: String, newMaintenance: Maintenance) {
         if (!newMaintenance.isValid())
-            throw BadOperationException("Maintenance")
+            throw BadOperationException(Maintenance::class.java.simpleName)
 
         transaction {
             if (MaintenanceDao.find { MaintenanceTable.workOrderNumber eq newMaintenance.workOrderNumber!! }.firstOrNull() != null)

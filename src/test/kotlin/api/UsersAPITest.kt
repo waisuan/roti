@@ -7,6 +7,7 @@ import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
+import kong.unirest.json.JSONArray
 import models.User
 import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.UserService
+import utils.logger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UsersAPITest {
@@ -158,6 +160,57 @@ class UsersAPITest {
         response = Unirest.put("/users/TEST")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"password\":\"NEW_PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `PUT multiple users`() {
+        EnvironmentVariables().set("DEV_MODE", "1")
+
+        UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
+        UserService.createUser(User(username = "TEST2", password = "PASSWORD", email = "email2@mail.com"))
+
+        var response = Unirest.put("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST","password":"NEW_PASSWORD", "is_approved":"true"},
+                 {"username":"TEST2","email":"new_mail@mail.com"}]
+            """.trimIndent()))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        assertThat(UserService.loginUser(User(username = "TEST", password = "NEW_PASSWORD"))).isNotNull()
+        assertThat(UserService.getUser("TEST2")!!.email).isEqualTo("new_mail@mail.com")
+
+        EnvironmentVariables().set("DEV_MODE", null)
+    }
+
+    @Test
+    fun `PUT multiple users is only allowed for ADMIN users`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        response = Unirest.put("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST","password":"NEW_PASSWORD"}]
+            """.trimIndent()))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
+        response = Unirest.put("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST","password":"NEW_PASSWORD"}]
+            """.trimIndent()))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
     }

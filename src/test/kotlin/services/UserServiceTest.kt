@@ -11,6 +11,7 @@ import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -126,6 +127,14 @@ class UserServiceTest {
             assertThat(foundUser).isNotNull
             assertThat(foundUser!![UserTable.role]).isEqualTo(UserRole.ADMIN.name)
         }
+
+        updatedUser = User(is_approved = true)
+        UserService.updateUser("evan.s", updatedUser)
+        transaction {
+            val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
+            assertThat(foundUser).isNotNull
+            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+        }
     }
 
     @Test
@@ -135,6 +144,35 @@ class UserServiceTest {
             UserService.updateUser("evan.s", updatedUser)
         }.isInstanceOf(BadOperationException::class.java)
             .hasMessageContaining("Unable to operate on User record")
+    }
+
+    @Test
+    fun `updateUsers() should update multiple users accordingly`() {
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+        UserService.createUser(User("evan.s.2", "password", "evan.s.2@test.com"))
+        UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
+
+        UserService.updateUsers(listOf(
+            User(username = "evan.s", is_approved = true),
+            User(username = "evan.s.2", role = UserRole.ADMIN),
+            User(username = "evan.s.3", email = "new_mail@test.com")
+        ))
+        val foundUsers = UserService.getUsers()
+        assertThat(foundUsers.size).isEqualTo(3)
+        assertThat(foundUsers.find { it.username.equals("evan.s")  }!!.is_approved).isTrue()
+        assertThat(foundUsers.find { it.username.equals("evan.s.2")  }!!.role).isEqualTo(UserRole.ADMIN)
+        assertThat(foundUsers.find { it.username.equals("evan.s.3")  }!!.email).isEqualTo("new_mail@test.com")
+    }
+
+    @Test
+    fun `updateUsers() should throw an exception is user has no username`() {
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+
+        assertThatThrownBy {
+            UserService.updateUsers(listOf(
+                User(is_approved = true)
+            ))
+        }.isInstanceOf(BadOperationException::class.java)
     }
 
     @Test

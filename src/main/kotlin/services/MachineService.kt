@@ -18,7 +18,7 @@ object MachineService {
 
     fun createMachine(newMachine: Machine) {
         if (!newMachine.isValid())
-            throw BadOperationException("Machine")
+            throw BadOperationException(Machine::class.java.simpleName)
 
         transaction {
             if (MachineDao.find { MachineTable.serialNumber eq newMachine.serialNumber!! }.firstOrNull() != null)

@@ -1,11 +1,14 @@
 <template id="admin-room">
     <app-frame>
-        <div class="container">
+        <div class="container" style="margin-bottom: 80px">
             <table>
                 <thead>
                     <tr>
                         <th v-for="header in headers" v-bind:key="header">
                             {{ header | capitalize | clean }}
+                        </th>
+                        <th>
+                            <i class="fa fa-cog"></i>
                         </th>
                     </tr>
                 </thead>
@@ -15,32 +18,42 @@
                             {{ user.username }}
                         </td>
                         <td>
-                            <div v-show="isEditing !== (index + 'email')">
-                                <span v-on:dblclick="edit(index, 'email')">{{ user.email }}</span>
+                            <div v-show="isEditing !== user">
+                                <span>{{ user.email }}</span>
                             </div>
-                            <input ref="editEmailCellTag"
-                                   type="email"
-                                   v-show="isEditing === (index + 'email')"
-                                   v-model="user.email"
-                                   v-on:blur="revert(index)"
-                                   v-on:keyup.enter="saveInCache(user)">
+                            <input type="email"
+                                   v-show="isEditing === user"
+                                   v-model="user.email">
                         </td>
                         <td>
-                            <input type="checkbox" name="userIsApprovedCheckBox" v-model="user.is_approved" v-on:click="saveInCache(user)">
+                            <input type="checkbox" name="userIsApprovedCheckBox"
+                                   v-model="user.is_approved"
+                                   :disabled="isEditing !== user">
                         </td>
                         <td>
-                            <div v-show="isEditing !== (index + 'role')">
-                                <span v-on:dblclick="edit(index, 'role')">{{ user.role }}</span>
+                            <div v-show="isEditing !== user">
+                                <span>{{ user.role }}</span>
                             </div>
-                            <select ref="editRoleCellTag"
-                                    v-model="user.role"
-                                    v-show="isEditing === (index + 'role')"
-                                    v-on:blur="revert(index)"
-                                    v-on:keypress.enter="saveInCache(user)">
+                            <select v-model="user.role"
+                                    v-show="isEditing === user">
                                 <option v-for="role in userRoles" v-bind:value="role">
                                     {{ role }}
                                 </option>
                             </select>
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" v-on:click="edit(user)" v-show="isEditing !== user && isDeleting !== user">
+                                <i class="fa fa-edit" style="color: green"></i>
+                            </a>
+                            <a href="javascript:void(0)" v-on:click="remove(user)" v-show="isEditing !== user && isDeleting !== user">
+                                <i class="fa fa-trash" style="color: red"></i>
+                            </a>
+
+                            <a href="javascript:void(0)" v-on:click="saveInCache(user)" v-show="isEditing === user"><i class="fa fa-save" style="color: green"></i></a>
+                            <a href="javascript:void(0)" v-on:click="revertEdit()" v-show="isEditing === user"><i class="fa fa-ban" style="color: red"></i></a>
+
+                            <a href="javascript:void(0)" v-on:click="removeInCache(index)" v-show="isDeleting === user"><i class="fa fa-check" style="color: green"></i></a>
+                            <a href="javascript:void(0)" v-on:click="revertRemove()" v-show="isDeleting === user"><i class="fa fa-times" style="color: red"></i></a>
                         </td>
                     </tr>
                 </tbody>
@@ -68,50 +81,58 @@
             headers: [],
             userRoles: [],
             isEditing: null,
+            isDeleting: null,
             isEditingCache: null,
-            isSaving: false,
-            savedEvent: false,
+            cachedChanges: {},
+            cachedRemovals: {},
             hasChanges: false,
-            cachedChanges: {}
+            isSaving: false
         }),
         computed: {
         },
         methods: {
-            edit(index, value) {
-                this.isEditing = index + value
-                this.isEditingCache = JSON.parse(JSON.stringify(this.users[index]))
-                this.savedEvent = false
-                this.$nextTick(_ => {
-                    this.$refs.editEmailCellTag[index].focus()
-                    this.$refs.editRoleCellTag[index].focus()
-                })
+            edit(user) {
+                if (this.isEditing != null)
+                    this.revertEdit()
+                this.isEditing = user
+                this.isEditingCache = JSON.parse(JSON.stringify(user))
             },
-            revert(index) {
-                if (!this.savedEvent)
-                    this.users[index] = this.isEditingCache
+            revertEdit() {
+                let index = this.users.indexOf(this.isEditing)
+                this.users[index] = this.isEditingCache
+                this.isEditing = null
+            },
+            remove(user) {
+                this.isDeleting = user
+            },
+            revertRemove() {
+                this.isDeleting = null
             },
             saveInCache(user) {
-                this.savedEvent = true
+                if (JSON.stringify(this.isEditingCache) !== JSON.stringify(user)) {
+                    this.cachedChanges[user.username] = user
+                    this.hasChanges = true
+                }
                 this.isEditing = null
+            },
+            removeInCache(index) {
+                let removedUser = this.users[index]
+                this.cachedRemovals[removedUser.username] = removedUser
+                delete this.cachedChanges[removedUser.username]
+                this.users.splice(index, 1)
                 this.hasChanges = true
-                this.cachedChanges[user.username] = user
+                this.isDeleting = null
             },
             persistChanges() {
                 this.isSaving = true
-
-                let count = 0
-                let size = Object.keys(this.cachedChanges).length
-                for (const [ key, value ] of Object.entries(this.cachedChanges)) {
-                    axios.put('api/users/' + key, value).then(_ => {
-                        console.log("saved")
-                        // count += 1
-                        // if (count === size) {
-                        //     this.isSaving = false
-                        // }
-                    }).catch(error => {
-                        console.log(error)
-                    })
-                }
+                axios.put('api/users', Object.values(this.cachedChanges)).then(_ => {
+                    this.isSaving = false
+                    this.cachedChanges = {}
+                    this.hasChanges = false
+                }).catch(error => {
+                    // TODO
+                    console.log(error)
+                })
             }
         },
         filters: {

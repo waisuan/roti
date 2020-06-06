@@ -114,7 +114,7 @@ object UserService {
 
     fun getUsers(): List<User> {
         return transaction {
-            UserTable.selectAll().map { toUserModel(it) }
+            UserTable.selectAll().orderBy(username).map { toUserModel(it) }
         }
     }
 

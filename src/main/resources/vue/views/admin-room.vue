@@ -62,6 +62,7 @@
         <div class="footer">
             <div class="container">
                 <div class="float-right">
+                    <small style="color: red" v-show="hasError">Error! Failed to save changes. Please refresh the page and try again.</small>
                     <button class="button"
                             style="margin-top: 7px"
                             :disabled="!hasChanges || isSaving"
@@ -86,7 +87,9 @@
             cachedChanges: {},
             cachedRemovals: {},
             hasChanges: false,
-            isSaving: false
+            isSaving: false,
+            hasError: false,
+            errorMsg: ""
         }),
         computed: {
         },
@@ -125,13 +128,20 @@
             },
             persistChanges() {
                 this.isSaving = true
+
                 axios.put('api/users', Object.values(this.cachedChanges)).then(_ => {
-                    this.isSaving = false
                     this.cachedChanges = {}
-                    this.hasChanges = false
-                }).catch(error => {
-                    // TODO
-                    console.log(error)
+                    axios.delete('api/users', { data: Object.values(this.cachedRemovals) }).then(_ => {
+                        this.cachedRemovals = {}
+                        this.isSaving = false
+                        this.hasChanges = false
+                    }).catch(_ => {
+                        this.hasError = true
+                        this.isSaving = false
+                    })
+                }).catch(_ => {
+                    this.hasError = true
+                    this.isSaving = false
                 })
             }
         },

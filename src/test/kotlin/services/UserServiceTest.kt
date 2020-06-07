@@ -105,6 +105,40 @@ class UserServiceTest {
     }
 
     @Test
+    fun `deleteUser() should throw an exception if user does not exist`() {
+        assertThatThrownBy {
+            UserService.deleteUser("evan.s")
+        }.isInstanceOf(BadOperationException::class.java)
+            .hasMessageContaining("Unable to operate on User record")
+    }
+
+    @Test
+    fun `deleteUsers() should delete multiple users accordingly`() {
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+        UserService.createUser(User("evan.s.2", "password", "evan.s.2@test.com"))
+        UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
+
+        UserService.deleteUsers(listOf(
+            User(username = "evan.s"),
+            User(username = "evan.s.2"),
+            User(username = "evan.s.3")
+        ))
+        val foundUsers = UserService.getUsers()
+        assertThat(foundUsers.size).isEqualTo(0)
+    }
+
+    @Test
+    fun `deleteUsers() should throw an exception is user has no username`() {
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+
+        assertThatThrownBy {
+            UserService.deleteUsers(listOf(
+                User()
+            ))
+        }.isInstanceOf(BadOperationException::class.java)
+    }
+
+    @Test
     fun `updateUser() should update existing user accordingly`() {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
@@ -172,14 +206,6 @@ class UserServiceTest {
                 User(is_approved = true)
             ))
         }.isInstanceOf(BadOperationException::class.java)
-    }
-
-    @Test
-    fun `deleteUser() should throw an exception if user does not exist`() {
-        assertThatThrownBy {
-            UserService.deleteUser("evan.s")
-        }.isInstanceOf(BadOperationException::class.java)
-            .hasMessageContaining("Unable to operate on User record")
     }
 
     @Test

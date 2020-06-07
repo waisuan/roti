@@ -256,6 +256,57 @@ class UsersAPITest {
     }
 
     @Test
+    fun `DELETE multiple users`() {
+        EnvironmentVariables().set("DEV_MODE", "1")
+
+        UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
+        UserService.createUser(User(username = "TEST2", password = "PASSWORD", email = "email2@mail.com"))
+
+        var response = Unirest.delete("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST"},
+                 {"username":"TEST2"}]
+            """.trimIndent()))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        assertThat(UserService.getUser("TEST")).isNull()
+        assertThat(UserService.getUser("TEST2")).isNull()
+
+        EnvironmentVariables().set("DEV_MODE", null)
+    }
+
+    @Test
+    fun `DELETE multiple users is only allowed for ADMIN users`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        response = Unirest.delete("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST"}]
+            """.trimIndent()))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(401)
+
+        UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
+        response = Unirest.delete("/users")
+            .header("Content-Type", "application/json")
+            .body(JSONArray("""
+                [{"username":"TEST"}]
+            """.trimIndent()))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
     fun `GET users`() {
         EnvironmentVariables().set("DEV_MODE", "1")
         var response = Unirest.get("/users").asString()

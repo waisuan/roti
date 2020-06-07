@@ -22,6 +22,10 @@ object UserController {
         UserService.deleteUser(ctx.pathParam("username"))
     }
 
+    fun deleteUsers(ctx: Context) {
+        UserService.deleteUsers(ctx.bodyAsClass(Array<User>::class.java).toList())
+    }
+
     fun loginUser(ctx: Context) {
         val user = ctx.body<User>()
         val userToken = UserService.loginUser(user)

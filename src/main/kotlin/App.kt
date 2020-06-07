@@ -53,6 +53,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                 path("users") {
                     get(UserController::getUsers, roles(UserRole.ADMIN))
                     put(UserController::updateUsers, roles(UserRole.ADMIN))
+                    delete(UserController::deleteUsers, roles(UserRole.ADMIN))
                     path(":username") {
                         put(UserController::updateUser, roles(UserRole.ADMIN))
                         delete(UserController::deleteUser, roles(UserRole.ADMIN))

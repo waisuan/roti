@@ -80,6 +80,14 @@ object UserService {
         }
     }
 
+    fun deleteUsers(users: List<User>) {
+        users.forEach { user ->
+            if (user.username == null)
+                throw BadOperationException(User::class.java.simpleName)
+            deleteUser(user.username)
+        }
+    }
+
     fun loginUser(user: User): String {
         val foundUser = transaction {
             UserTable.select { username eq user.username!! }.firstOrNull()

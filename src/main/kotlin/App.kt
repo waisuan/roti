@@ -46,6 +46,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
         app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
         app.get("/admin", VueComponent("<admin-room></admin-room>"), roles(UserRole.ADMIN))
+        app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         // API
         app.routes {

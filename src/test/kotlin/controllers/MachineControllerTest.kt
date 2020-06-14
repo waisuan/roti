@@ -18,8 +18,8 @@ class MachineControllerTest {
         TestDatabase.purge()
     }
 
-    @Test
-    fun `getAllMachines() should accept & handle query params`() {
-
-    }
+    // @Test
+    // fun `getAllMachines() should accept & handle query params`() {
+    //
+    // }
 }

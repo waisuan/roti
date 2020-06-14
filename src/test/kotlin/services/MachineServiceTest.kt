@@ -71,6 +71,31 @@ class MachineServiceTest {
     }
 
     @Test
+    fun `getAllMachines() with limit & offset should return machine records successfully`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03"))
+
+        var createdMachines = MachineService.getAllMachines(limit = 1)
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.size).isEqualTo(1)
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST01")
+
+        createdMachines = MachineService.getAllMachines(limit = 1, offset = 1)
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.size).isEqualTo(1)
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST02")
+
+        createdMachines = MachineService.getAllMachines(limit = 1, offset = 2)
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.size).isEqualTo(1)
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST03")
+
+        createdMachines = MachineService.getAllMachines(limit = 1, offset = 3)
+        assertThat(createdMachines).isEmpty()
+    }
+
+    @Test
     fun `deleteMachine() should delete machine record successfully`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
 

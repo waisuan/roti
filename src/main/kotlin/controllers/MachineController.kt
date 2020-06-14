@@ -6,7 +6,10 @@ import services.MachineService
 
 object MachineController {
     fun getAllMachines(ctx: Context) {
-        ctx.json(MachineService.getAllMachines())
+        ctx.json(MachineService.getAllMachines(
+            ctx.queryParam("page_limit", "0")!!.toInt(),
+            ctx.queryParam("page_offset", "0")!!.toLong()
+        ))
     }
 
     fun createMachine(ctx: Context) {

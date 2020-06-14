@@ -10,9 +10,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 
 object MachineService {
-    fun getAllMachines(): List<Machine> {
+    fun getAllMachines(limit: Int = 0, offset: Long = 0): List<Machine> {
         return transaction {
-            MachineDao.all().map { it.toModel() }
+            MachineDao.all().limit(limit, offset).sortedBy { it.id }.map { it.toModel() }
         }
     }
 

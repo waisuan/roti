@@ -54,10 +54,23 @@ class MachinesAPITest {
         assertThat(response.body as String).isEqualTo("[]")
 
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02"))
         response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
             JavalinJson.toJson(MachineService.getAllMachines())
+        )
+
+        response = Unirest.get("/machines?page_limit=1").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.getAllMachines(limit = 1))
+        )
+
+        response = Unirest.get("/machines?page_limit=1&page_offset=1").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.getAllMachines(limit = 1, offset = 1))
         )
     }
 

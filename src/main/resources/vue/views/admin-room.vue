@@ -158,7 +158,7 @@
                 .get('api/users')
                 .then(response => {
                     this.users = response.data
-                    if (this.users) {
+                    if (this.users.length > 0) {
                         this.headers = Object.keys(this.users[0]).filter(key => key.toLowerCase() !== 'password')
                     }
                 })

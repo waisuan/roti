@@ -96,6 +96,25 @@ class MachineServiceTest {
     }
 
     @Test
+    fun `getAllMachines() should return machine records in a specified order`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01", state = "C"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02", state = "A"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03", state = "B"))
+
+        var createdMachines = MachineService.getAllMachines(sortFilter = "state")
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST02")
+        assertThat(createdMachines[1].serialNumber).isEqualTo("TEST03")
+        assertThat(createdMachines.last().serialNumber).isEqualTo("TEST01")
+
+        createdMachines = MachineService.getAllMachines(sortFilter = "state", sortOrder = "DESC")
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST01")
+        assertThat(createdMachines[1].serialNumber).isEqualTo("TEST03")
+        assertThat(createdMachines.last().serialNumber).isEqualTo("TEST02")
+    }
+
+    @Test
     fun `deleteMachine() should delete machine record successfully`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
 

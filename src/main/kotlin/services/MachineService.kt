@@ -6,13 +6,17 @@ import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Machine
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 
 object MachineService {
-    fun getAllMachines(limit: Int = 0, offset: Long = 0): List<Machine> {
+    fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
         return transaction {
-            MachineDao.all().limit(limit, offset).sortedBy { it.id }.map { it.toModel() }
+            MachineDao.all()
+                .limit(limit, offset)
+                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder))
+                .map { it.toModel() }
         }
     }
 

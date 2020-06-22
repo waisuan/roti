@@ -9,21 +9,15 @@ import org.apache.commons.io.FileUtils
 import utils.FileMan
 
 object FileService {
-    private var fileMan: FileMan = FileMan
-
-    fun setFileManager(fileMan: FileMan) {
-        this.fileMan = fileMan
-    }
-
     fun getFileNames(dir: String): List<String> {
-        return fileMan.getObjects(dir)
+        return FileMan.getObjects(dir)
     }
 
     fun getFile(dir: String, fileName: String): InputStream {
         val fullName = "$dir/$fileName"
-        if (!fileMan.checkIfObjectExists(fullName))
+        if (!FileMan.checkIfObjectExists(fullName))
             throw RecordNotFoundException()
-        return fileMan.getObject("$dir/$fileName")!!
+        return FileMan.getObject("$dir/$fileName")!!
     }
 
     fun saveFile(dir: String, fileName: String, fileContent: InputStream) {
@@ -33,7 +27,7 @@ object FileService {
             if (isOversizedFile(tmpFile)) {
                 throw OversizedFileException()
             }
-            fileMan.saveObject("$dir/$fileName", tmpFile)
+            FileMan.saveObject("$dir/$fileName", tmpFile)
         } finally {
             if (tmpFile.exists())
                 tmpFile.delete()
@@ -42,9 +36,9 @@ object FileService {
 
     fun deleteFile(dir: String, fileName: String) {
         val fullName = "$dir/$fileName"
-        if (!fileMan.checkIfObjectExists(fullName))
+        if (!FileMan.checkIfObjectExists(fullName))
             throw RecordNotFoundException()
-        fileMan.deleteObject(fullName)
+        FileMan.deleteObject(fullName)
     }
 
     private fun isOversizedFile(file: File): Boolean {

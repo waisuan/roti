@@ -6,6 +6,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import exceptions.OversizedFileException
 import exceptions.RecordNotFoundException
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.verify
@@ -25,6 +26,7 @@ class FileServiceTest {
         FileService.saveFile("TEST", "TEST", fileContent!!)
 
         verify { FileMan.saveObject("TEST/TEST", any<File>()) }
+        clearAllMocks()
     }
 
     @Test

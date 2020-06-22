@@ -5,6 +5,9 @@ import com.adobe.testing.s3mock.junit5.S3MockExtension
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
 import io.javalin.Javalin
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockkObject
 import kong.unirest.Unirest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -36,7 +39,9 @@ class FilesAPITest {
 
         val s3Client = s3Mock.createS3Client()
         s3Client.createBucket(FileMan.getDefaultBucket())
-        FileMan.setS3Client(s3Client)
+
+        mockkObject(FileMan)
+        every { FileMan.s3Client() } returns(s3Client)
     }
 
     @AfterAll
@@ -45,6 +50,7 @@ class FilesAPITest {
 
         EnvironmentVariables().set("DEV_MODE", null)
         Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
+        clearAllMocks()
     }
 
     @BeforeEach

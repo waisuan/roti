@@ -10,21 +10,24 @@ import java.io.InputStream
 import java.lang.Exception
 
 object FileMan {
-    private var s3Client: AmazonS3 = AmazonS3ClientBuilder
-        .standard()
-        .withCredentials(AWSStaticCredentialsProvider(
-            BasicAWSCredentials(
-                System.getenv("S3_ACCESS_KEY") ?: "",
-                System.getenv("S3_SECRET_KEY") ?: "")
-        ))
-        .withRegion(
-            Regions.EU_WEST_2
-        )
-        .build()
+    private var s3Client: AmazonS3? = null
     private const val BUCKET_NAME = "roti-api"
 
-    fun setS3Client(s3Client: AmazonS3) {
-        this.s3Client = s3Client
+    fun s3Client(): AmazonS3 {
+        if (s3Client == null) {
+            s3Client = AmazonS3ClientBuilder
+                .standard()
+                .withCredentials(AWSStaticCredentialsProvider(
+                    BasicAWSCredentials(
+                        System.getenv("S3_ACCESS_KEY") ?: "",
+                        System.getenv("S3_SECRET_KEY") ?: "")
+                ))
+                .withRegion(
+                    Regions.EU_WEST_2
+                )
+                .build()
+        }
+        return s3Client!!
     }
 
     fun getDefaultBucket(): String {
@@ -32,7 +35,7 @@ object FileMan {
     }
 
     fun getObjects(filter: String): List<String> {
-        return s3Client.listObjects(BUCKET_NAME).objectSummaries.filter {
+        return s3Client().listObjects(BUCKET_NAME).objectSummaries.filter {
             it.key.startsWith("$filter/")
         }.map {
             it.key.removePrefix("$filter/")
@@ -40,12 +43,12 @@ object FileMan {
     }
 
     fun getObject(objectName: String): InputStream? {
-        return s3Client.getObject(BUCKET_NAME, objectName).objectContent.delegateStream
+        return s3Client().getObject(BUCKET_NAME, objectName).objectContent.delegateStream
     }
 
     fun checkIfObjectExists(objectName: String): Boolean {
         return try {
-            s3Client.getObjectMetadata(BUCKET_NAME, objectName)
+            s3Client().getObjectMetadata(BUCKET_NAME, objectName)
             true
         } catch (e: Exception) {
             logger().info(e.message)
@@ -54,10 +57,10 @@ object FileMan {
     }
 
     fun saveObject(objectName: String, objectBody: File) {
-        s3Client.putObject(BUCKET_NAME, objectName, objectBody)
+        s3Client().putObject(BUCKET_NAME, objectName, objectBody)
     }
 
     fun deleteObject(objectName: String) {
-        s3Client.deleteObject(BUCKET_NAME, objectName)
+        s3Client().deleteObject(BUCKET_NAME, objectName)
     }
 }

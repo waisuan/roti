@@ -8,7 +8,9 @@ object MachineController {
     fun getAllMachines(ctx: Context) {
         ctx.json(MachineService.getAllMachines(
             ctx.queryParam("page_limit", "0")!!.toInt(),
-            ctx.queryParam("page_offset", "0")!!.toLong()
+            ctx.queryParam("page_offset", "0")!!.toLong(),
+            ctx.queryParam("sort_filter", "id")!!,
+            ctx.queryParam("sort_order", "ASC")!!
         ))
     }
 

@@ -15,7 +15,7 @@ object MachineService {
         return transaction {
             MachineDao.all()
                 .limit(limit, offset)
-                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder))
+                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                 .map { it.toModel() }
         }
     }

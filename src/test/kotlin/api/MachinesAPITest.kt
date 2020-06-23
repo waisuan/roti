@@ -55,6 +55,7 @@ class MachinesAPITest {
 
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
         MachineService.createMachine(Machine(serialNumber = "TEST02"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03"))
         response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
@@ -71,6 +72,18 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
             JavalinJson.toJson(MachineService.getAllMachines(limit = 1, offset = 1))
+        )
+
+        response = Unirest.get("/machines?sort_filter=serialNumber").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "ASC"))
+        )
+
+        response = Unirest.get("/machines?sort_filter=serialNumber&sort_order=DESC").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "DESC"))
         )
     }
 

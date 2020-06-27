@@ -3,12 +3,13 @@
         <div class="container">
             <div class="row">
                 <div class="column column-20">
-                    <select>
-                        <option v-for="field in fields">{{field}}</option>
+                    <select v-model="sortFilter">
+                        <option value="id" disabled hidden>Sort by...</option>
+                        <option v-for="field in fields" v-bind:value="field.actualField">{{field.prettyField}}</option>
                     </select>
                 </div>
                 <div class="column">
-                    <button><i class="fa fa-sort"></i> Sort</button>
+                    <button v-on:click="sort()" :disabled="sortFilter === 'id'"><i class="fa fa-sort"></i> Sort</button>
                 </div>
             </div>
             <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
@@ -84,15 +85,29 @@
             machines: [],
             fields: [],
             pageLimit: 50,
-            pageOffset: 0
+            pageOffset: 0,
+            sortFilter: "id",
+            sortOrder: "ASC"
         }),
         methods: {
+            sort() {
+                this.reset()
+                this.getMachines()
+            },
+            reset() {
+                this.machines = []
+                this.fields = []
+                this.pageLimit = 50
+                this.pageOffset = 0
+            },
             getMachines() {
                 axios
                     .get('api/machines', {
                         params: {
                             page_limit: this.pageLimit,
-                            page_offset: this.pageOffset
+                            page_offset: this.pageOffset,
+                            sort_filter: this.sortFilter,
+                            sort_order: this.sortOrder
                         }
                     })
                     .then(response => {
@@ -100,13 +115,16 @@
                         this.pageOffset += this.pageLimit
                         if (this.machines.length > 0 && this.fields.length === 0) {
                             Object.keys(this.machines[0]).forEach(f => {
-                                this.fields.push(
-                                    f.replace(/([A-Z])/g, ' $1')
-                                    .replace(/^./, function(str){ return str.toUpperCase(); })
-                                )
+                                this.fields.push({
+                                    actualField: f,
+                                    prettyField: f.replace(/([A-Z])/g, ' $1')
+                                        .replace(/^./, function (str) {
+                                            return str.toUpperCase();
+                                        })
+                                })
                             })
-                            console.log(this.fields)
                         }
+                        console.log(this.machines)
                     })
             },
             scroll() {

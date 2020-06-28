@@ -35,6 +35,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             it.enableCorsForAllOrigins()
             it.enforceSsl = true
             it.enableWebjars()
+            it.addStaticFiles("vue/static")
         }.apply {
             ws("/websocket") { ws ->
                 ws.onConnect { }

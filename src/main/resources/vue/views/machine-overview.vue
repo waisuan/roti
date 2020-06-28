@@ -8,6 +8,12 @@
                         <option v-for="field in fields" v-bind:value="field.actualField">{{field.prettyField}}</option>
                     </select>
                 </div>
+                <div class="column column-10">
+                    <select v-model="sortOrder">
+                        <option value="ASC">ASC</option>
+                        <option value="DESC">DESC</option>
+                    </select>
+                </div>
                 <div class="column">
                     <button v-on:click="sort()" :disabled="sortFilter === 'id'"><i class="fa fa-sort"></i> Sort</button>
                 </div>
@@ -63,15 +69,24 @@
                                 <input type="text" :id="'reporterField'+index" v-model="machine.reportedBy" disabled>
                             </div>
                             <div class="column">
-                                <label :for="'createdAtField'+index">Created At</label>
-                                <input type="text" :id="'createdAtField'+index" v-model="machine.createdAt" disabled>
+                                <label :for="'tncDateField'+index">TNC Date</label>
+                                <input type="text" :id="'tncDateField'+index" v-model="machine.tncDate" disabled>
                             </div>
                             <div class="column">
-                                <label :for="'updatedAtField'+index">Updated At</label>
-                                <input type="text" :id="'updatedAtField'+index" v-model="machine.updatedAt" disabled>
+                                <label :for="'ppmDateField'+index">PPM Date</label>
+                                <input type="text" :id="'ppmDateField'+index" v-model="machine.ppmDate" disabled>
                             </div>
                         </div>
-<!--                        TODO: tncDate, ppmDate, additionalNotes, attachment-->
+                        <div class="row">
+                            <div class="column">
+                                <div class="float-right">
+                                    <small style="color: black">Created at: {{ machine.createdAt }}</small>
+                                    |
+                                    <small style="color: darkorange">Updated at: {{ machine.updatedAt }}</small>
+                                </div>
+                            </div>
+                        </div>
+<!--                        TODO: additionalNotes, attachment-->
                     </fieldset>
                 </form>
             </div>

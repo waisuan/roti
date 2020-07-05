@@ -10,7 +10,6 @@ import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
-import utils.logger
 
 object MachineService {
     fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {

@@ -19,6 +19,10 @@
                 </div>
             </div>
             <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
+                <div style="text-align: right">
+<!--                    <span><i class="fa fa-plus"></i></span>-->
+                    <span><i class="fa fa-minus"></i></span>
+                </div>
                 <form>
                     <fieldset>
                         <div class="row">

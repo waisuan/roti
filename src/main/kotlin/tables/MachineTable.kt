@@ -20,4 +20,5 @@ object MachineTable : LongIdTable("Machines") {
     val ppmDate = date("ppmDate").nullable()
     val createdAt = datetime("createdAt")
     val updatedAt = datetime("updatedAt")
+    val document = text("document").nullable()
 }

@@ -81,4 +81,14 @@ object MachineService {
             }
         }
     }
+
+    // fun searchMachine() {
+    //     transaction {
+    //         TransactionManager.current().exec("select * from machines") { resultSet ->
+    //             while (resultSet.next()) {
+    //                 logger().info(resultSet.getString("serialNumber"))
+    //             }
+    //         }
+    //     }
+    // }
 }

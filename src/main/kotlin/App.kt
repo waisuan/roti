@@ -13,6 +13,7 @@ import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.core.security.SecurityUtil.roles
 import io.javalin.plugin.rendering.vue.VueComponent
 import models.UserRole
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
@@ -110,16 +111,27 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
     }
 
     private fun initDB() {
+        val dbUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti"
+        val dbUser = System.getenv("DB_USER") ?: "postgres"
+        val dbPwd = System.getenv("DB_PWD") ?: "password"
+
         Database.connect(
-            url = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti",
+            url = dbUrl,
             driver = "org.postgresql.Driver",
-            user = System.getenv("DB_USER") ?: "postgres",
-            password = System.getenv("DB_PWD") ?: "password"
+            user = dbUser,
+            password = dbPwd
         )
 
         transaction {
             addLogger(StdOutSqlLogger)
             SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
         }
+
+        val flyway = Flyway
+            .configure()
+            .dataSource(dbUrl, dbUser, dbPwd)
+            .baselineOnMigrate(true)
+            .load()
+        flyway.migrate()
     }
 }

@@ -127,4 +127,23 @@ class MachineServiceTest {
             MachineService.deleteMachine(serialNumber = "TEST09")
         }.isInstanceOf(RecordNotFoundException::class.java)
     }
+
+    @Test
+    fun `searchMachine() should return search results as expected`() {
+        val machine1 = Machine(serialNumber = "TEST01", state = "Regalia")
+        val machine2 = Machine(serialNumber = "TEST02", customer = "Noctis, Sir", district = "NotImperial")
+        val machine3 = Machine(serialNumber = "TEST03", reportedBy = "Prompto", brand = "Imperial")
+        MachineService.createMachine(machine1)
+        MachineService.createMachine(machine2)
+        MachineService.createMachine(machine3)
+
+        var machines = MachineService.searchMachine("sir")
+        assertThat(machines.map { it.serialNumber }).isEqualTo(listOf(machine2.serialNumber))
+
+        machines = MachineService.searchMachine("perial")
+        assertThat(machines.map { it.serialNumber }).isEqualTo(listOf(machine2.serialNumber, machine3.serialNumber))
+
+        machines = MachineService.searchMachine("something")
+        assertThat(machines.map { it.serialNumber }).isEqualTo(emptyList<String>())
+    }
 }

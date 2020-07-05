@@ -7,8 +7,10 @@ import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Machine
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
+import utils.logger
 
 object MachineService {
     fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
@@ -82,13 +84,11 @@ object MachineService {
         }
     }
 
-    // fun searchMachine() {
-    //     transaction {
-    //         TransactionManager.current().exec("select * from machines") { resultSet ->
-    //             while (resultSet.next()) {
-    //                 logger().info(resultSet.getString("serialNumber"))
-    //             }
-    //         }
-    //     }
-    // }
+    fun searchMachine(keyword: String): List<Machine> {
+        return transaction {
+            MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.map {
+                it.toModel()
+            }
+        }
+    }
 }

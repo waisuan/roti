@@ -26,7 +26,7 @@ object MachineController {
         MachineService.deleteMachine(ctx.pathParam("serialNumber"))
     }
 
-    fun searchMachine(ctx:Context) {
+    fun searchMachine(ctx: Context) {
         ctx.json(MachineService.searchMachine(ctx.pathParam("keyword")))
     }
 }

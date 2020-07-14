@@ -2,6 +2,11 @@
     <div class="overview-main">
         <div class="container">
             <div class="row">
+                <div class="column">
+                    <input type="text" placeholder="Search for..." v-model.trim="searchFilter" @keyup="search()">
+                </div>
+            </div>
+            <div class="row">
                 <div class="column column-20">
                     <select v-model="sortFilter">
                         <option value="id" disabled hidden>Sort by...</option>
@@ -106,22 +111,38 @@
             pageLimit: 50,
             pageOffset: 0,
             sortFilter: "id",
-            sortOrder: "ASC"
+            sortOrder: "ASC",
+            searchFilter: "",
         }),
         methods: {
+            search() {
+                if (this.searchFilter.length <= 2 && this.searchFilter.length > 0) {
+                    return
+                }
+                this.reset()
+                if (this.searchFilter.length === 0) {
+                    this.getMachines()
+                } else {
+                    this.searchMachines()
+                }
+            },
             sort() {
                 this.reset()
                 this.getMachines()
             },
             reset() {
                 this.machines = []
-                this.fields = []
                 this.pageLimit = 50
                 this.pageOffset = 0
             },
+            searchMachines() {
+              axios.get("api/machines/search/" + this.searchFilter).then(response => {
+                  this.machines = this.machines.concat(response.data)
+              })
+            },
             getMachines() {
                 axios
-                    .get('api/machines', {
+                    .get("api/machines", {
                         params: {
                             page_limit: this.pageLimit,
                             page_offset: this.pageOffset,
@@ -136,21 +157,20 @@
                             Object.keys(this.machines[0]).forEach(f => {
                                 this.fields.push({
                                     actualField: f,
-                                    prettyField: f.replace(/([A-Z])/g, ' $1')
+                                    prettyField: f.replace(/([A-Z])/g, " $1")
                                         .replace(/^./, function (str) {
                                             return str.toUpperCase();
                                         })
                                 })
                             })
                         }
-                        console.log(this.machines)
                     })
             },
             scroll() {
                 window.onscroll = () => {
                     let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
 
-                    if (bottomOfWindow) {
+                    if (bottomOfWindow && this.searchFilter.length === 0) {
                         this.getMachines()
                     }
                 }

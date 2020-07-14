@@ -87,6 +87,11 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                             }
                         }
                     }
+                    path("search") {
+                        path(":keyword") {
+                            get(MachineController::searchMachine)
+                        }
+                    }
                 }
                 path("files") {
                     path(":ownerId") {

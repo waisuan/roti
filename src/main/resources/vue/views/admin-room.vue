@@ -91,8 +91,6 @@
             hasError: false,
             errorMsg: ""
         }),
-        computed: {
-        },
         methods: {
             edit(user) {
                 if (this.isEditing != null)

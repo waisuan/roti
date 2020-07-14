@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.MachineService
+import utils.logger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MachinesAPITest {
@@ -134,5 +135,51 @@ class MachinesAPITest {
         response = Unirest.delete("/machines/TEST01").asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("Unable to locate record")
+    }
+
+    @Test
+    fun `SEARCH machines`() {
+        val machine1 = Machine(serialNumber = "TEST01", state = "Regalia")
+        val machine2 = Machine(serialNumber = "TEST02", customer = "Noctis, Sir", district = "NotImperial")
+        val machine3 = Machine(serialNumber = "TEST03", reportedBy = "Prompto", brand = "Imperial")
+        MachineService.createMachine(machine1)
+        MachineService.createMachine(machine2)
+        MachineService.createMachine(machine3)
+
+        var response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "test")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).contains("TEST01", "TEST02", "TEST03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.searchMachine("test"))
+        )
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "perial")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).contains("TEST02", "TEST03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.searchMachine("perial"))
+        )
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "noctis, sir")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).contains("TEST02")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.searchMachine("noctis, sir"))
+        )
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "something something")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).contains("[]")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineService.searchMachine("something something"))
+        )
     }
 }

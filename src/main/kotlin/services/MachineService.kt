@@ -21,6 +21,12 @@ object MachineService {
         }
     }
 
+    fun getNumberOfMachines(): Long {
+        return transaction {
+            MachineDao.all().count()
+        }
+    }
+
     fun createMachine(newMachine: Machine) {
         if (!newMachine.isValid())
             throw BadOperationException(Machine::class.java.simpleName)

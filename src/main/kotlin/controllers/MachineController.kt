@@ -29,4 +29,8 @@ object MachineController {
     fun searchMachine(ctx: Context) {
         ctx.json(MachineService.searchMachine(ctx.pathParam("keyword")))
     }
+
+    fun getNumberOfMachines(ctx: Context) {
+        ctx.json(MachineService.getNumberOfMachines())
+    }
 }

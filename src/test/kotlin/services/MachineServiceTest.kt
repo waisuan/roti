@@ -146,4 +146,13 @@ class MachineServiceTest {
         machines = MachineService.searchMachine("something")
         assertThat(machines.map { it.serialNumber }).isEqualTo(emptyList<String>())
     }
+
+    @Test
+    fun `getNumberOfMachines() returns number of machines in the DB`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03"))
+
+        assertThat(MachineService.getNumberOfMachines()).isEqualTo(3)
+    }
 }

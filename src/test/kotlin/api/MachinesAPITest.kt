@@ -181,4 +181,15 @@ class MachinesAPITest {
             JavalinJson.toJson(MachineService.searchMachine("something something"))
         )
     }
+
+    @Test
+    fun `GET number of machines`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03"))
+
+        val response = Unirest.get("/machines/count").asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo("3")
+    }
 }

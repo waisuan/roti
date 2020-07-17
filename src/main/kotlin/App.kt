@@ -92,6 +92,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                             get(MachineController::searchMachine)
                         }
                     }
+                    path("count") {
+                        get(MachineController::getNumberOfMachines)
+                    }
                 }
                 path("files") {
                     path(":ownerId") {

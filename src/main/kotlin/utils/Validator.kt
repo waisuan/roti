@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 object Validator {
-    private val algo = Algorithm.HMAC256("secret")
+    private val algo = Algorithm.HMAC256("secret") // TODO move "secret" to env var
 
     fun generateToken(expiresAt: LocalDate = LocalDate.now().plusDays(1)): String {
         return JWT

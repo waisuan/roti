@@ -27,10 +27,16 @@ object MachineController {
     }
 
     fun searchMachine(ctx: Context) {
-        ctx.json(MachineService.searchMachine(ctx.pathParam("keyword")))
+        ctx.json(MachineService.searchMachine(
+            ctx.pathParam("keyword"),
+            ctx.queryParam("page_limit", "0")!!.toInt(),
+            ctx.queryParam("page_offset", "0")!!.toLong(),
+            ctx.queryParam("sort_filter", "id")!!,
+            ctx.queryParam("sort_order", "ASC")!!
+        ))
     }
 
     fun getNumberOfMachines(ctx: Context) {
-        ctx.json(MachineService.getNumberOfMachines())
+        ctx.json(MachineService.getNumberOfMachines(ctx.queryParam("keyword")))
     }
 }

@@ -1,6 +1,7 @@
 package api
 
 import RotiApp
+import com.google.gson.Gson
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.MachineService
+import utils.logger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MachinesAPITest {
@@ -180,6 +182,36 @@ class MachinesAPITest {
         assertThat(response.body).isEqualTo(
             JavalinJson.toJson(MachineService.searchMachine("something something"))
         )
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "TEST")
+            .queryString("page_limit", "1")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        var body = Gson().fromJson(response.body, List::class.java)
+        assertThat(body.size).isEqualTo(1)
+        assertThat(body.first().toString()).contains("TEST01")
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "TEST")
+            .queryString("page_limit", "1")
+            .queryString("page_offset", "1")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        body = Gson().fromJson(response.body, List::class.java)
+        assertThat(body.size).isEqualTo(1)
+        assertThat(body.first().toString()).contains("TEST02")
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "TEST")
+            .queryString("sort_filter", "serialNumber")
+            .queryString("sort_order", "DESC")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        body = Gson().fromJson(response.body, List::class.java)
+        assertThat(body.size).isEqualTo(3)
+        assertThat(body.first().toString()).contains("TEST03")
+        assertThat(body.last().toString()).contains("TEST01")
     }
 
     @Test
@@ -188,8 +220,14 @@ class MachinesAPITest {
         MachineService.createMachine(Machine(serialNumber = "TEST02"))
         MachineService.createMachine(Machine(serialNumber = "TEST03"))
 
-        val response = Unirest.get("/machines/count").asString()
+        var response = Unirest.get("/machines/count").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo("3")
+
+        response = Unirest.get("/machines/count")
+            .queryString("keyword", "TEST02")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo("1")
     }
 }

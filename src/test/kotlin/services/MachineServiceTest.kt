@@ -148,11 +148,57 @@ class MachineServiceTest {
     }
 
     @Test
+    fun `searchMachine() with limit & offset should return search results as expected`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03"))
+
+        var found = MachineService.searchMachine(keyword = "TEST",limit = 1)
+        assertThat(found).isNotEmpty
+        assertThat(found.size).isEqualTo(1)
+        assertThat(found.first().serialNumber).isEqualTo("TEST01")
+
+        found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 1)
+        assertThat(found).isNotEmpty
+        assertThat(found.size).isEqualTo(1)
+        assertThat(found.first().serialNumber).isEqualTo("TEST02")
+
+        found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 2)
+        assertThat(found).isNotEmpty
+        assertThat(found.size).isEqualTo(1)
+        assertThat(found.first().serialNumber).isEqualTo("TEST03")
+
+        found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 3)
+        assertThat(found).isEmpty()
+    }
+
+    @Test
+    fun `searchMachine() should return search results in a specified order`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01", state = "C"))
+        MachineService.createMachine(Machine(serialNumber = "TEST02", state = "A"))
+        MachineService.createMachine(Machine(serialNumber = "TEST03", state = "B"))
+
+        var found = MachineService.searchMachine(keyword = "TEST", sortFilter = "state")
+        assertThat(found).isNotEmpty
+        assertThat(found.first().serialNumber).isEqualTo("TEST02")
+        assertThat(found[1].serialNumber).isEqualTo("TEST03")
+        assertThat(found.last().serialNumber).isEqualTo("TEST01")
+
+        found = MachineService.searchMachine(keyword = "TEST", sortFilter = "state", sortOrder = "DESC")
+        assertThat(found).isNotEmpty
+        assertThat(found.first().serialNumber).isEqualTo("TEST01")
+        assertThat(found[1].serialNumber).isEqualTo("TEST03")
+        assertThat(found.last().serialNumber).isEqualTo("TEST02")
+    }
+
+    @Test
     fun `getNumberOfMachines() returns number of machines in the DB`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
         MachineService.createMachine(Machine(serialNumber = "TEST02"))
         MachineService.createMachine(Machine(serialNumber = "TEST03"))
 
         assertThat(MachineService.getNumberOfMachines()).isEqualTo(3)
+
+        assertThat(MachineService.getNumberOfMachines(keyword = "TEST02")).isEqualTo(1)
     }
 }

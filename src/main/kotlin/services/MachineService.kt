@@ -21,12 +21,6 @@ object MachineService {
         }
     }
 
-    fun getNumberOfMachines(): Long {
-        return transaction {
-            MachineDao.all().count()
-        }
-    }
-
     fun createMachine(newMachine: Machine) {
         if (!newMachine.isValid())
             throw BadOperationException(Machine::class.java.simpleName)
@@ -89,11 +83,23 @@ object MachineService {
         }
     }
 
-    fun searchMachine(keyword: String): List<Machine> {
+    fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
         return transaction {
-            MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.map {
+            MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
+                .limit(limit, offset)
+                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
+                .map {
                 it.toModel()
             }
+        }
+    }
+
+    fun getNumberOfMachines(keyword: String? = null): Long {
+        return transaction {
+            if (keyword == null)
+                MachineDao.all().count()
+            else
+                MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.count()
         }
     }
 }

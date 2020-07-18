@@ -153,7 +153,7 @@ class MachineServiceTest {
         MachineService.createMachine(Machine(serialNumber = "TEST02"))
         MachineService.createMachine(Machine(serialNumber = "TEST03"))
 
-        var found = MachineService.searchMachine(keyword = "TEST",limit = 1)
+        var found = MachineService.searchMachine(keyword = "TEST", limit = 1)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
         assertThat(found.first().serialNumber).isEqualTo("TEST01")

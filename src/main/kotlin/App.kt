@@ -85,6 +85,14 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                                 put(MaintenanceController::updateMaintenanceHistory)
                                 delete(MaintenanceController::deleteMaintenanceHistory)
                             }
+                            path("search") {
+                                path(":keyword") {
+                                    get(MaintenanceController::searchMaintenanceHistory)
+                                }
+                            }
+                            path("count") {
+                                get(MaintenanceController::getNumberOfRecords)
+                            }
                         }
                     }
                     path("search") {

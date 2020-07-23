@@ -211,6 +211,18 @@ class MachinesAPITest {
         assertThat(body.size).isEqualTo(3)
         assertThat(body.first().toString()).contains("TEST03")
         assertThat(body.last().toString()).contains("TEST01")
+
+        response = Unirest.get("/machines/search/{keyword}")
+            .routeParam("keyword", "TEST")
+            .queryString("page_limit", "1")
+            .queryString("page_offset", "2")
+            .queryString("sort_filter", "serialNumber")
+            .queryString("sort_order", "DESC")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        body = Gson().fromJson(response.body, List::class.java)
+        assertThat(body.size).isEqualTo(1)
+        assertThat(body.first().toString()).contains("TEST01")
     }
 
     @Test

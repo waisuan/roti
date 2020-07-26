@@ -15,6 +15,7 @@ object MaintenanceTable : LongIdTable("Maintenance") {
     val createdAt = datetime("createdAt")
     val updatedAt = datetime("updatedAt")
     val document = text("document").nullable()
+    val attachment = varchar("attachment", 200).nullable()
 
     init {
         index(true, serialNumber, workOrderNumber)

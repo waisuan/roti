@@ -7,7 +7,6 @@ import exceptions.RecordNotFoundException
 import java.time.LocalDateTime
 import models.Maintenance
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -42,6 +41,7 @@ object MaintenanceService {
                 actionTaken = newMaintenance.actionTaken
                 reportedBy = newMaintenance.reportedBy
                 workOrderType = newMaintenance.workOrderType
+                attachment = newMaintenance.attachment
                 createdAt = LocalDateTime.now()
                 updatedAt = LocalDateTime.now()
             }
@@ -60,6 +60,7 @@ object MaintenanceService {
                 maintenance.actionTaken = updatedMaintenance.actionTaken
                 maintenance.reportedBy = updatedMaintenance.reportedBy
                 maintenance.workOrderType = updatedMaintenance.workOrderType
+                maintenance.attachment = updatedMaintenance.attachment
                 maintenance.updatedAt = LocalDateTime.now()
             } else {
                 throw RecordNotFoundException()

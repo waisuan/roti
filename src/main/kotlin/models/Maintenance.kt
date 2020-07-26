@@ -23,6 +23,7 @@ data class Maintenance(
     val actionTaken: String? = null,
     val reportedBy: String? = null,
     val workOrderType: String? = null,
+    val attachment: String? = null,
 
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     @JsonSerialize(using = LocalDateTimeSerializer::class)

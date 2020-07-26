@@ -41,6 +41,7 @@ object MachineService {
                 personInCharge = newMachine.personInCharge
                 reportedBy = newMachine.reportedBy
                 additionalNotes = newMachine.additionalNotes
+                attachment = newMachine.attachment
                 tncDate = newMachine.tncDate
                 ppmDate = newMachine.ppmDate
                 createdAt = LocalDateTime.now()
@@ -63,6 +64,7 @@ object MachineService {
                 machine.personInCharge = updatedMachine.personInCharge
                 machine.reportedBy = updatedMachine.reportedBy
                 machine.additionalNotes = updatedMachine.additionalNotes
+                machine.attachment = updatedMachine.attachment
                 machine.tncDate = updatedMachine.tncDate
                 machine.ppmDate = updatedMachine.ppmDate
                 machine.updatedAt = LocalDateTime.now()

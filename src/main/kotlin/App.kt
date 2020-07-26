@@ -22,6 +22,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 import tables.MaintenanceTable
 import tables.UserTable
+import utils.logger
 
 fun main() {
     RotiApp().init()
@@ -119,6 +120,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
 
         // TODO add more exception handling w/ proper status codes
         app.exception(Exception::class.java) { e, ctx ->
+            logger().info(e.message!!)
             ctx.result(e.message!!)
             ctx.status(404)
         }

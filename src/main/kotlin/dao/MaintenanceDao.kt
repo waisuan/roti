@@ -15,6 +15,7 @@ class MaintenanceDao(id: EntityID<Long>) : LongEntity(id) {
     var actionTaken by MaintenanceTable.actionTaken
     var reportedBy by MaintenanceTable.reportedBy
     var workOrderType by MaintenanceTable.workOrderType
+    var attachment by MaintenanceTable.attachment
     var createdAt by MaintenanceTable.createdAt
     var updatedAt by MaintenanceTable.updatedAt
 
@@ -26,6 +27,7 @@ class MaintenanceDao(id: EntityID<Long>) : LongEntity(id) {
             actionTaken,
             reportedBy,
             workOrderType,
+            attachment,
             createdAt,
             updatedAt
         )

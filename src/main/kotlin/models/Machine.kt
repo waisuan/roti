@@ -23,6 +23,7 @@ data class Machine(
     val personInCharge: String? = null,
     val reportedBy: String? = null,
     val additionalNotes: String? = null,
+    val attachment: String? = null,
 
     @JsonDeserialize(using = LocalDateDeserializer::class)
     @JsonSerialize(using = LocalDateSerializer::class)

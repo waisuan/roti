@@ -20,6 +20,7 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
     var personInCharge by MachineTable.personInCharge
     var reportedBy by MachineTable.reportedBy
     var additionalNotes by MachineTable.additionalNotes
+    var attachment by MachineTable.attachment
     var tncDate by MachineTable.tncDate
     var ppmDate by MachineTable.ppmDate
     var createdAt by MachineTable.createdAt
@@ -38,6 +39,7 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
             personInCharge,
             reportedBy,
             additionalNotes,
+            attachment,
             tncDate,
             ppmDate,
             createdAt,

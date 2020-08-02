@@ -24,6 +24,7 @@ data class Machine(
     val reportedBy: String? = null,
     val additionalNotes: String? = null,
     val attachment: String? = null,
+    val ppmStatus: String? = null,
 
     @JsonDeserialize(using = LocalDateDeserializer::class)
     @JsonSerialize(using = LocalDateSerializer::class)

@@ -19,6 +19,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import services.MachineService
 import tables.MachineTable
 import tables.MaintenanceTable
 import tables.UserTable
@@ -40,7 +41,12 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             it.addStaticFiles("vue/static")
         }.apply {
             ws("/websocket") { ws ->
-                ws.onConnect { }
+                ws.onConnect { ctx ->
+                    while (true) {
+                        ctx.send(MachineService.getNumOfPpmDueMachines())
+                        Thread.sleep(3600000L) // 1.hour
+                    }
+                }
                 ws.onMessage { }
             }
         }.start(System.getenv("PORT")?.toInt() ?: port)
@@ -103,6 +109,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                     }
                     path("count") {
                         get(MachineController::getNumberOfMachines)
+                    }
+                    path("due") {
+                        get(MachineController::getPpmDueMachines)
                     }
                 }
                 path("files") {

@@ -26,7 +26,7 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
     var createdAt by MachineTable.createdAt
     var updatedAt by MachineTable.updatedAt
 
-    fun toModel(): Machine {
+    fun toModel(ppmStatus: String? = null): Machine {
         return Machine(
             serialNumber,
             customer,
@@ -40,6 +40,7 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
             reportedBy,
             additionalNotes,
             attachment,
+            ppmStatus,
             tncDate,
             ppmDate,
             createdAt,

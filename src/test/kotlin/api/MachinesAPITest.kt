@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.MachineService
+import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MachinesAPITest {
@@ -240,5 +241,11 @@ class MachinesAPITest {
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo("1")
+    }
+
+    @Test
+    fun `GET machines that are due for PPM servicing`() {
+        val response = Unirest.get("/machines/due").asString()
+        assertThat(response.status).isEqualTo(200)
     }
 }

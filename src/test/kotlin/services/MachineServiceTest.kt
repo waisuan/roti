@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class MachineServiceTest {
     @BeforeEach
@@ -200,5 +201,36 @@ class MachineServiceTest {
         assertThat(MachineService.getNumberOfMachines()).isEqualTo(3)
 
         assertThat(MachineService.getNumberOfMachines(keyword = "TEST02")).isEqualTo(1)
+    }
+
+    @Test
+    fun `getNumOfPpmDueMachines() returns the right number of due machines`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01", ppmDate = LocalDate.parse("2020-01-01")))
+        MachineService.createMachine(Machine(serialNumber = "TEST02", ppmDate = LocalDate.parse("2020-07-10")))
+        MachineService.createMachine(Machine(serialNumber = "TEST03", ppmDate = LocalDate.parse("2020-07-14")))
+        MachineService.createMachine(Machine(serialNumber = "TEST04", ppmDate = LocalDate.parse("2020-08-08")))
+
+        assertThat(MachineService.getNumOfPpmDueMachines(LocalDate.parse("2020-07-28"))).isEqualTo(2)
+    }
+
+    @Test
+    fun `getPpmDueMachines() returns machine records that are over,almost,are due for servicing`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01", ppmDate = LocalDate.parse("2020-01-01")))
+        MachineService.createMachine(Machine(serialNumber = "TEST02", ppmDate = LocalDate.parse("2020-07-10")))
+        MachineService.createMachine(Machine(serialNumber = "TEST03", ppmDate = LocalDate.parse("2020-07-14")))
+        MachineService.createMachine(Machine(serialNumber = "TEST04", ppmDate = LocalDate.parse("2020-07-28")))
+        MachineService.createMachine(Machine(serialNumber = "TEST05", ppmDate = LocalDate.parse("2020-08-08")))
+        MachineService.createMachine(Machine(serialNumber = "TEST06", ppmDate = LocalDate.parse("2020-08-12")))
+
+        val ppmDueMachines = MachineService.getPpmDueMachines(LocalDate.parse("2020-07-28")).sortedBy { it.serialNumber }
+        assertThat(ppmDueMachines.size).isEqualTo(3)
+        assertThat(ppmDueMachines.map { Pair(it.serialNumber, it.ppmStatus) }.first()).isEqualTo(Pair("TEST03", "overdue"))
+        assertThat(ppmDueMachines.map { Pair(it.serialNumber, it.ppmStatus) }[1]).isEqualTo(Pair("TEST04", "due"))
+        assertThat(ppmDueMachines.map { Pair(it.serialNumber, it.ppmStatus) }.last()).isEqualTo(Pair("TEST05", "almost_due"))
+    }
+
+    @Test
+    fun `getPpmDueMachines() returns no records if none are due for servicing`() {
+        assertThat(MachineService.getPpmDueMachines(LocalDate.parse("2020-07-28"))).isEqualTo(emptyList<Machine>())
     }
 }

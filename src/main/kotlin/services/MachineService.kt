@@ -4,6 +4,7 @@ import dao.MachineDao
 import exceptions.BadOperationException
 import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
+import java.time.LocalDate
 import java.time.LocalDateTime
 import models.Machine
 import org.jetbrains.exposed.sql.SortOrder
@@ -11,7 +12,6 @@ import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
-import java.time.LocalDate
 
 object MachineService {
     fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
@@ -115,7 +115,7 @@ object MachineService {
                 from
                     machines m
                 where
-                    (m."ppmDate" - '${date}'::date) between -14 and 14;
+                    (m."ppmDate" - '$date'::date) between -14 and 14;
             """.trimIndent()) {
                 it.next()
                 it.getInt("count")
@@ -133,7 +133,7 @@ object MachineService {
                 union
                 ${ppmDueMachinesSubQuery("overdue", date, -14, -1)}
             """.trimIndent()) {
-                while(it.next()) {
+                while (it.next()) {
                     machines.add(
                         Machine(
                             it.getString("serialNumber"),
@@ -164,12 +164,12 @@ object MachineService {
     private fun ppmDueMachinesSubQuery(ppmStatus: String, date: LocalDate, from: Int, to: Int): String {
         return """
             select
-                '${ppmStatus}' as ppmStatus,
+                '$ppmStatus' as ppmStatus,
                 m.*
             from
                 machines m
             where
-                (m."ppmDate" - '${date}'::date) between $from and $to
+                (m."ppmDate" - '$date'::date) between $from and $to
         """.trimIndent()
     }
 }

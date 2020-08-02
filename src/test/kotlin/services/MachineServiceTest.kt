@@ -4,13 +4,13 @@ import exceptions.BadOperationException
 import exceptions.RecordAlreadyExistsException
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
+import java.time.LocalDate
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class MachineServiceTest {
     @BeforeEach

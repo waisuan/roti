@@ -112,6 +112,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                     }
                     path("due") {
                         get(MachineController::getPpmDueMachines)
+                        path("count") {
+                            get(MachineController::getNumOfPpmDueMachines)
+                        }
                     }
                 }
                 path("files") {

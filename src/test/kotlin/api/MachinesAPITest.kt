@@ -247,4 +247,10 @@ class MachinesAPITest {
         val response = Unirest.get("/machines/due").asString()
         assertThat(response.status).isEqualTo(200)
     }
+
+    @Test
+    fun `GET num of machines that are due for PPM servicing`() {
+        val response = Unirest.get("/machines/due/count").asString()
+        assertThat(response.status).isEqualTo(200)
+    }
 }

@@ -40,6 +40,10 @@ object MachineController {
         ctx.json(MachineService.getNumberOfMachines(ctx.queryParam("keyword")))
     }
 
+    fun getNumOfPpmDueMachines(ctx: Context) {
+        ctx.json(MachineService.getNumOfPpmDueMachines())
+    }
+
     fun getPpmDueMachines(ctx: Context) {
         ctx.json(MachineService.getPpmDueMachines())
     }

@@ -75,6 +75,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                     path("login") {
                         post(UserController::loginUser, roles(UserRole.GUEST))
                     }
+                    path("logout") {
+                        post(UserController::logoutUser)
+                    }
                     path("roles") {
                         get(UserController::getUserRoles, roles(UserRole.ADMIN))
                     }

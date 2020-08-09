@@ -7,11 +7,15 @@ import models.Constants
 import models.UserRole
 import services.UserService
 import utils.Validator
+import utils.logger
 
 object AuthController {
     fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>) {
         val token = ctx.cookie(Constants.USER_TOKEN.name) ?: ""
-        val username = ctx.cookieStore(Constants.USER_NAME.name) ?: ""
+        val username = ctx.cookie(Constants.USER_NAME.name) ?: ""
+        logger().info(ctx.headerMap().toString())
+        logger().info(token)
+        logger().info(username)
         if (isDevMode() || isExcludedFromAuth(permittedRoles) || (isAuthorizedRole(username, permittedRoles) && Validator.verifyToken(token))) {
             handler.handle(ctx)
         } else {

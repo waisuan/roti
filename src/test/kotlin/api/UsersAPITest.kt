@@ -82,7 +82,7 @@ class UsersAPITest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "javalin-cookie-store=")
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "USER_NAME=")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -105,6 +105,24 @@ class UsersAPITest {
             .asString()
         assertThat(response.status).isEqualTo(404)
         assertThat(response.body as String).contains("User has not been approved")
+    }
+
+    @Test
+    fun `POST logout`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "USER_NAME=TEST")
+
+        response = Unirest.post("/users/logout").asEmpty()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=;", "USER_NAME=;")
     }
 
     @Test

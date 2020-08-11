@@ -33,7 +33,7 @@ object UserController {
     }
 
     fun logoutUser(ctx: Context) {
-        ctx.removeCookie(Constants.USER_TOKEN.name).removeCookie(Constants.USER_NAME.name)
+        ctx.removeCookie(Constants.USER_TOKEN.name, "/").removeCookie(Constants.USER_NAME.name, "/")
     }
 
     fun getUsers(ctx: Context) {

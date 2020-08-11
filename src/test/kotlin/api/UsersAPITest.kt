@@ -120,9 +120,15 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "USER_NAME=TEST")
 
+        response = Unirest.get("/machines").asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
         response = Unirest.post("/users/logout").asEmpty()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=;", "USER_NAME=;")
+
+        response = Unirest.get("/machines").asEmpty()
+        assertThat(response.status).isEqualTo(401)
     }
 
     @Test

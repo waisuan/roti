@@ -29,11 +29,13 @@ object UserController {
     fun loginUser(ctx: Context) {
         val user = ctx.body<User>()
         val userToken = UserService.loginUser(user)
-        ctx.cookie(Constants.USER_TOKEN.name, userToken).cookie(Constants.USER_NAME.name, user.username!!)
+        ctx.cookie(Constants.USER_TOKEN.name, userToken)
+        ctx.cookie(Constants.USER_NAME.name, user.username!!)
     }
 
     fun logoutUser(ctx: Context) {
-        ctx.removeCookie(Constants.USER_TOKEN.name, "/").removeCookie(Constants.USER_NAME.name, "/")
+        ctx.removeCookie(Constants.USER_TOKEN.name, "/")
+        ctx.removeCookie(Constants.USER_NAME.name, "/")
     }
 
     fun getUsers(ctx: Context) {

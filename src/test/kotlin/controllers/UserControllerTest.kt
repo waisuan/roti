@@ -55,4 +55,17 @@ class UserControllerTest {
         verify(context).cookie(eq(Constants.USER_TOKEN.name), any(), any())
         verify(context).cookie(eq(Constants.USER_NAME.name), eq(user.username!!), any())
     }
+
+    @Test
+    fun `logoutUser() removes cookies`() {
+        val context = mock<Context>()
+
+        context.cookie(Constants.USER_TOKEN.name, "TOKEN")
+        context.cookie(Constants.USER_NAME.name, "USER")
+
+        UserController.logoutUser(context)
+
+        verify(context).removeCookie(eq(Constants.USER_TOKEN.name), eq("/"))
+        verify(context).removeCookie(eq(Constants.USER_NAME.name), eq("/"))
+    }
 }

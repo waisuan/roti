@@ -3,6 +3,7 @@ package api
 import RotiApp
 import helpers.TestDatabase
 import io.javalin.Javalin
+import java.time.LocalDate
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import models.Constants
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.UserService
+import utils.Validator
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthIntegrationTest {
@@ -61,12 +63,20 @@ class AuthIntegrationTest {
         val token = UserService.loginUser(user)
 
         response = Unirest.get("/machines")
-            .header("Cookie", "${Constants.USER_TOKEN.name}=$token")
+            .cookie(Constants.USER_TOKEN.name, token)
+            .cookie(Constants.USER_NAME.name, user.username)
             .asString()
         assertThat(response.status).isEqualTo(200)
 
         response = Unirest.get("/machines")
-            .header("Cookie", "${Constants.USER_TOKEN.name}=BAD_TOKEN")
+            .cookie(Constants.USER_TOKEN.name, "BAD_TOKEN")
+            .cookie(Constants.USER_NAME.name, user.username)
+            .asString()
+        assertThat(response.status).isEqualTo(401)
+
+        response = Unirest.get("/machines")
+            .cookie(Constants.USER_TOKEN.name, token)
+            .cookie(Constants.USER_NAME.name, "SOME_USER")
             .asString()
         assertThat(response.status).isEqualTo(401)
     }
@@ -89,7 +99,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    fun `cookie and cookieStore are init after user is logged in`() {
+    fun `cookies are init after user is logged in`() {
         var response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(401)
 
@@ -101,7 +111,8 @@ class AuthIntegrationTest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asString()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "javalin-cookie-store=")
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isNotEmpty()
 
         response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
@@ -126,8 +137,34 @@ class AuthIntegrationTest {
 
         user = User(role = UserRole.ADMIN)
         UserService.updateUser("TEST", user)
-
         response = Unirest.get("http://localhost:8000/admin").asString()
         assertThat(response.status).isEqualTo(200)
+
+        user = User(role = UserRole.GUEST)
+        UserService.updateUser("TEST", user)
+        response = Unirest.get("http://localhost:8000/api/machines").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        user = User(role = UserRole.NON_ADMIN)
+        UserService.updateUser("TEST", user)
+        response = Unirest.get("http://localhost:8000/api/machines").asString()
+        assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `JWT should be renewed if they are almost expired`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        val token = Validator.generateToken(expiresAt = LocalDate.now().plusDays(1))
+
+        val response = Unirest.get("/machines")
+            .cookie(Constants.USER_TOKEN.name, token)
+            .cookie(Constants.USER_NAME.name, user.username)
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        val refreshedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
+        assertThat(refreshedCookie).isNotEmpty()
+        assertThat(refreshedCookie).isNotEqualTo(token)
     }
 }

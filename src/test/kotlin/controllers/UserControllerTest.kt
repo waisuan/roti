@@ -42,7 +42,7 @@ class UserControllerTest {
     }
 
     @Test
-    fun `loginUser() writes to cookie and cookieStore`() {
+    fun `loginUser() writes to cookie`() {
         val context = mock<Context>()
         val user = User(username = "TEST", password = "TEST", email = "test@mail.com")
         UserService.createUser(user)
@@ -53,6 +53,6 @@ class UserControllerTest {
         UserController.loginUser(context)
 
         verify(context).cookie(eq(Constants.USER_TOKEN.name), any(), any())
-        verify(context).cookieStore(eq(Constants.USER_NAME.name), eq(user.username!!))
+        verify(context).cookie(eq(Constants.USER_NAME.name), eq(user.username!!), any())
     }
 }

@@ -8,6 +8,7 @@ import io.javalin.plugin.json.JavalinJson
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import kong.unirest.json.JSONArray
+import models.Constants
 import models.User
 import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
@@ -82,7 +83,8 @@ class UsersAPITest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "USER_NAME=")
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -118,14 +120,16 @@ class UsersAPITest {
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=", "USER_NAME=TEST")
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
 
         response = Unirest.get("/machines").asEmpty()
         assertThat(response.status).isEqualTo(200)
 
         response = Unirest.post("/users/logout").asEmpty()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.headers.get("Set-Cookie").toString()).contains("USER_TOKEN=;", "USER_NAME=;")
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isEmpty()
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEmpty()
 
         response = Unirest.get("/machines").asEmpty()
         assertThat(response.status).isEqualTo(401)

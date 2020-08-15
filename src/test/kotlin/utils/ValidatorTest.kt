@@ -29,4 +29,26 @@ class ValidatorTest {
         token = Validator.generateToken(expiresAt = LocalDate.now().plusDays(10))
         assertThat(Validator.verifyToken(token)).isTrue()
     }
+
+    @Test
+    fun `isTokenAlmostExpired() returns true if token is almost expired`() {
+        var token = Validator.generateToken(LocalDate.now().plusDays(1))
+        assertThat(Validator.isTokenAlmostExpired(token)).isTrue()
+
+        token = Validator.generateToken(LocalDate.now().plusDays(5))
+        assertThat(Validator.isTokenAlmostExpired(token, 5)).isTrue()
+
+        token = Validator.generateToken(LocalDate.now().plusDays(5))
+        assertThat(Validator.isTokenAlmostExpired(token, 5, LocalDate.now().plusDays(1))).isTrue()
+        assertThat(Validator.isTokenAlmostExpired(token, 5, LocalDate.now().plusDays(2))).isTrue()
+        assertThat(Validator.isTokenAlmostExpired(token, 5, LocalDate.now().plusDays(3))).isTrue()
+        assertThat(Validator.isTokenAlmostExpired(token, 5, LocalDate.now().plusDays(4))).isTrue()
+    }
+
+    @Test
+    fun `isTokenAlmostExpired() returns false if token is not almost expired`() {
+        val token = Validator.generateToken()
+        assertThat(Validator.isTokenAlmostExpired(token)).isFalse()
+        assertThat(Validator.isTokenAlmostExpired(token, 6)).isFalse()
+    }
 }

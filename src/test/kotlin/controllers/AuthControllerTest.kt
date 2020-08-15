@@ -6,7 +6,6 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import helpers.TestDatabase
-import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
 import models.Constants

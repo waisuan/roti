@@ -41,6 +41,7 @@ class UserControllerTest {
         }.isInstanceOf(IllegalUserException::class.java)
     }
 
+    // TODO fix this failing test
     @Test
     fun `loginUser() writes to cookie`() {
         val context = mock<Context>()

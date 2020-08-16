@@ -29,8 +29,8 @@ object UserController {
     fun loginUser(ctx: Context) {
         val user = ctx.body<User>()
         val userToken = UserService.loginUser(user)
-        ctx.cookie(Constants.USER_TOKEN.name, userToken)
-        ctx.cookie(Constants.USER_NAME.name, user.username!!)
+        ctx.res.addHeader("Set-Cookie", "${Constants.USER_TOKEN.name}=$userToken; Path=/; SameSite=none")
+        ctx.res.addHeader("Set-Cookie", "${Constants.USER_NAME.name}=${user.username}; Path=/; SameSite=none")
     }
 
     fun logoutUser(ctx: Context) {

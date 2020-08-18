@@ -4,6 +4,7 @@ import io.javalin.http.Context
 import models.Constants
 import models.User
 import services.UserService
+import utils.CookieMonster
 
 object UserController {
     fun createUser(ctx: Context) {
@@ -29,13 +30,13 @@ object UserController {
     fun loginUser(ctx: Context) {
         val user = ctx.body<User>()
         val userToken = UserService.loginUser(user)
-        ctx.res.addHeader("Set-Cookie", "${Constants.USER_TOKEN.name}=$userToken; Path=/; SameSite=none")
-        ctx.res.addHeader("Set-Cookie", "${Constants.USER_NAME.name}=${user.username}; Path=/; SameSite=none")
+        CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, userToken)
+        CookieMonster.setCookie(ctx, Constants.USER_NAME.name, user.username!!)
     }
 
     fun logoutUser(ctx: Context) {
-        ctx.removeCookie(Constants.USER_TOKEN.name, "/")
-        ctx.removeCookie(Constants.USER_NAME.name, "/")
+        CookieMonster.removeCookie(ctx, Constants.USER_TOKEN.name)
+        CookieMonster.removeCookie(ctx, Constants.USER_NAME.name)
     }
 
     fun getUsers(ctx: Context) {

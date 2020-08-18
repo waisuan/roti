@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.UserService
 import utils.Validator
+import utils.logger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthIntegrationTest {
@@ -166,5 +167,21 @@ class AuthIntegrationTest {
         val refreshedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
         assertThat(refreshedCookie).isNotEmpty()
         assertThat(refreshedCookie).isNotEqualTo(token)
+    }
+
+    @Test
+    fun `JWT should not be renewed if LOGOUT endpoint was called`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        val token = Validator.generateToken(expiresAt = LocalDate.now().plusDays(1))
+
+        val response = Unirest.post("/users/logout")
+            .cookie(Constants.USER_TOKEN.name, token)
+            .cookie(Constants.USER_NAME.name, user.username)
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+        val refreshedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
+        assertThat(refreshedCookie).isNullOrEmpty()
     }
 }

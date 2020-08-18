@@ -24,6 +24,7 @@ import services.MachineService
 import tables.MachineTable
 import tables.MaintenanceTable
 import tables.UserTable
+import utils.CookieMonster
 import utils.Validator
 import utils.logger
 
@@ -61,10 +62,12 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         app.after { ctx ->
-            if (ctx.status() != 401) {
-                val token = ctx.cookie(Constants.USER_TOKEN.name)
-                if (token != null && Validator.isTokenAlmostExpired(token)) {
-                    ctx.cookie(Constants.USER_TOKEN.name, Validator.generateToken())
+            if (ctx.status() != 401
+                && !ctx.path().contains("logout")
+                && CookieMonster.hasCookies(ctx, Constants.USER_TOKEN.name, Constants.USER_NAME.name)) {
+                val token = CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name)
+                if (Validator.isTokenAlmostExpired(token!!)) {
+                    CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, Validator.generateToken())
                 }
             }
         }

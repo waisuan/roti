@@ -17,7 +17,11 @@ object CookieMonster {
     }
 
     fun removeCookie(ctx: Context, key: String) {
-        ctx.removeCookie(key, "/")
+        if (isSecure(ctx)) {
+            ctx.res.addHeader("Set-Cookie", "$key=; Path=/; HttpOnly; Secure; SameSite=none; Max-Age=0")
+        } else {
+            ctx.removeCookie(key, "/")
+        }
     }
 
     fun hasCookie(ctx: Context, key: String): Boolean {

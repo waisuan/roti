@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import services.UserService
 import utils.Validator
-import utils.logger
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthIntegrationTest {

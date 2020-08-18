@@ -2,7 +2,6 @@ package utils
 
 import io.javalin.http.Context
 import io.javalin.http.util.ContextUtil.isLocalhost
-import models.Constants
 
 object CookieMonster {
     fun setCookie(ctx: Context, key: String, value: String) {

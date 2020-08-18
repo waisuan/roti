@@ -62,9 +62,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         app.after { ctx ->
-            if (ctx.status() != 401
-                && !ctx.path().contains("logout")
-                && CookieMonster.hasCookies(ctx, Constants.USER_TOKEN.name, Constants.USER_NAME.name)) {
+            if (ctx.status() != 401 &&
+                !ctx.path().contains("logout") &&
+                CookieMonster.hasCookies(ctx, Constants.USER_TOKEN.name, Constants.USER_NAME.name)) {
                 val token = CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name)
                 if (Validator.isTokenAlmostExpired(token!!)) {
                     CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, Validator.generateToken())

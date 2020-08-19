@@ -101,7 +101,7 @@ class MachinesAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"serialNumber\":\"TEST02\", \"tncDate\":\"2020-01-01\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Record already exists")
     }
 
@@ -120,7 +120,7 @@ class MachinesAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"ppmDate\":\"2020-01-01\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 
@@ -133,7 +133,7 @@ class MachinesAPITest {
             .isNull()
 
         response = Unirest.delete("/machines/TEST01").asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 

@@ -55,10 +55,10 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
         // Views
-        app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
-        app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
+        // app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
+        // app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
         app.get("/admin", VueComponent("<admin-room></admin-room>"), roles(UserRole.ADMIN))
-        app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
+        // app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
         app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         app.after { ctx ->
@@ -151,7 +151,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         app.exception(Exception::class.java) { e, ctx ->
             logger().info(e.message!!)
             ctx.result(e.message!!)
-            ctx.status(404)
+            ctx.status(500)
         }
 
         return app

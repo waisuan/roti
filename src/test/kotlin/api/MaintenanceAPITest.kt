@@ -115,14 +115,14 @@ class MaintenanceAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"workOrderNumber\":\"W01\", \"workOrderDate\":\"2020-01-01\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Record already exists")
 
         response = Unirest.post("/machines/TEST00000/history")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"workOrderNumber\":\"W02\", \"workOrderDate\":\"2020-01-01\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Key (serialNumber)=(TEST00000) is not present in table \"machines\"")
     }
 
@@ -145,7 +145,7 @@ class MaintenanceAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"actionTaken\":\"Something\", \"workOrderDate\":\"2011-06-12\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 
@@ -160,7 +160,7 @@ class MaintenanceAPITest {
             .isNull()
 
         response = Unirest.delete("/machines/TEST01/history/W00000").asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 

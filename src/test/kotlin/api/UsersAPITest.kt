@@ -61,14 +61,14 @@ class UsersAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Record already exists")
 
         response = Unirest.post("/users/register")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST02\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to create new user.")
     }
 
@@ -90,14 +90,14 @@ class UsersAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"BAD_PASSWORD\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Incorrect username/password detected")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST09\", \"password\":\"PASSWORD\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Incorrect username/password detected")
 
         UserService.approveUser(user.username!!, false)
@@ -105,7 +105,7 @@ class UsersAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("User has not been approved")
     }
 
@@ -160,7 +160,7 @@ class UsersAPITest {
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"password\":\"NEW_PASSWORD\"}"))
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to operate on User record")
 
         EnvironmentVariables().set("DEV_MODE", null)
@@ -258,7 +258,7 @@ class UsersAPITest {
         }.isInstanceOf(IllegalUserException::class.java)
 
         response = Unirest.delete("/users/TEST").asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to operate on User record")
 
         EnvironmentVariables().set("DEV_MODE", null)

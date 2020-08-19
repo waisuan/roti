@@ -86,13 +86,13 @@ class FilesAPITest {
         response = Unirest.post("/files/TEST")
             .field("file", javaClass.classLoader.getResourceAsStream("stubs/large_file.blob"), "large_file.blob")
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Provided file is too large to upload")
 
         response = Unirest.post("/files/TEST")
             .field("dude", javaClass.classLoader.getResourceAsStream("stubs/large_file.blob"), "large_file.blob")
             .asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to upload provided file")
     }
 
@@ -105,7 +105,7 @@ class FilesAPITest {
             .contains("attachment; filename=\"small_file.blob\"")
 
         response = Unirest.get("/files/TEST/some_file.blob").asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 
@@ -121,7 +121,7 @@ class FilesAPITest {
         }.isInstanceOf(RecordNotFoundException::class.java)
 
         response = Unirest.delete("/files/TEST/some_file.blob").asString()
-        assertThat(response.status).isEqualTo(404)
+        assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to locate record")
     }
 }

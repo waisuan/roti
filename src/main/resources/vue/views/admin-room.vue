@@ -152,6 +152,7 @@
             }
         },
         created() {
+            document.title = 'Admin Panel'
             axios
                 .get('api/users')
                 .then(response => {

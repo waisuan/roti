@@ -118,11 +118,7 @@ class UserServiceTest {
         UserService.createUser(User("evan.s.2", "password", "evan.s.2@test.com"))
         UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
 
-        UserService.deleteUsers(listOf(
-            User(username = "evan.s"),
-            User(username = "evan.s.2"),
-            User(username = "evan.s.3")
-        ))
+        UserService.deleteUsers(listOf("evan.s", "evan.s.2", "evan.s.3"))
         val foundUsers = UserService.getUsers()
         assertThat(foundUsers.size).isEqualTo(0)
     }
@@ -132,9 +128,7 @@ class UserServiceTest {
         UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
 
         assertThatThrownBy {
-            UserService.deleteUsers(listOf(
-                User()
-            ))
+            UserService.deleteUsers(listOf(""))
         }.isInstanceOf(BadOperationException::class.java)
     }
 

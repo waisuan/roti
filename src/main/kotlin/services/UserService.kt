@@ -80,11 +80,9 @@ object UserService {
         }
     }
 
-    fun deleteUsers(users: List<User>) {
-        users.forEach { user ->
-            if (user.username == null)
-                throw BadOperationException(User::class.java.simpleName)
-            deleteUser(user.username)
+    fun deleteUsers(users: List<String>) {
+        users.forEach { username ->
+            deleteUser(username)
         }
     }
 

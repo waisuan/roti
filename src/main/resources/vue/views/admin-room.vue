@@ -125,23 +125,41 @@
                 this.isDeleting = null
             },
             persistChanges() {
-                this.isSaving = true
+              this.isSaving = true
 
-                axios.put('api/users', Object.values(this.cachedChanges)).then(_ => {
-                    this.cachedChanges = {}
-                    axios.delete('api/users', { data: Object.values(this.cachedRemovals) }).then(_ => {
-                        this.cachedRemovals = {}
-                        this.isSaving = false
-                        this.hasChanges = false
-                    }).catch(_ => {
-                        this.hasError = true
-                        this.isSaving = false
-                    })
+              this.update().then(_ => {
+                this.cachedChanges = {}
+                this.delete().then(_ => {
+                  this.cachedRemovals = {}
+                  this.isSaving = false
+                  this.hasChanges = false
                 }).catch(_ => {
-                    this.hasError = true
-                    this.isSaving = false
+                  this.hasError = true
+                  this.isSaving = false
                 })
+              }).catch(_ => {
+                this.hasError = true
+                this.isSaving = false
+              })
+            },
+          update() {
+            if (Object.keys(this.cachedChanges).length !== 0) {
+              return axios.put('api/users', Object.values(this.cachedChanges))
+            } else {
+              return Promise.resolve()
             }
+          },
+          delete() {
+            if (Object.keys(this.cachedRemovals).length !== 0) {
+              const usernames = new URLSearchParams()
+              Object.keys(this.cachedRemovals).forEach(username => {
+                usernames.append("users", username)
+              })
+              return axios.delete('api/users', { params: usernames })
+            } else {
+              return Promise.resolve()
+            }
+          }
         },
         filters: {
             capitalize(str) {

@@ -1,6 +1,7 @@
 package controllers
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -49,6 +50,7 @@ class UserControllerTest {
         UserService.approveUser(user.username!!)
 
         whenever(context.body<User>()).thenReturn(user)
+        whenever(context.host()).doReturn("localhost")
 
         UserController.loginUser(context)
 
@@ -59,6 +61,8 @@ class UserControllerTest {
     @Test
     fun `logoutUser() removes cookies`() {
         val context = mock<Context>()
+
+        whenever(context.host()).doReturn("localhost")
 
         context.cookie(Constants.USER_TOKEN.name, "TOKEN")
         context.cookie(Constants.USER_NAME.name, "USER")

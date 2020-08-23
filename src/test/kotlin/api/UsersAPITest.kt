@@ -81,10 +81,11 @@ class UsersAPITest {
         var response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
-            .asEmpty()
+            .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
+        assertThat(response.body).isEqualTo("false")
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -107,6 +108,23 @@ class UsersAPITest {
             .asString()
         assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("User has not been approved")
+    }
+
+    @Test
+    fun `POST login returns true if user is an admin`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
+        UserService.approveUser(user.username!!, true)
+
+        var response = Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
+        assertThat(response.body).isEqualTo("true")
     }
 
     @Test
@@ -290,12 +308,8 @@ class UsersAPITest {
         UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
         UserService.createUser(User(username = "TEST2", password = "PASSWORD", email = "email2@mail.com"))
 
-        var response = Unirest.delete("/users")
-            .header("Content-Type", "application/json")
-            .body(JSONArray("""
-                [{"username":"TEST"},
-                 {"username":"TEST2"}]
-            """.trimIndent()))
+        val response = Unirest.delete("/users")
+            .queryString("users", listOf("TEST", "TEST2"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
 
@@ -317,19 +331,13 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(200)
 
         response = Unirest.delete("/users")
-            .header("Content-Type", "application/json")
-            .body(JSONArray("""
-                [{"username":"TEST"}]
-            """.trimIndent()))
+            .queryString("users", listOf("TEST"))
             .asEmpty()
         assertThat(response.status).isEqualTo(401)
 
         UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
         response = Unirest.delete("/users")
-            .header("Content-Type", "application/json")
-            .body(JSONArray("""
-                [{"username":"TEST"}]
-            """.trimIndent()))
+            .queryString("users", listOf("TEST"))
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
     }

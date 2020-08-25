@@ -15,11 +15,18 @@ import tables.MachineTable
 
 object MachineService {
     fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "DESC"): List<Machine> {
-        return transaction {
-            MachineDao.all()
-                .limit(limit, offset)
-                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
-                .map { it.toModel() }
+        val requestKey = "${limit}_${offset}_${sortFilter}_$sortOrder"
+        return if (CacheService.isMachinesCached(requestKey)) {
+            CacheService.getMachines(requestKey)
+        } else {
+            val machines = transaction {
+                MachineDao.all()
+                    .limit(limit, offset)
+                    .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
+                    .map { it.toModel() }
+            }
+            CacheService.setMachines(requestKey, machines)
+            machines
         }
     }
 
@@ -50,6 +57,7 @@ object MachineService {
                 updatedAt = LocalDateTime.now()
             }
         }
+        CacheService.purgeCachedMachines()
     }
 
     fun updateMachine(serialNumber: String, updatedMachine: Machine) {
@@ -74,6 +82,7 @@ object MachineService {
                 throw RecordNotFoundException()
             }
         }
+        CacheService.purgeCachedMachines()
     }
 
     fun deleteMachine(serialNumber: String) {
@@ -85,25 +94,40 @@ object MachineService {
                 throw RecordNotFoundException()
             }
         }
+        CacheService.purgeCachedMachines()
     }
 
     fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "DESC"): List<Machine> {
-        return transaction {
-            MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
-                .limit(limit, offset)
-                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
-                .map {
-                it.toModel()
+        val requestKey = "${keyword}_${limit}_${offset}_${sortFilter}_$sortOrder"
+        return if (CacheService.isMachinesCached(requestKey)) {
+            CacheService.getMachines(requestKey)
+        } else {
+            val machines = transaction {
+                MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
+                    .limit(limit, offset)
+                    .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
+                    .map {
+                        it.toModel()
+                    }
             }
+            CacheService.setMachines(requestKey, machines)
+            machines
         }
     }
 
     fun getNumberOfMachines(keyword: String? = null): Long {
-        return transaction {
-            if (keyword == null)
-                MachineDao.all().count()
-            else
-                MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.count()
+        val requestKey = "count_$keyword"
+        return if (CacheService.isMachinesCached(requestKey)) {
+            CacheService.getMachineCount(requestKey)!!
+        } else {
+            val count = transaction {
+                if (keyword == null)
+                    MachineDao.all().count()
+                else
+                    MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.count()
+            }
+            CacheService.setMachineCount(requestKey, count)
+            count
         }
     }
 

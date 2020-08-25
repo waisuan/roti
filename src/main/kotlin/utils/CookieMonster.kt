@@ -6,10 +6,8 @@ import io.javalin.http.util.ContextUtil.isLocalhost
 object CookieMonster {
     fun setCookie(ctx: Context, key: String, value: String) {
         if (isSecure(ctx)) {
-            logger().info(">>> Setting secure cookie...")
             ctx.res.addHeader("Set-Cookie", "$key=$value; Path=/; HttpOnly; Secure; SameSite=none")
         } else {
-            logger().info(">>> Setting non-secure cookie...")
             ctx.cookie(key, value)
         }
     }

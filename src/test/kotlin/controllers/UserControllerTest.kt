@@ -56,6 +56,7 @@ class UserControllerTest {
 
         verify(context).cookie(eq(Constants.USER_TOKEN.name), any(), any())
         verify(context).cookie(eq(Constants.USER_NAME.name), eq(user.username!!), any())
+        verify(context).json(any<User>())
     }
 
     @Test

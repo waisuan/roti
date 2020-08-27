@@ -11,14 +11,21 @@ import utils.logger
 
 object AuthController {
     fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>) {
-        val token = ctx.cookie(Constants.USER_TOKEN.name) ?: ""
-        val username = ctx.cookie(Constants.USER_NAME.name) ?: ""
+        val (token, username) = authDetails(ctx)
         logger().info("Request token: $token; Request user: $username")
         if (isDevMode() || isExcludedFromAuth(permittedRoles) || (isAuthorizedRole(username, permittedRoles) && Validator.verifyToken(token))) {
             handler.handle(ctx)
         } else {
             ctx.status(401)
         }
+    }
+
+    private fun authDetails(ctx: Context): Pair<String, String> {
+        val (tokenFromHeader, userFromHeader) = ctx.header("Authorization")?.removePrefix("Bearer ")?.split(":") ?: listOf("", "")
+        return Pair(
+            ctx.cookie(Constants.USER_TOKEN.name) ?: tokenFromHeader ?: "",
+            ctx.cookie(Constants.USER_NAME.name) ?: userFromHeader ?: ""
+        )
     }
 
     private fun isDevMode(): Boolean {

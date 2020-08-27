@@ -53,6 +53,24 @@ class AuthControllerTest {
     }
 
     @Test
+    fun `falls back on authorization header if cookies are not available`() {
+        val handler = mock<Handler>()
+        val context = mock<Context>()
+        val token = Validator.generateToken()
+        UserService.createUser(User("TEST", "TEST", email = "TEST"))
+
+        whenever(context.header("Authorization")).doAnswer { "Bearer $token:TEST" }
+        whenever(context.matchedPath()).thenReturn("/some/path")
+        whenever(context.method()).thenReturn("GET")
+        whenever(context.status(any())).thenReturn(context)
+        whenever(handler.handle(any())).doAnswer { Unit }
+
+        AuthController.accessManager(handler, context, setOf(UserRole.NON_ADMIN))
+
+        verify(handler).handle(any())
+    }
+
+    @Test
     fun `discards request if JWT token is invalid`() {
         val handler = mock<Handler>()
         val context = mock<Context>()

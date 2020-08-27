@@ -3,7 +3,6 @@ package controllers
 import io.javalin.http.Context
 import models.Constants
 import models.User
-import models.UserRole
 import services.UserService
 import utils.CookieMonster
 
@@ -31,11 +30,12 @@ object UserController {
     fun loginUser(ctx: Context) {
         val user = ctx.body<User>()
         val userToken = UserService.loginUser(user)
-        val isAdmin = (UserService.getUser(user.username!!)!!.role == UserRole.ADMIN)
+        val loggedInUser = UserService.getUser(user.username!!)!!
+        loggedInUser.token = userToken
 
         CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, userToken)
         CookieMonster.setCookie(ctx, Constants.USER_NAME.name, user.username)
-        ctx.json(isAdmin)
+        ctx.json(loggedInUser)
     }
 
     fun logoutUser(ctx: Context) {

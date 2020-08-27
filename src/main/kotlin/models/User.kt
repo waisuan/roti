@@ -10,7 +10,8 @@ data class User(
     val password: String? = null,
     val email: String? = null,
     val is_approved: Boolean? = null,
-    val role: UserRole? = null
+    val role: UserRole? = null,
+    var token: String? = null
 ) {
     @JsonIgnore
     fun isValid(): Boolean {

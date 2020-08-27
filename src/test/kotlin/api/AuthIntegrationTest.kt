@@ -99,7 +99,7 @@ class AuthIntegrationTest {
     }
 
     @Test
-    fun `cookies are init after user is logged in`() {
+    fun `cookies and auth details are init after user is logged in`() {
         var response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(401)
 
@@ -113,6 +113,9 @@ class AuthIntegrationTest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isNotEmpty()
+        assertThat(response.body).isEqualTo(
+            """{"username":"${user.username}","password":null,"email":"${user.email}","is_approved":true,"role":"NON_ADMIN","token":"${response.cookies.getNamed(Constants.USER_TOKEN.name).value}"}"""
+        )
 
         response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
@@ -182,5 +185,21 @@ class AuthIntegrationTest {
         assertThat(response.status).isEqualTo(200)
         val refreshedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
         assertThat(refreshedCookie).isNullOrEmpty()
+    }
+
+    @Test
+    fun `falls back on authorization header for auth if cookies are not available`() {
+        var response = Unirest.get("/machines").asString()
+        assertThat(response.status).isEqualTo(401)
+
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        val token = UserService.loginUser(user)
+
+        response = Unirest.get("/machines")
+            .header("Authorization", "Bearer $token:${user.username}")
+            .asString()
+        assertThat(response.status).isEqualTo(200)
     }
 }

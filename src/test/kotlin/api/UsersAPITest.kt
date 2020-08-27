@@ -85,7 +85,9 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
-        assertThat(response.body).isEqualTo("false")
+        assertThat(response.body).isEqualTo(
+            """{"username":"${user.username}","password":null,"email":"${user.email}","is_approved":true,"role":"NON_ADMIN","token":"${response.cookies.getNamed(Constants.USER_TOKEN.name).value}"}"""
+        )
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -111,20 +113,22 @@ class UsersAPITest {
     }
 
     @Test
-    fun `POST login returns true if user is an admin`() {
+    fun `POST login returns user details if successful`() {
         val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
         UserService.updateUser(user.username!!, User(role = UserRole.ADMIN))
         UserService.approveUser(user.username!!, true)
 
-        var response = Unirest.post("/users/login")
+        val response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\"}"))
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
-        assertThat(response.body).isEqualTo("true")
+        assertThat(response.body).isEqualTo(
+            """{"username":"${user.username}","password":null,"email":"${user.email}","is_approved":true,"role":"ADMIN","token":"${response.cookies.getNamed(Constants.USER_TOKEN.name).value}"}"""
+        )
     }
 
     @Test

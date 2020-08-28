@@ -9,8 +9,8 @@ object MachineController {
         ctx.json(MachineService.getAllMachines(
             ctx.queryParam("page_limit", "0")!!.toInt(),
             ctx.queryParam("page_offset", "0")!!.toLong(),
-            ctx.queryParam("sort_filter", "id")!!,
-            ctx.queryParam("sort_order", "ASC")!!
+            ctx.queryParam("sort_filter", "updatedAt")!!,
+            ctx.queryParam("sort_order", "DESC")!!
         ))
     }
 
@@ -31,8 +31,8 @@ object MachineController {
             ctx.pathParam("keyword"),
             ctx.queryParam("page_limit", "0")!!.toInt(),
             ctx.queryParam("page_offset", "0")!!.toLong(),
-            ctx.queryParam("sort_filter", "id")!!,
-            ctx.queryParam("sort_order", "ASC")!!
+            ctx.queryParam("sort_filter", "updatedAt")!!,
+            ctx.queryParam("sort_order", "DESC")!!
         ))
     }
 

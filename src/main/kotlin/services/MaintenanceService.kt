@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MaintenanceTable
 
 object MaintenanceService {
-    fun getMaintenanceHistory(serialNumber: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Maintenance> {
+    fun getMaintenanceHistory(serialNumber: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "DESC"): List<Maintenance> {
         return transaction {
             MaintenanceDao.find { MaintenanceTable.serialNumber eq serialNumber }
                 .limit(limit, offset)
@@ -83,7 +83,7 @@ object MaintenanceService {
         }
     }
 
-    fun searchMaintenanceHistory(serialNumber: String, keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Maintenance> {
+    fun searchMaintenanceHistory(serialNumber: String, keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "DESC"): List<Maintenance> {
         return transaction {
             MaintenanceDao.find {
                 (MaintenanceTable.serialNumber eq serialNumber).and(

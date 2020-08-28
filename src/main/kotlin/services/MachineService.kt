@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 
 object MachineService {
-    fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
+    fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "DESC"): List<Machine> {
         return transaction {
             MachineDao.all()
                 .limit(limit, offset)
@@ -87,7 +87,7 @@ object MachineService {
         }
     }
 
-    fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "ASC"): List<Machine> {
+    fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "id", sortOrder: String = "DESC"): List<Machine> {
         return transaction {
             MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
                 .limit(limit, offset)

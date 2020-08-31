@@ -78,13 +78,13 @@ class MachinesAPITest {
         response = Unirest.get("/machines?sort_filter=serialNumber").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "ASC"))
+            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "DESC"))
         )
 
-        response = Unirest.get("/machines?sort_filter=serialNumber&sort_order=DESC").asString()
+        response = Unirest.get("/machines?sort_filter=serialNumber&sort_order=ASC").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "DESC"))
+            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "ASC"))
         )
     }
 
@@ -189,7 +189,7 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         var body = Gson().fromJson(response.body, List::class.java)
         assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("TEST01")
+        assertThat(body.first().toString()).contains("TEST03")
 
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
@@ -204,25 +204,25 @@ class MachinesAPITest {
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
             .queryString("sort_filter", "serialNumber")
-            .queryString("sort_order", "DESC")
+            .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
         body = Gson().fromJson(response.body, List::class.java)
         assertThat(body.size).isEqualTo(3)
-        assertThat(body.first().toString()).contains("TEST03")
-        assertThat(body.last().toString()).contains("TEST01")
+        assertThat(body.first().toString()).contains("TEST01")
+        assertThat(body.last().toString()).contains("TEST03")
 
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
             .queryString("page_limit", "1")
             .queryString("page_offset", "2")
             .queryString("sort_filter", "serialNumber")
-            .queryString("sort_order", "DESC")
+            .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
         body = Gson().fromJson(response.body, List::class.java)
         assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("TEST01")
+        assertThat(body.first().toString()).contains("TEST03")
     }
 
     @Test

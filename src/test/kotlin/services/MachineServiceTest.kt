@@ -80,7 +80,7 @@ class MachineServiceTest {
         var createdMachines = MachineService.getAllMachines(limit = 1)
         assertThat(createdMachines).isNotEmpty
         assertThat(createdMachines.size).isEqualTo(1)
-        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST01")
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST03")
 
         createdMachines = MachineService.getAllMachines(limit = 1, offset = 1)
         assertThat(createdMachines).isNotEmpty
@@ -90,7 +90,7 @@ class MachineServiceTest {
         createdMachines = MachineService.getAllMachines(limit = 1, offset = 2)
         assertThat(createdMachines).isNotEmpty
         assertThat(createdMachines.size).isEqualTo(1)
-        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST03")
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST01")
 
         createdMachines = MachineService.getAllMachines(limit = 1, offset = 3)
         assertThat(createdMachines).isEmpty()
@@ -104,15 +104,15 @@ class MachineServiceTest {
 
         var createdMachines = MachineService.getAllMachines(sortFilter = "state")
         assertThat(createdMachines).isNotEmpty
-        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST02")
-        assertThat(createdMachines[1].serialNumber).isEqualTo("TEST03")
-        assertThat(createdMachines.last().serialNumber).isEqualTo("TEST01")
-
-        createdMachines = MachineService.getAllMachines(sortFilter = "state", sortOrder = "DESC")
-        assertThat(createdMachines).isNotEmpty
         assertThat(createdMachines.first().serialNumber).isEqualTo("TEST01")
         assertThat(createdMachines[1].serialNumber).isEqualTo("TEST03")
         assertThat(createdMachines.last().serialNumber).isEqualTo("TEST02")
+
+        createdMachines = MachineService.getAllMachines(sortFilter = "state", sortOrder = "ASC")
+        assertThat(createdMachines).isNotEmpty
+        assertThat(createdMachines.first().serialNumber).isEqualTo("TEST02")
+        assertThat(createdMachines[1].serialNumber).isEqualTo("TEST03")
+        assertThat(createdMachines.last().serialNumber).isEqualTo("TEST01")
     }
 
     @Test
@@ -142,7 +142,7 @@ class MachineServiceTest {
         assertThat(machines.map { it.serialNumber }).isEqualTo(listOf(machine2.serialNumber))
 
         machines = MachineService.searchMachine("perial")
-        assertThat(machines.map { it.serialNumber }).isEqualTo(listOf(machine2.serialNumber, machine3.serialNumber))
+        assertThat(machines.map { it.serialNumber }).isEqualTo(listOf(machine3.serialNumber, machine2.serialNumber))
 
         machines = MachineService.searchMachine("something")
         assertThat(machines.map { it.serialNumber }).isEqualTo(emptyList<String>())
@@ -157,7 +157,7 @@ class MachineServiceTest {
         var found = MachineService.searchMachine(keyword = "TEST", limit = 1)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().serialNumber).isEqualTo("TEST01")
+        assertThat(found.first().serialNumber).isEqualTo("TEST03")
 
         found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 1)
         assertThat(found).isNotEmpty
@@ -167,7 +167,7 @@ class MachineServiceTest {
         found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 2)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().serialNumber).isEqualTo("TEST03")
+        assertThat(found.first().serialNumber).isEqualTo("TEST01")
 
         found = MachineService.searchMachine(keyword = "TEST", limit = 1, offset = 3)
         assertThat(found).isEmpty()
@@ -181,15 +181,15 @@ class MachineServiceTest {
 
         var found = MachineService.searchMachine(keyword = "TEST", sortFilter = "state")
         assertThat(found).isNotEmpty
-        assertThat(found.first().serialNumber).isEqualTo("TEST02")
-        assertThat(found[1].serialNumber).isEqualTo("TEST03")
-        assertThat(found.last().serialNumber).isEqualTo("TEST01")
-
-        found = MachineService.searchMachine(keyword = "TEST", sortFilter = "state", sortOrder = "DESC")
-        assertThat(found).isNotEmpty
         assertThat(found.first().serialNumber).isEqualTo("TEST01")
         assertThat(found[1].serialNumber).isEqualTo("TEST03")
         assertThat(found.last().serialNumber).isEqualTo("TEST02")
+
+        found = MachineService.searchMachine(keyword = "TEST", sortFilter = "state", sortOrder = "ASC")
+        assertThat(found).isNotEmpty
+        assertThat(found.first().serialNumber).isEqualTo("TEST02")
+        assertThat(found[1].serialNumber).isEqualTo("TEST03")
+        assertThat(found.last().serialNumber).isEqualTo("TEST01")
     }
 
     @Test

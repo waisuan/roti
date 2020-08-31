@@ -47,7 +47,7 @@ class MaintenanceServiceTest {
         var found = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().workOrderNumber).isEqualTo("W01")
+        assertThat(found.first().workOrderNumber).isEqualTo("W03")
 
         found = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1, offset = 1)
         assertThat(found).isNotEmpty
@@ -57,7 +57,7 @@ class MaintenanceServiceTest {
         found = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1, offset = 2)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().workOrderNumber).isEqualTo("W03")
+        assertThat(found.first().workOrderNumber).isEqualTo("W01")
 
         found = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1, offset = 3)
         assertThat(found).isEmpty()
@@ -71,15 +71,15 @@ class MaintenanceServiceTest {
 
         var found = MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "reportedBy")
         assertThat(found).isNotEmpty
-        assertThat(found.first().workOrderNumber).isEqualTo("W02")
-        assertThat(found[1].workOrderNumber).isEqualTo("W03")
-        assertThat(found.last().workOrderNumber).isEqualTo("W01")
-
-        found = MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "reportedBy", sortOrder = "DESC")
-        assertThat(found).isNotEmpty
         assertThat(found.first().workOrderNumber).isEqualTo("W01")
         assertThat(found[1].workOrderNumber).isEqualTo("W03")
         assertThat(found.last().workOrderNumber).isEqualTo("W02")
+
+        found = MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "reportedBy", sortOrder = "ASC")
+        assertThat(found).isNotEmpty
+        assertThat(found.first().workOrderNumber).isEqualTo("W02")
+        assertThat(found[1].workOrderNumber).isEqualTo("W03")
+        assertThat(found.last().workOrderNumber).isEqualTo("W01")
     }
 
     @Test
@@ -144,7 +144,7 @@ class MaintenanceServiceTest {
         assertThat(found.map { it.workOrderNumber }).isEqualTo(listOf("W02"))
 
         found = MaintenanceService.searchMaintenanceHistory("TEST01", "some")
-        assertThat(found.map { it.workOrderNumber }).isEqualTo(listOf("W02", "W03"))
+        assertThat(found.map { it.workOrderNumber }).isEqualTo(listOf("W03", "W02"))
 
         found = MaintenanceService.searchMaintenanceHistory("TEST02", "someone")
         assertThat(found.map { it.workOrderNumber }).isEqualTo(emptyList<String>())
@@ -159,7 +159,7 @@ class MaintenanceServiceTest {
         var found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", limit = 1)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().workOrderNumber).isEqualTo("W01")
+        assertThat(found.first().workOrderNumber).isEqualTo("W03")
 
         found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", limit = 1, offset = 1)
         assertThat(found).isNotEmpty
@@ -169,7 +169,7 @@ class MaintenanceServiceTest {
         found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", limit = 1, offset = 2)
         assertThat(found).isNotEmpty
         assertThat(found.size).isEqualTo(1)
-        assertThat(found.first().workOrderNumber).isEqualTo("W03")
+        assertThat(found.first().workOrderNumber).isEqualTo("W01")
 
         found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", limit = 1, offset = 3)
         assertThat(found).isEmpty()
@@ -183,15 +183,15 @@ class MaintenanceServiceTest {
 
         var found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", sortFilter = "workOrderType")
         assertThat(found).isNotEmpty
-        assertThat(found.first().workOrderNumber).isEqualTo("W02")
-        assertThat(found[1].workOrderNumber).isEqualTo("W03")
-        assertThat(found.last().workOrderNumber).isEqualTo("W01")
-
-        found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", sortFilter = "workOrderType", sortOrder = "DESC")
-        assertThat(found).isNotEmpty
         assertThat(found.first().workOrderNumber).isEqualTo("W01")
         assertThat(found[1].workOrderNumber).isEqualTo("W03")
         assertThat(found.last().workOrderNumber).isEqualTo("W02")
+
+        found = MaintenanceService.searchMaintenanceHistory("TEST01", "W0", sortFilter = "workOrderType", sortOrder = "ASC")
+        assertThat(found).isNotEmpty
+        assertThat(found.first().workOrderNumber).isEqualTo("W02")
+        assertThat(found[1].workOrderNumber).isEqualTo("W03")
+        assertThat(found.last().workOrderNumber).isEqualTo("W01")
     }
 
     @Test

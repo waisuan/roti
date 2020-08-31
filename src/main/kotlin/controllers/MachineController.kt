@@ -2,15 +2,19 @@ package controllers
 
 import io.javalin.http.Context
 import models.Machine
+import models.MachineContainer
 import services.MachineService
 
 object MachineController {
     fun getAllMachines(ctx: Context) {
-        ctx.json(MachineService.getAllMachines(
-            ctx.queryParam("page_limit", "0")!!.toInt(),
-            ctx.queryParam("page_offset", "0")!!.toLong(),
-            ctx.queryParam("sort_filter", "updatedAt")!!,
-            ctx.queryParam("sort_order", "DESC")!!
+        ctx.json(MachineContainer(
+            machines = MachineService.getAllMachines(
+                ctx.queryParam("page_limit", "0")!!.toInt(),
+                ctx.queryParam("page_offset", "0")!!.toLong(),
+                ctx.queryParam("sort_filter", "updatedAt")!!,
+                ctx.queryParam("sort_order", "DESC")!!
+            ),
+            count = MachineService.getNumberOfMachines()
         ))
     }
 
@@ -27,12 +31,15 @@ object MachineController {
     }
 
     fun searchMachine(ctx: Context) {
-        ctx.json(MachineService.searchMachine(
-            ctx.pathParam("keyword"),
-            ctx.queryParam("page_limit", "0")!!.toInt(),
-            ctx.queryParam("page_offset", "0")!!.toLong(),
-            ctx.queryParam("sort_filter", "updatedAt")!!,
-            ctx.queryParam("sort_order", "DESC")!!
+        ctx.json(MachineContainer(
+            machines = MachineService.searchMachine(
+                ctx.pathParam("keyword"),
+                ctx.queryParam("page_limit", "0")!!.toInt(),
+                ctx.queryParam("page_offset", "0")!!.toLong(),
+                ctx.queryParam("sort_filter", "updatedAt")!!,
+                ctx.queryParam("sort_order", "DESC")!!
+            ),
+            count = MachineService.getNumberOfMachines(ctx.queryParam("keyword"))
         ))
     }
 

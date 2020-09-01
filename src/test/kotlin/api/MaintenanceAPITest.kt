@@ -1,7 +1,6 @@
 package api
 
 import RotiApp
-import com.google.gson.Gson
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
@@ -10,6 +9,7 @@ import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import models.Machine
 import models.Maintenance
+import models.MaintenanceContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
@@ -56,7 +56,7 @@ class MaintenanceAPITest {
     fun `GET history`() {
         var response = Unirest.get("/machines/TEST01/history").asString()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.body).isEqualTo("[]")
+        assertThat(response.body as String).isEqualTo("{\"history\":[],\"count\":0}")
 
         MaintenanceService.createMaintenanceHistory("TEST01", Maintenance(workOrderNumber = "W01", reportedBy = "Dude1"))
         MaintenanceService.createMaintenanceHistory("TEST01", Maintenance(workOrderNumber = "W02", reportedBy = "Dude2"))
@@ -64,7 +64,10 @@ class MaintenanceAPITest {
         response = Unirest.get("/machines/TEST01/history").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.getMaintenanceHistory("TEST01"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.getMaintenanceHistory("TEST01"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history")
@@ -72,7 +75,10 @@ class MaintenanceAPITest {
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.getMaintenanceHistory("TEST01", limit = 1))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history")
@@ -81,7 +87,10 @@ class MaintenanceAPITest {
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.getMaintenanceHistory("TEST01", limit = 1, offset = 1))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.getMaintenanceHistory("TEST01", limit = 1, offset = 1),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history")
@@ -89,7 +98,10 @@ class MaintenanceAPITest {
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "workOrderNumber"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "workOrderNumber"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history")
@@ -98,7 +110,10 @@ class MaintenanceAPITest {
             .asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "workOrderNumber", sortOrder = "DESC"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.getMaintenanceHistory("TEST01", sortFilter = "workOrderNumber", sortOrder = "DESC"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01")
+            ))
         )
     }
 
@@ -176,7 +191,10 @@ class MaintenanceAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("W01", "W02", "W03")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.searchMaintenanceHistory("TEST01", "w0"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "w0"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "w0")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
@@ -185,7 +203,10 @@ class MaintenanceAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("W02")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.searchMaintenanceHistory("TEST01", "dood"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "dood"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "dood")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
@@ -194,7 +215,10 @@ class MaintenanceAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("W01")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MaintenanceService.searchMaintenanceHistory("TEST01", "03-03"))
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "03-03"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "03-03")
+            ))
         )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
@@ -202,9 +226,12 @@ class MaintenanceAPITest {
             .queryString("page_limit", "1")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        var body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("W03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "w0", limit = 1),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "w0")
+            ))
+        )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
             .routeParam("keyword", "w0")
@@ -212,9 +239,12 @@ class MaintenanceAPITest {
             .queryString("page_offset", "1")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("W02")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "w0", limit = 1, offset = 1),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "w0")
+            ))
+        )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
             .routeParam("keyword", "w0")
@@ -222,10 +252,12 @@ class MaintenanceAPITest {
             .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(3)
-        assertThat(body.first().toString()).contains("W01")
-        assertThat(body.last().toString()).contains("W03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "w0", sortFilter = "workOrderNumber", sortOrder = "ASC"),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "w0")
+            ))
+        )
 
         response = Unirest.get("/machines/TEST01/history/search/{keyword}")
             .routeParam("keyword", "w0")
@@ -235,9 +267,12 @@ class MaintenanceAPITest {
             .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("W03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MaintenanceContainer(
+                history = MaintenanceService.searchMaintenanceHistory("TEST01", "w0", sortFilter = "workOrderNumber", sortOrder = "ASC", limit = 1, offset = 2),
+                count = MaintenanceService.getNumberOfMaintenanceRecords("TEST01", "w0")
+            ))
+        )
     }
 
     @Test

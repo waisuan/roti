@@ -39,7 +39,7 @@ object MachineController {
                 ctx.queryParam("sort_filter", "updatedAt")!!,
                 ctx.queryParam("sort_order", "DESC")!!
             ),
-            count = MachineService.getNumberOfMachines(ctx.queryParam("keyword"))
+            count = MachineService.getNumberOfMachines(ctx.pathParam("keyword"))
         ))
     }
 

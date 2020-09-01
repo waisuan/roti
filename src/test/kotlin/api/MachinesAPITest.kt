@@ -1,13 +1,13 @@
 package api
 
 import RotiApp
-import com.google.gson.Gson
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import models.Machine
+import models.MachineContainer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
@@ -52,7 +52,7 @@ class MachinesAPITest {
     fun `GET machines`() {
         var response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
-        assertThat(response.body as String).isEqualTo("[]")
+        assertThat(response.body as String).isEqualTo("{\"machines\":[],\"count\":0}")
 
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
         MachineService.createMachine(Machine(serialNumber = "TEST02"))
@@ -60,31 +60,46 @@ class MachinesAPITest {
         response = Unirest.get("/machines").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines())
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.getAllMachines(),
+                count = MachineService.getNumberOfMachines()
+            ))
         )
 
         response = Unirest.get("/machines?page_limit=1").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(limit = 1))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.getAllMachines(limit = 1),
+                count = MachineService.getNumberOfMachines()
+            ))
         )
 
         response = Unirest.get("/machines?page_limit=1&page_offset=1").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(limit = 1, offset = 1))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.getAllMachines(limit = 1, offset = 1),
+                count = MachineService.getNumberOfMachines()
+            ))
         )
 
         response = Unirest.get("/machines?sort_filter=serialNumber").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "DESC"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "DESC"),
+                count = MachineService.getNumberOfMachines()
+            ))
         )
 
         response = Unirest.get("/machines?sort_filter=serialNumber&sort_order=ASC").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "ASC"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.getAllMachines(sortFilter = "serialNumber", sortOrder = "ASC"),
+                count = MachineService.getNumberOfMachines()
+            ))
         )
     }
 
@@ -152,7 +167,10 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("TEST01", "TEST02", "TEST03")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.searchMachine("test"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("test"),
+                count = MachineService.getNumberOfMachines("test")
+            ))
         )
 
         response = Unirest.get("/machines/search/{keyword}")
@@ -161,7 +179,10 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("TEST02", "TEST03")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.searchMachine("perial"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("perial"),
+                count = MachineService.getNumberOfMachines("perial")
+            ))
         )
 
         response = Unirest.get("/machines/search/{keyword}")
@@ -170,7 +191,10 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("TEST02")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.searchMachine("noctis, sir"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("noctis, sir"),
+                count = MachineService.getNumberOfMachines("noctis, sir")
+            ))
         )
 
         response = Unirest.get("/machines/search/{keyword}")
@@ -179,7 +203,10 @@ class MachinesAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body).contains("[]")
         assertThat(response.body).isEqualTo(
-            JavalinJson.toJson(MachineService.searchMachine("something something"))
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("something something"),
+                count = MachineService.getNumberOfMachines("something something")
+            ))
         )
 
         response = Unirest.get("/machines/search/{keyword}")
@@ -187,9 +214,12 @@ class MachinesAPITest {
             .queryString("page_limit", "1")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        var body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("TEST03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("TEST", limit = 1),
+                count = MachineService.getNumberOfMachines("TEST")
+            ))
+        )
 
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
@@ -197,9 +227,12 @@ class MachinesAPITest {
             .queryString("page_offset", "1")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("TEST02")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("TEST", limit = 1, offset = 1),
+                count = MachineService.getNumberOfMachines("TEST")
+            ))
+        )
 
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
@@ -207,10 +240,12 @@ class MachinesAPITest {
             .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(3)
-        assertThat(body.first().toString()).contains("TEST01")
-        assertThat(body.last().toString()).contains("TEST03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("TEST", sortFilter = "serialNumber", sortOrder = "ASC"),
+                count = MachineService.getNumberOfMachines("TEST")
+            ))
+        )
 
         response = Unirest.get("/machines/search/{keyword}")
             .routeParam("keyword", "TEST")
@@ -220,9 +255,12 @@ class MachinesAPITest {
             .queryString("sort_order", "ASC")
             .asString()
         assertThat(response.status).isEqualTo(200)
-        body = Gson().fromJson(response.body, List::class.java)
-        assertThat(body.size).isEqualTo(1)
-        assertThat(body.first().toString()).contains("TEST03")
+        assertThat(response.body).isEqualTo(
+            JavalinJson.toJson(MachineContainer(
+                machines = MachineService.searchMachine("TEST", sortFilter = "serialNumber", sortOrder = "ASC", limit = 1, offset = 2),
+                count = MachineService.getNumberOfMachines("TEST")
+            ))
+        )
     }
 
     @Test

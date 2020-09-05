@@ -104,7 +104,7 @@ object MachineService {
             CacheService.getMachines(requestKey)
         } else {
             val machines = transaction {
-                MachineDao.find { MachineTable.document.lowerCase() like "%${keywordInLowerCase}%" }
+                MachineDao.find { MachineTable.document.lowerCase() like "%$keywordInLowerCase%" }
                     .limit(limit, offset)
                     .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                     .map {
@@ -118,7 +118,7 @@ object MachineService {
 
     fun getNumberOfMachines(keyword: String? = null): Long {
         val keywordInLowerCase = keyword?.toLowerCase()
-        val requestKey = "count_${keywordInLowerCase}"
+        val requestKey = "count_$keywordInLowerCase"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachineCount(requestKey)!!
         } else {
@@ -126,7 +126,7 @@ object MachineService {
                 if (keywordInLowerCase == null)
                     MachineDao.all().count()
                 else
-                    MachineDao.find { MachineTable.document.lowerCase() like "%${keywordInLowerCase}%" }.count()
+                    MachineDao.find { MachineTable.document.lowerCase() like "%$keywordInLowerCase%" }.count()
             }
             CacheService.setMachineCount(requestKey, count)
             count

@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import tables.MachineTable
 
 object MachineService {
-    fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "DESC"): List<Machine> {
+    fun getAllMachines(limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "desc"): List<Machine> {
         val requestKey = "${limit}_${offset}_${sortFilter}_$sortOrder"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachines(requestKey)
@@ -97,13 +97,14 @@ object MachineService {
         CacheService.purgeCachedMachines()
     }
 
-    fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "DESC"): List<Machine> {
-        val requestKey = "${keyword.toLowerCase()}_${limit}_${offset}_${sortFilter}_$sortOrder"
+    fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "desc"): List<Machine> {
+        val keywordInLowerCase = keyword.toLowerCase()
+        val requestKey = "${keywordInLowerCase}_${limit}_${offset}_${sortFilter}_$sortOrder"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachines(requestKey)
         } else {
             val machines = transaction {
-                MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
+                MachineDao.find { MachineTable.document.lowerCase() like "%${keywordInLowerCase}%" }
                     .limit(limit, offset)
                     .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                     .map {
@@ -116,15 +117,16 @@ object MachineService {
     }
 
     fun getNumberOfMachines(keyword: String? = null): Long {
-        val requestKey = "count_${keyword?.toLowerCase()}"
+        val keywordInLowerCase = keyword?.toLowerCase()
+        val requestKey = "count_${keywordInLowerCase}"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachineCount(requestKey)!!
         } else {
             val count = transaction {
-                if (keyword == null)
+                if (keywordInLowerCase == null)
                     MachineDao.all().count()
                 else
-                    MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.count()
+                    MachineDao.find { MachineTable.document.lowerCase() like "%${keywordInLowerCase}%" }.count()
             }
             CacheService.setMachineCount(requestKey, count)
             count

@@ -20,6 +20,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
+import services.CacheService
 import services.MachineService
 import tables.MachineTable
 import tables.MaintenanceTable
@@ -52,6 +53,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                 }
                 ws.onMessage { }
             }
+        }.events { event ->
+            event.serverStarted { CacheService.start() }
+            event.serverStopping { CacheService.stop() }
         }.start(System.getenv("PORT")?.toInt() ?: port)
 
         // Views
@@ -104,18 +108,41 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
                         delete(MachineController::deleteMachine, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
                         path("history") {
                             get(MaintenanceController::getMaintenanceHistory, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
-                            post(MaintenanceController::createMaintenanceHistory, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
+                            post(
+                                MaintenanceController::createMaintenanceHistory, roles(
+                                    UserRole.ADMIN,
+                                    UserRole.NON_ADMIN
+                                )
+                            )
                             path(":workOrderNumber") {
-                                put(MaintenanceController::updateMaintenanceHistory, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
-                                delete(MaintenanceController::deleteMaintenanceHistory, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
+                                put(
+                                    MaintenanceController::updateMaintenanceHistory, roles(
+                                        UserRole.ADMIN,
+                                        UserRole.NON_ADMIN
+                                    )
+                                )
+                                delete(
+                                    MaintenanceController::deleteMaintenanceHistory, roles(
+                                        UserRole.ADMIN,
+                                        UserRole.NON_ADMIN
+                                    )
+                                )
                             }
                             path("search") {
                                 path(":keyword") {
-                                    get(MaintenanceController::searchMaintenanceHistory, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
+                                    get(
+                                        MaintenanceController::searchMaintenanceHistory, roles(
+                                            UserRole.ADMIN,
+                                            UserRole.NON_ADMIN
+                                        )
+                                    )
                                 }
                             }
                             path("count") {
-                                get(MaintenanceController::getNumberOfRecords, roles(UserRole.ADMIN, UserRole.NON_ADMIN))
+                                get(
+                                    MaintenanceController::getNumberOfRecords,
+                                    roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                )
                             }
                         }
                     }
@@ -153,6 +180,10 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             ctx.result(e.message!!)
             ctx.status(500)
         }
+
+        Runtime.getRuntime().addShutdownHook(Thread {
+            app.stop()
+        })
 
         return app
     }

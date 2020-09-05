@@ -21,6 +21,9 @@ object AuthController {
     }
 
     private fun authDetails(ctx: Context): Pair<String, String> {
+        // TODO This redundant/fallback auth approach is to mainly cater for mobile visits to the FE layer.
+        // Cookies are not being accepted as expected when browsing the FE layer through mobile.
+        // Let's remove this fallback ASAP.
         val (tokenFromHeader, userFromHeader) = ctx.header("Authorization")?.removePrefix("Bearer ")?.split(":") ?: listOf("", "")
         return Pair(
             ctx.cookie(Constants.USER_TOKEN.name) ?: tokenFromHeader ?: "",

@@ -98,7 +98,7 @@ object MachineService {
     }
 
     fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "DESC"): List<Machine> {
-        val requestKey = "${keyword}_${limit}_${offset}_${sortFilter}_$sortOrder"
+        val requestKey = "${keyword.toLowerCase()}_${limit}_${offset}_${sortFilter}_$sortOrder"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachines(requestKey)
         } else {
@@ -116,7 +116,7 @@ object MachineService {
     }
 
     fun getNumberOfMachines(keyword: String? = null): Long {
-        val requestKey = "count_$keyword"
+        val requestKey = "count_${keyword?.toLowerCase()}"
         return if (CacheService.isMachinesCached(requestKey)) {
             CacheService.getMachineCount(requestKey)!!
         } else {

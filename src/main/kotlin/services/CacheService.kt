@@ -3,6 +3,7 @@ package services
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.lang.Exception
+import java.net.URI
 import models.Machine
 import redis.clients.jedis.Jedis
 import utils.logger
@@ -15,10 +16,7 @@ object CacheService {
 
     fun start() {
         if (jedis == null && cacheIsEnabled())
-            jedis = Jedis(
-                System.getenv("REDIS_HOST") ?: "localhost",
-                System.getenv("REDIS_PORT")?.toInt() ?: 6379
-            )
+            jedis = Jedis(URI(System.getenv("REDIS_URL") ?: "redis://localhost:6379"))
     }
 
     fun stop() {
@@ -91,6 +89,6 @@ object CacheService {
     }
 
     private fun cacheIsEnabled(): Boolean {
-        return System.getenv("ENABLE_CACHE") != null
+        return System.getenv("ENABLE_CACHE")?.equals("1") ?: false
     }
 }

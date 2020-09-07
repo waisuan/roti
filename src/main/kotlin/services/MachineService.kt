@@ -98,21 +98,13 @@ object MachineService {
     }
 
     fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "desc"): List<Machine> {
-        val keywordInLowerCase = keyword.toLowerCase()
-        val requestKey = "${keywordInLowerCase}_${limit}_${offset}_${sortFilter}_$sortOrder"
-        return if (CacheService.isMachinesCached(requestKey)) {
-            CacheService.getMachines(requestKey)
-        } else {
-            val machines = transaction {
-                MachineDao.find { MachineTable.document.lowerCase() like "%$keywordInLowerCase%" }
-                    .limit(limit, offset)
-                    .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
-                    .map {
-                        it.toModel()
-                    }
-            }
-            CacheService.setMachines(requestKey, machines)
-            machines
+        return transaction {
+            MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
+                .limit(limit, offset)
+                .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
+                .map {
+                    it.toModel()
+                }
         }
     }
 

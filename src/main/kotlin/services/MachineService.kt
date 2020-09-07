@@ -109,19 +109,19 @@ object MachineService {
     }
 
     fun getNumberOfMachines(keyword: String? = null): Long {
-        val keywordInLowerCase = keyword?.toLowerCase()
-        val requestKey = "count_$keywordInLowerCase"
-        return if (CacheService.isMachinesCached(requestKey)) {
-            CacheService.getMachineCount(requestKey)!!
-        } else {
-            val count = transaction {
-                if (keywordInLowerCase == null)
-                    MachineDao.all().count()
-                else
-                    MachineDao.find { MachineTable.document.lowerCase() like "%$keywordInLowerCase%" }.count()
+        return transaction {
+            if (keyword == null) {
+                val requestKey = "count"
+                if (CacheService.isMachinesCached(requestKey)) {
+                    CacheService.getMachineCount(requestKey)!!
+                } else {
+                    val count = MachineDao.all().count()
+                    CacheService.setMachineCount(requestKey, count)
+                    count
+                }
+            } else {
+                MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }.count()
             }
-            CacheService.setMachineCount(requestKey, count)
-            count
         }
     }
 

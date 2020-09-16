@@ -21,7 +21,6 @@ import org.jetbrains.exposed.sql.StdOutSqlLogger
 import org.jetbrains.exposed.sql.addLogger
 import org.jetbrains.exposed.sql.transactions.transaction
 import services.CacheService
-import services.MachineService
 import tables.MachineTable
 import tables.MaintenanceTable
 import tables.UserTable
@@ -43,16 +42,6 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             it.enforceSsl = true
             it.enableWebjars()
             it.addStaticFiles("vue/static")
-        }.apply {
-            ws("/websocket") { ws ->
-                ws.onConnect { ctx ->
-                    while (true) {
-                        ctx.send(MachineService.getNumOfPpmDueMachines())
-                        Thread.sleep(3600000L) // 1.hour
-                    }
-                }
-                ws.onMessage { }
-            }
         }.events { event ->
             event.serverStarted { CacheService.start() }
             event.serverStopping { CacheService.stop() }
@@ -69,9 +58,10 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             if (ctx.status() != 401 &&
                 !ctx.path().contains("logout") &&
                 CookieMonster.hasCookies(ctx, Constants.USER_TOKEN.name, Constants.USER_NAME.name)) {
-                val token = CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name)
-                if (Validator.isTokenAlmostExpired(token!!)) {
-                    CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, Validator.generateToken())
+                CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name).let { token ->
+                    if (Validator.isTokenAlmostExpired(token!!)) {
+                        CookieMonster.setCookie(ctx, Constants.USER_TOKEN.name, Validator.generateToken())
+                    }
                 }
             }
         }

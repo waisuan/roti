@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.webjars:vue:2.6.11'
     implementation 'org.flywaydb:flyway-core:6.5.0'
     implementation 'redis.clients:jedis:3.2.0'
+    implementation 'com.fiftyonred:mock-jedis:0.4.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.0'

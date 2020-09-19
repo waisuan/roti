@@ -8,6 +8,7 @@ import io.javalin.Javalin
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kong.unirest.Unirest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -50,6 +51,8 @@ class FilesAPITest {
 
         EnvironmentVariables().set("DEV_MODE", null)
         Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
+
+        unmockkObject(FileMan)
         clearAllMocks()
     }
 

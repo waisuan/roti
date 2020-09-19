@@ -29,12 +29,12 @@ object TestDatabase {
             SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
         }
 
-        val flyway = Flyway
+        Flyway
             .configure()
             .dataSource(dbUrl, dbUser, dbPwd)
             .baselineOnMigrate(true)
             .load()
-        flyway.migrate()
+            .migrate()
     }
 
     fun purge() {

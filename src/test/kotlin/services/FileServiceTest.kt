@@ -9,6 +9,7 @@ import exceptions.RecordNotFoundException
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import java.io.File
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -26,6 +27,8 @@ class FileServiceTest {
         FileService.saveFile("TEST", "TEST", fileContent!!)
 
         verify { FileMan.saveObject("TEST/TEST", any<File>()) }
+
+        unmockkObject(FileMan)
         clearAllMocks()
     }
 

@@ -195,11 +195,11 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
             SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
         }
 
-        val flyway = Flyway
+        Flyway
             .configure()
             .dataSource(dbUrl, dbUser, dbPwd)
             .baselineOnMigrate(true)
             .load()
-        flyway.migrate()
+            .migrate()
     }
 }

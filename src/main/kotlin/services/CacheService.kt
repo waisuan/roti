@@ -61,11 +61,11 @@ object CacheService {
         cache()?.del(CACHED_MACHINES) ?: warning()
     }
 
-    private fun cache(): Jedis? {
+    fun cache(): Jedis? {
         return jedis.takeIf { isCacheActive() }
     }
 
-    private fun isCacheActive(): Boolean {
+    fun isCacheActive(): Boolean {
         if (jedis == null)
             return false
         try {
@@ -74,6 +74,10 @@ object CacheService {
             return false
         }
         return true
+    }
+
+    fun cacheIsEnabled(): Boolean {
+        return System.getenv("ENABLE_CACHE")?.equals("1") ?: false
     }
 
     private fun logMiss(key: String) {
@@ -86,9 +90,5 @@ object CacheService {
 
     private fun warning() {
         logger().warn("Cache is not alive. Therefore, nothing is cached.")
-    }
-
-    private fun cacheIsEnabled(): Boolean {
-        return System.getenv("ENABLE_CACHE")?.equals("1") ?: false
     }
 }

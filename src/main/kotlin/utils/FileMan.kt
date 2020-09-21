@@ -5,6 +5,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import configs.Config
 import java.io.File
 import java.io.InputStream
 import java.lang.Exception
@@ -19,8 +20,8 @@ object FileMan {
                 .standard()
                 .withCredentials(AWSStaticCredentialsProvider(
                     BasicAWSCredentials(
-                        System.getenv("S3_ACCESS_KEY") ?: "",
-                        System.getenv("S3_SECRET_KEY") ?: "")
+                        Config.s3AccessKey,
+                        Config.s3SecretKey)
                 ))
                 .withRegion(
                     Regions.EU_WEST_2

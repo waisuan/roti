@@ -1,4 +1,5 @@
 
+import configs.Config
 import controllers.AuthController
 import controllers.FileController
 import controllers.MachineController
@@ -45,7 +46,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
         }.events { event ->
             event.serverStarted { CacheService.start() }
             event.serverStopping { CacheService.stop() }
-        }.start(System.getenv("PORT")?.toInt() ?: port)
+        }.start(Config.appPort ?: port)
 
         // Views
         // app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
@@ -179,9 +180,9 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
     }
 
     private fun initDB() {
-        val dbUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti"
-        val dbUser = System.getenv("DB_USER") ?: "postgres"
-        val dbPwd = System.getenv("DB_PWD") ?: "password"
+        val dbUrl = Config.dbUrl
+        val dbUser = Config.dbUser
+        val dbPwd = Config.dbPwd
 
         Database.connect(
             url = dbUrl,

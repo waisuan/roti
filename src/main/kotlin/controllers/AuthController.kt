@@ -1,5 +1,6 @@
 package controllers
 
+import configs.Config
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
@@ -32,7 +33,7 @@ object AuthController {
     }
 
     private fun isDevMode(): Boolean {
-        val devMode = System.getenv("DEV_MODE")
+        val devMode = Config.devMode
         return devMode != null && devMode == "1"
     }
 

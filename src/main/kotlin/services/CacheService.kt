@@ -2,6 +2,7 @@ package services
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import configs.Config
 import java.lang.Exception
 import java.net.URI
 import models.Machine
@@ -16,7 +17,7 @@ object CacheService {
 
     fun start() {
         if (jedis == null && cacheIsEnabled())
-            jedis = Jedis(URI(System.getenv("REDIS_URL") ?: "redis://localhost:6379"))
+            jedis = Jedis(URI(Config.redisUrl))
     }
 
     fun stop() {
@@ -77,7 +78,7 @@ object CacheService {
     }
 
     fun cacheIsEnabled(): Boolean {
-        return System.getenv("ENABLE_CACHE")?.equals("1") ?: false
+        return Config.enableCache?.equals("1") ?: false
     }
 
     private fun logMiss(key: String) {

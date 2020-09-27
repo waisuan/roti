@@ -15,13 +15,14 @@ object CacheService {
 
     private const val CACHED_MACHINES = "cached_machines"
 
-    fun start() {
+    fun start(cache: Jedis? = null) {
         if (jedis == null && cacheIsEnabled())
-            jedis = Jedis(URI(Config.redisUrl))
+            jedis = cache ?: Jedis(URI(Config.redisUrl))
     }
 
     fun stop() {
         cache()?.shutdown()
+        jedis = null
     }
 
     fun setMachines(key: String, machines: List<Machine>) {

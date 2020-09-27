@@ -1,6 +1,7 @@
 package services
 
 import com.fiftyonred.mock_jedis.MockJedis
+import configs.Config
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -10,6 +11,7 @@ import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
@@ -17,18 +19,27 @@ import org.junit.jupiter.api.TestInstance
 class CacheServiceTest {
     @BeforeAll
     fun setup() {
-        mockkObject(CacheService)
-        every { CacheService.cache() } returns MockJedis("dummy_host")
+        EnvironmentVariables().set("ENABLE_CACHE", "1")
     }
 
     @AfterAll
     fun tearDown() {
-        unmockkObject(CacheService)
+        EnvironmentVariables().set("ENABLE_CACHE", null)
+    }
+
+    @BeforeEach
+    fun beforeEachTest() {
+        val mockJedis = MockJedis("dummy_host")
+        mockkObject(mockJedis)
+        every { mockJedis.shutdown() } answers { null }
+
+        CacheService.start(mockJedis)
     }
 
     @AfterEach
-    fun cleanUp() {
+    fun afterEachTest() {
         CacheService.purgeCachedMachines()
+        CacheService.stop()
     }
 
     @Test
@@ -82,62 +93,59 @@ class CacheServiceTest {
         assertThat(CacheService.isMachinesCached("SOME_KEY_2")).isFalse()
     }
 
-    // FIXME: These tests don't work :(
-    // @Test
-    // fun `isCacheActive() returns true if jedis is defined and active`() {
-    //     EnvironmentVariables().set("ENABLE_CACHE", "1")
-    //
-    //     mockkConstructor(Jedis::class)
-    //     every { anyConstructed<Jedis>().ping() } returns null
-    //
-    //     CacheService.start()
-    //     verify { anyConstructed<Jedis>().ping() }
-    //     assertThat(CacheService.isCacheActive()).isTrue()
-    //
-    //     unmockkConstructor(Jedis::class)
-    //     EnvironmentVariables().set("ENABLE_CACHE", null)
-    // }
-    //
-    // @Test
-    // fun `isCacheActive() returns false if jedis is defined but not active`() {
-    //     EnvironmentVariables().set("ENABLE_CACHE", "1")
-    //
-    //     mockkConstructor(Jedis::class)
-    //     every { anyConstructed<Jedis>().ping() } throws Exception("I'm not alive")
-    //
-    //     CacheService.start()
-    //     verify { anyConstructed<Jedis>().ping() }
-    //     assertThat(CacheService.isCacheActive()).isFalse()
-    //
-    //     unmockkConstructor(Jedis::class)
-    //     EnvironmentVariables().set("ENABLE_CACHE", null)
-    // }
+    @Test
+    fun `isCacheActive() returns true if jedis is defined and active`() {
+        assertThat(CacheService.isCacheActive()).isTrue()
+    }
+
+    @Test
+    fun `isCacheActive() returns false if jedis is defined but not active`() {
+        CacheService.stop()
+
+        val mockJedis = MockJedis("dummy_host")
+        mockkObject(mockJedis)
+        every { mockJedis.ping() } throws(Exception("Bad stuff happened here..."))
+
+        CacheService.start(mockJedis)
+
+        assertThat(CacheService.isCacheActive()).isFalse()
+    }
 
     @Test
     fun `isCacheActive() returns false if jedis is not defined`() {
+        CacheService.stop()
         assertThat(CacheService.isCacheActive()).isFalse()
     }
 
     @Test
     fun `cacheIsEnabled() returns true if ENABLE_CACHE env var is defined`() {
-        EnvironmentVariables().set("ENABLE_CACHE", "1")
-
         assertThat(CacheService.cacheIsEnabled()).isTrue()
-
-        EnvironmentVariables().set("ENABLE_CACHE", null)
     }
 
     @Test
     fun `cacheIsEnabled() returns false if ENABLE_CACHE env var is not defined`() {
+        mockkObject(Config)
+
+        every { Config.enableCache } returns("0")
         assertThat(CacheService.cacheIsEnabled()).isFalse()
 
-        EnvironmentVariables().set("ENABLE_CACHE", "0")
+        every { Config.enableCache } returns("true")
         assertThat(CacheService.cacheIsEnabled()).isFalse()
 
-        EnvironmentVariables().set("ENABLE_CACHE", "true")
+        every { Config.enableCache } returns(null)
         assertThat(CacheService.cacheIsEnabled()).isFalse()
 
-        EnvironmentVariables().set("ENABLE_CACHE", null)
-        assertThat(CacheService.cacheIsEnabled()).isFalse()
+        unmockkObject(Config)
+    }
+
+    @Test
+    fun `cache() returns cache instance if avail and active`() {
+        assertThat(CacheService.cache()).isNotNull
+    }
+
+    @Test
+    fun `cache() returns NULL if cache instance is not avail or is inactive`() {
+        CacheService.stop()
+        assertThat(CacheService.cache()).isNull()
     }
 }

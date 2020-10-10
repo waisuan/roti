@@ -170,13 +170,13 @@
             }
         },
         created() {
-            document.title = 'Admin Panel'
+            document.title += ' | Admin Panel'
             axios
                 .get('api/users')
                 .then(response => {
                     this.users = response.data
                     if (this.users.length > 0) {
-                        this.headers = Object.keys(this.users[0]).filter(key => key.toLowerCase() !== 'password')
+                        this.headers = Object.keys(this.users[0]).filter(key => key.toLowerCase() !== 'password' && key.toLowerCase() !== 'token')
                     }
                 })
 

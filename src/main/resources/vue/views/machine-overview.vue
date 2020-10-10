@@ -1,9 +1,19 @@
 <template id="machine-overview">
     <div class="overview-main">
         <div class="container">
-            <div class="row">
-                <div class="column">
-                    <input type="text" placeholder="Search for..." v-model.trim="searchFilter" @keyup="search()">
+<!--            <div class="row">-->
+<!--                <div class="column">-->
+<!--                    <input style="margin-bottom: -1px" type="search" placeholder="Search for..." v-model.trim="searchFilter" v-on:keypress.enter="search()">-->
+<!--                    <div style="text-align: right">-->
+<!--                        <small><a href="javascript:void(0)"><i class="fa fa-times-circle"></i> Clear search results</a></small>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+            <div>
+                <!--TODO Add search button-->
+                <input style="margin-bottom: -1px" type="search" placeholder="Search for..." v-model.trim="searchFilter" v-on:keypress.enter="search()">
+                <div style="text-align: right">
+                  <small><a href="javascript:void(0)"><i class="fa fa-times-circle"></i> Clear search results</a></small>
                 </div>
             </div>
             <div class="row">
@@ -23,12 +33,22 @@
                     <button v-on:click="sort()" :disabled="sortFilter === 'id'"><i class="fa fa-sort"></i> Sort</button>
                 </div>
             </div>
+<!--            <div style="text-align: center; font-size: 100px">-->
+<!--                <span><i class="fa fa-spinner fa-pulse"></i></span>-->
+<!--            </div>-->
             <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
                 <div style="text-align: right">
-<!--                    <span><i class="fa fa-plus"></i></span>-->
-                    <span><i class="fa fa-minus"></i></span>
+                    <a href="javascript:void(0)" v-on:click.prevent="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber)"><i class="fa fa-plus"></i></a>
+                    <a href="javascript:void(0)" v-on:click.prevent="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber)"><i class="fa fa-minus"></i></a>
                 </div>
-                <form>
+                <div v-show="!isFormShown(machine.serialNumber)">
+                  <span style="color: dodgerblue">Serial No.: {{machine.serialNumber}}</span>
+                  |
+                  <span style="color: black">Created at: {{ machine.createdAt }}</span>
+                  |
+                  <span style="color: darkorange">Updated at: {{ machine.updatedAt }}</span>
+                </div>
+                <form v-show="isFormShown(machine.serialNumber)">
                     <fieldset>
                         <div class="row">
                             <div class="column">
@@ -95,7 +115,7 @@
                                 </div>
                             </div>
                         </div>
-<!--                        TODO: additionalNotes, attachment-->
+<!--                        TODO: Show more... additionalNotes, attachment-->
                     </fieldset>
                 </form>
             </div>
@@ -111,20 +131,33 @@
             pageLimit: 50,
             pageOffset: 0,
             sortFilter: "id",
-            sortOrder: "ASC",
+            sortOrder: "DESC",
             searchFilter: "",
+            shownForms: {}
         }),
         methods: {
+            toggleForm(formId) {
+              if (this.isFormShown(formId)) {
+                this.hideForm(formId)
+              } else {
+                this.showForm(formId)
+              }
+            },
+            showForm(formId) {
+                this.$set(this.shownForms, formId, 1)
+            },
+            hideForm(formId) {
+                this.$delete(this.shownForms, formId)
+            },
+            isFormShown: function(formId)  {
+                return formId in this.shownForms
+            },
             search() {
-                if (this.searchFilter.length <= 2 && this.searchFilter.length > 0) {
+                if (this.searchFilter.length <= 2) {
                     return
                 }
                 this.reset()
-                if (this.searchFilter.length === 0) {
-                    this.getMachines()
-                } else {
-                    this.searchMachines()
-                }
+                this.searchMachines()
             },
             sort() {
                 this.reset()
@@ -137,7 +170,7 @@
             },
             searchMachines() {
               axios.get("api/machines/search/" + this.searchFilter).then(response => {
-                  this.machines = this.machines.concat(response.data)
+                  this.machines = this.machines.concat(response.data['machines'])
               })
             },
             getMachines() {
@@ -151,7 +184,7 @@
                         }
                     })
                     .then(response => {
-                        this.machines = this.machines.concat(response.data)
+                        this.machines = this.machines.concat(response.data['machines'])
                         this.pageOffset += this.pageLimit
                         if (this.machines.length > 0 && this.fields.length === 0) {
                             Object.keys(this.machines[0]).forEach(f => {
@@ -177,6 +210,7 @@
             }
         },
         created() {
+            document.title += ' | Machines Overview'
             this.getMachines()
         },
         mounted() {

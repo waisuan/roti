@@ -27,8 +27,8 @@
           </div>
           <div class="column">
             <button style="margin-bottom: -1px" v-on:click="sort()" :disabled="sortFilter === 'id'"><i class="fa fa-sort"></i> Sort</button>
-            <div style="text-align: left">
-              <small><a href="javascript:void(0)"><i class="fa fa-times-circle"></i> Clear sort filter</a></small>
+            <div style="text-align: left" v-show="sortFilterIsOn">
+              <small><a href="javascript:void(0)" v-on:click="clearSort()"><i class="fa fa-times-circle"></i> Clear sort filter</a></small>
             </div>
           </div>
         </div>
@@ -37,9 +37,9 @@
 <!--                <span><i class="fa fa-spinner fa-pulse"></i></span>-->
 <!--            </div>-->
         <div style="text-align: right">
-          <small><a href="javascript:void(0)">Expand all</a></small>
+          <small><a href="javascript:void(0)" v-on:click="expandAllForms()">Expand all</a></small>
           |
-          <small><a href="javascript:void(0)">Collapse all</a></small>
+          <small><a href="javascript:void(0)" v-on:click="collapseAllForms()">Collapse all</a></small>
           |
           <small style="color: black">No. of records: {{machines.length}} / {{totalNoOfMachines}}</small>
         </div>
@@ -142,7 +142,8 @@
       searchFilter: "",
       shownForms: {},
       searchFilterIsOn: false,
-      totalNoOfMachines: 0
+      totalNoOfMachines: 0,
+      sortFilterIsOn: false
     }),
       methods: {
         toggleForm(formId) {
@@ -151,6 +152,16 @@
           } else {
             this.showForm(formId)
           }
+        },
+        expandAllForms() {
+          this.machines.forEach(machine => {
+            this.showForm(machine['serialNumber'])
+          })
+        },
+        collapseAllForms() {
+          this.machines.forEach(machine => {
+            this.hideForm(machine['serialNumber'])
+          })
         },
         showForm(formId) {
           this.$set(this.shownForms, formId, 1)
@@ -167,6 +178,7 @@
           }
           this.reset()
           this.searchMachines()
+          this.searchFilterIsOn = true
         },
         clearSearch() {
           this.searchFilter = ""
@@ -184,6 +196,13 @@
           } else {
             this.getMachines()
           }
+          this.sortFilterIsOn = true
+        },
+        clearSort() {
+          this.sortFilter = "id"
+          this.sortOrder = "DESC"
+          this.sort()
+          this.sortFilterIsOn = false
         },
         reset() {
           this.machines = []
@@ -202,7 +221,6 @@
           }).then(response => {
             this.machines = this.machines.concat(response.data['machines'])
             this.totalNoOfMachines = response.data['count']
-            this.searchFilterIsOn = true
           })
         },
         getMachines() {
@@ -232,6 +250,7 @@
             })
         },
         scroll() {
+          // TODO: Use pagination instead
           window.onscroll = () => {
             let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
 

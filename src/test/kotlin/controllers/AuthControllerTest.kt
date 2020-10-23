@@ -5,9 +5,14 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import configs.Config
 import helpers.TestDatabase
 import io.javalin.http.Context
 import io.javalin.http.Handler
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import models.Constants
 import models.User
 import models.UserRole
@@ -89,20 +94,22 @@ class AuthControllerTest {
 
     @Test
     fun `skips auth if path is under dev mode`() {
-        val handler = mock<Handler>()
-        val context = mock<Context>()
+        val handler = mockk<Handler>()
+        val context = mockk<Context>()
+        mockkObject(Config)
 
-        whenever(handler.handle(any())).doAnswer { Unit }
+        every { handler.handle(any()) } answers { Unit }
+        every { context.header(any()) } returns null
+        every { context.cookie(any<String>()) } returns null
+        every { Config.devMode } returns "1"
 
-        val envVar = EnvironmentVariables()
-        envVar.set("DEV_MODE", "1")
-        assertThat(System.getenv("DEV_MODE")).isEqualTo("1")
+        assertThat(Config.devMode).isEqualTo("1")
 
         AuthController.accessManager(handler, context, setOf(UserRole.NON_ADMIN))
 
-        verify(handler).handle(any())
+        io.mockk.verify { handler.handle(any()) }
 
-        envVar.set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test
@@ -110,7 +117,7 @@ class AuthControllerTest {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
-        whenever(context.matchedPath()).thenReturn("/users/login")
+        whenever(context.matchedPath()).thenReturn("/some/path")
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
@@ -124,7 +131,7 @@ class AuthControllerTest {
         val handler = mock<Handler>()
         val context = mock<Context>()
 
-        whenever(context.matchedPath()).thenReturn("/users/login")
+        whenever(context.matchedPath()).thenReturn("/some/path")
         whenever(context.method()).thenReturn("POST")
         whenever(handler.handle(any())).doAnswer { Unit }
 
@@ -135,29 +142,33 @@ class AuthControllerTest {
 
     @Test
     fun `needs auth if role is NON_ADMIN`() {
-        val handler = mock<Handler>()
-        val context = mock<Context>()
+        val handler = mockk<Handler>()
+        val context = mockk<Context>()
 
-        whenever(context.matchedPath()).thenReturn("/users/login")
-        whenever(context.method()).thenReturn("POST")
-        whenever(handler.handle(any())).doAnswer { Unit }
+        every { context.matchedPath() } returns "/some/path"
+        every { context.method() } returns "POST"
+        every { context.header(any()) } returns null
+        every { context.status(any()) } returns context
+        every { context.cookie(any<String>()) } answers { null }
 
         AuthController.accessManager(handler, context, setOf(UserRole.NON_ADMIN))
 
-        verify(context).status(401)
+        io.mockk.verify { context.status(401) }
     }
 
     @Test
     fun `needs auth if role is ADMIN`() {
-        val handler = mock<Handler>()
-        val context = mock<Context>()
+        val handler = mockk<Handler>()
+        val context = mockk<Context>()
 
-        whenever(context.matchedPath()).thenReturn("/users/login")
-        whenever(context.method()).thenReturn("POST")
-        whenever(handler.handle(any())).doAnswer { Unit }
+        every { context.matchedPath() } returns "/some/path"
+        every { context.method() } returns "POST"
+        every { context.header(any()) } returns null
+        every { context.status(any()) } returns context
+        every { context.cookie(any<String>()) } answers { null }
 
         AuthController.accessManager(handler, context, setOf(UserRole.ADMIN))
 
-        verify(context).status(401)
+        io.mockk.verify { context.status(401) }
     }
 }

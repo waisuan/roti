@@ -1,9 +1,14 @@
 package api
 
 import RotiApp
+import configs.Config
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import java.time.LocalDate
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
@@ -27,17 +32,20 @@ class MaintenanceAPITest {
 
     @BeforeAll
     fun setup() {
-        EnvironmentVariables().set("DEV_MODE", "1")
-
         app = RotiApp(port = 8000, enableDB = false).init()
         Unirest.config().defaultBaseUrl("http://localhost:8000/api")
+
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
     }
 
     @AfterAll
     fun tearDown() {
         app.stop()
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
+        clearAllMocks()
+
         Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
     }
 

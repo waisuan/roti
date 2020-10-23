@@ -10,4 +10,6 @@ object Config {
     val enableCache: String? = System.getenv("ENABLE_CACHE")
     val s3AccessKey = System.getenv("S3_ACCESS_KEY") ?: ""
     val s3SecretKey = System.getenv("S3_SECRET_KEY") ?: ""
+    val s3Bucket = System.getenv("S3_BUCKET") ?: "dummy-bucket"
+    val jwtSecret = System.getenv("JWT_SECRET") ?: "dummy_secret"
 }

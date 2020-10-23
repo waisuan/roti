@@ -3,6 +3,7 @@ package utils
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
+import configs.Config
 import java.sql.Date
 import java.time.LocalDate
 import java.time.ZoneId
@@ -10,7 +11,7 @@ import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 object Validator {
-    private val algo = Algorithm.HMAC256("secret") // TODO move "secret" to env var
+    private val algo = Algorithm.HMAC256(Config.jwtSecret)
 
     fun generateToken(expiresAt: LocalDate = LocalDate.now().plusDays(7)): String {
         return JWT

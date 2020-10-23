@@ -2,6 +2,7 @@ package api
 
 import RotiApp
 import com.adobe.testing.s3mock.junit5.S3MockExtension
+import configs.Config
 import exceptions.RecordNotFoundException
 import helpers.TestDatabase
 import io.javalin.Javalin
@@ -33,8 +34,6 @@ class FilesAPITest {
 
     @BeforeAll
     fun setup() {
-        EnvironmentVariables().set("DEV_MODE", "1")
-
         app = RotiApp(port = 8000, enableDB = false).init()
         Unirest.config().defaultBaseUrl("http://localhost:8000/api")
 
@@ -43,17 +42,20 @@ class FilesAPITest {
 
         mockkObject(FileMan)
         every { FileMan.s3Client() } returns(s3Client)
+
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
     }
 
     @AfterAll
     fun tearDown() {
         app.stop()
 
-        EnvironmentVariables().set("DEV_MODE", null)
-        Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
-
         unmockkObject(FileMan)
+        unmockkObject(Config)
         clearAllMocks()
+
+        Thread.sleep(5_000) // Hack to allow the web server to properly shutdown before continuing on with the test suite.
     }
 
     @BeforeEach

@@ -2,12 +2,12 @@ package services
 
 import com.fiftyonred.mock_jedis.MockJedis
 import configs.Config
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -17,21 +17,14 @@ import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CacheServiceTest {
-    @BeforeAll
-    fun setup() {
-        EnvironmentVariables().set("ENABLE_CACHE", "1")
-    }
-
-    @AfterAll
-    fun tearDown() {
-        EnvironmentVariables().set("ENABLE_CACHE", null)
-    }
-
     @BeforeEach
     fun beforeEachTest() {
         val mockJedis = MockJedis("dummy_host")
         mockkObject(mockJedis)
         every { mockJedis.shutdown() } answers { null }
+
+        mockkObject(Config)
+        every { Config.enableCache } returns "1"
 
         CacheService.start(mockJedis)
     }
@@ -40,6 +33,7 @@ class CacheServiceTest {
     fun afterEachTest() {
         CacheService.purgeCachedMachines()
         CacheService.stop()
+        unmockkObject(Config)
     }
 
     @Test

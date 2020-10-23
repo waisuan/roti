@@ -12,7 +12,7 @@ import java.lang.Exception
 
 object FileMan {
     private var s3Client: AmazonS3? = null
-    private const val BUCKET_NAME = "roti-api"
+    private val BUCKET_NAME = Config.s3Bucket
 
     fun s3Client(): AmazonS3 {
         if (s3Client == null) {

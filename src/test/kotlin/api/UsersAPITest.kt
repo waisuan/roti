@@ -1,10 +1,14 @@
 package api
 
 import RotiApp
+import configs.Config
 import exceptions.IllegalUserException
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import kong.unirest.json.JSONArray
@@ -13,7 +17,6 @@ import models.User
 import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
@@ -159,7 +162,8 @@ class UsersAPITest {
 
     @Test
     fun `PUT users`() {
-        EnvironmentVariables().set("DEV_MODE", "1")
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
 
         var user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
@@ -185,7 +189,7 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to operate on User record")
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test
@@ -215,7 +219,8 @@ class UsersAPITest {
 
     @Test
     fun `PUT multiple users`() {
-        EnvironmentVariables().set("DEV_MODE", "1")
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
 
         UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
         UserService.createUser(User(username = "TEST2", password = "PASSWORD", email = "email2@mail.com"))
@@ -232,7 +237,7 @@ class UsersAPITest {
         assertThat(UserService.loginUser(User(username = "TEST", password = "NEW_PASSWORD"))).isNotNull()
         assertThat(UserService.getUser("TEST2")!!.email).isEqualTo("new_mail@mail.com")
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test
@@ -266,7 +271,8 @@ class UsersAPITest {
 
     @Test
     fun `DELETE users`() {
-        EnvironmentVariables().set("DEV_MODE", "1")
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
 
         var user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
@@ -283,7 +289,7 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to operate on User record")
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test
@@ -307,7 +313,8 @@ class UsersAPITest {
 
     @Test
     fun `DELETE multiple users`() {
-        EnvironmentVariables().set("DEV_MODE", "1")
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
 
         UserService.createUser(User(username = "TEST", password = "PASSWORD", email = "email@mail.com"))
         UserService.createUser(User(username = "TEST2", password = "PASSWORD", email = "email2@mail.com"))
@@ -320,7 +327,7 @@ class UsersAPITest {
         assertThat(UserService.getUser("TEST")).isNull()
         assertThat(UserService.getUser("TEST2")).isNull()
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test
@@ -348,7 +355,9 @@ class UsersAPITest {
 
     @Test
     fun `GET users`() {
-        EnvironmentVariables().set("DEV_MODE", "1")
+        mockkObject(Config)
+        every { Config.devMode } returns "1"
+
         var response = Unirest.get("/users").asString()
         assertThat(response.status).isEqualTo(200)
         assertThat(response.body as String).isEqualTo("[]")
@@ -362,7 +371,7 @@ class UsersAPITest {
             )
         )
 
-        EnvironmentVariables().set("DEV_MODE", null)
+        unmockkObject(Config)
     }
 
     @Test

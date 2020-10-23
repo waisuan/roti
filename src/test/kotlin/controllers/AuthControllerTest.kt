@@ -17,7 +17,6 @@ import models.Constants
 import models.User
 import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

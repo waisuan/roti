@@ -14,7 +14,6 @@ import kong.unirest.Unirest
 import models.Machine
 import models.MachineContainer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.contrib.java.lang.system.EnvironmentVariables
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll

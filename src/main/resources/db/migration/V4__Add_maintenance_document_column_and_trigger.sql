@@ -1,4 +1,4 @@
-ALTER TABLE maintenance ADD COLUMN document TEXT;
+ALTER TABLE maintenance ADD COLUMN IF NOT EXISTS document TEXT;
 
 CREATE OR REPLACE FUNCTION refresh_maintenance_document()
   RETURNS TRIGGER AS
@@ -8,6 +8,8 @@ BEGIN
    RETURN NEW;
 END
 $func$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS refresh_maintenance_document ON maintenance;
 
 CREATE TRIGGER refresh_maintenance_document
 BEFORE INSERT OR UPDATE ON maintenance

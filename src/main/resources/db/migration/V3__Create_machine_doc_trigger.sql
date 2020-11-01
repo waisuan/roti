@@ -7,6 +7,8 @@ BEGIN
 END
 $func$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS refresh_machine_document ON machines;
+
 CREATE TRIGGER refresh_machine_document
 BEFORE INSERT OR UPDATE ON machines
 FOR EACH ROW EXECUTE PROCEDURE refresh_machine_document();

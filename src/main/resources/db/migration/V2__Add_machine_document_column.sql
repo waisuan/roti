@@ -1,1 +1,1 @@
-ALTER TABLE machines ADD COLUMN document TEXT;
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS document TEXT;

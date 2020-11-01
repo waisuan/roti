@@ -11,10 +11,18 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.core.security.SecurityUtil
+import io.javalin.plugin.rendering.vue.VueComponent
 import models.UserRole
 
 object Routes {
     fun init(app: Javalin) {
+        // Views
+        // app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
+        // app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
+        app.get("/admin", VueComponent("<admin-room></admin-room>"), SecurityUtil.roles(UserRole.ADMIN))
+        // app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
+        app.error(404, "html", VueComponent("<error-page></error-page>"))
+
         app.routes {
             path("api") {
                 // /api/users

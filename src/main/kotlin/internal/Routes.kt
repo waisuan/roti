@@ -10,7 +10,6 @@ import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
-import io.javalin.core.security.SecurityUtil
 import io.javalin.core.security.SecurityUtil.roles
 import io.javalin.plugin.rendering.vue.VueComponent
 import models.UserRole

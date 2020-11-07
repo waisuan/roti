@@ -11,6 +11,7 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.javalin.apibuilder.ApiBuilder.post
 import io.javalin.apibuilder.ApiBuilder.put
 import io.javalin.core.security.SecurityUtil
+import io.javalin.core.security.SecurityUtil.roles
 import io.javalin.plugin.rendering.vue.VueComponent
 import models.UserRole
 
@@ -19,35 +20,35 @@ object Routes {
         // Views
         // app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
         // app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
-        app.get("/admin", VueComponent("<admin-room></admin-room>"), SecurityUtil.roles(UserRole.ADMIN))
-        // app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
+        app.get("/admin", VueComponent("<admin-room></admin-room>"), roles(UserRole.ADMIN))
+        app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
         app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         app.routes {
             path("api") {
                 // /api/users
                 path("users") {
-                    get(UserController::getUsers, SecurityUtil.roles(UserRole.ADMIN))
-                    put(UserController::updateUsers, SecurityUtil.roles(UserRole.ADMIN))
-                    delete(UserController::deleteUsers, SecurityUtil.roles(UserRole.ADMIN))
+                    get(UserController::getUsers, roles(UserRole.ADMIN))
+                    put(UserController::updateUsers, roles(UserRole.ADMIN))
+                    delete(UserController::deleteUsers, roles(UserRole.ADMIN))
                     path(":username") {
-                        put(UserController::updateUser, SecurityUtil.roles(UserRole.ADMIN))
-                        delete(UserController::deleteUser, SecurityUtil.roles(UserRole.ADMIN))
+                        put(UserController::updateUser, roles(UserRole.ADMIN))
+                        delete(UserController::deleteUser, roles(UserRole.ADMIN))
                     }
                     path("register") {
-                        post(UserController::createUser, SecurityUtil.roles(UserRole.GUEST))
+                        post(UserController::createUser, roles(UserRole.GUEST))
                     }
                     path("login") {
-                        post(UserController::loginUser, SecurityUtil.roles(UserRole.GUEST))
+                        post(UserController::loginUser, roles(UserRole.GUEST))
                     }
                     path("logout") {
                         post(
                             UserController::logoutUser,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                     }
                     path("roles") {
-                        get(UserController::getUserRoles, SecurityUtil.roles(UserRole.ADMIN))
+                        get(UserController::getUserRoles, roles(UserRole.ADMIN))
                     }
                 }
 
@@ -55,41 +56,41 @@ object Routes {
                 path("machines") {
                     get(
                         MachineController::getAllMachines,
-                        SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                        roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                     )
                     post(
                         MachineController::createMachine,
-                        SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                        roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                     )
                     path(":serialNumber") {
                         put(
                             MachineController::updateMachine,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                         delete(
                             MachineController::deleteMachine,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                         path("history") {
                             get(
                                 MaintenanceController::getMaintenanceHistory,
-                                SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                             )
                             post(
-                                MaintenanceController::createMaintenanceHistory, SecurityUtil.roles(
+                                MaintenanceController::createMaintenanceHistory, roles(
                                     UserRole.ADMIN,
                                     UserRole.NON_ADMIN
                                 )
                             )
                             path(":workOrderNumber") {
                                 put(
-                                    MaintenanceController::updateMaintenanceHistory, SecurityUtil.roles(
+                                    MaintenanceController::updateMaintenanceHistory, roles(
                                         UserRole.ADMIN,
                                         UserRole.NON_ADMIN
                                     )
                                 )
                                 delete(
-                                    MaintenanceController::deleteMaintenanceHistory, SecurityUtil.roles(
+                                    MaintenanceController::deleteMaintenanceHistory, roles(
                                         UserRole.ADMIN,
                                         UserRole.NON_ADMIN
                                     )
@@ -98,7 +99,7 @@ object Routes {
                             path("search") {
                                 path(":keyword") {
                                     get(
-                                        MaintenanceController::searchMaintenanceHistory, SecurityUtil.roles(
+                                        MaintenanceController::searchMaintenanceHistory, roles(
                                             UserRole.ADMIN,
                                             UserRole.NON_ADMIN
                                         )
@@ -108,7 +109,7 @@ object Routes {
                             path("count") {
                                 get(
                                     MaintenanceController::getNumberOfRecords,
-                                    SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                    roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                                 )
                             }
                         }
@@ -117,25 +118,25 @@ object Routes {
                         path(":keyword") {
                             get(
                                 MachineController::searchMachine,
-                                SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                             )
                         }
                     }
                     path("count") {
                         get(
                             MachineController::getNumberOfMachines,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                     }
                     path("due") {
                         get(
                             MachineController::getPpmDueMachines,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                         path("count") {
                             get(
                                 MachineController::getNumOfPpmDueMachines,
-                                SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                             )
                         }
                     }
@@ -146,20 +147,20 @@ object Routes {
                     path(":ownerId") {
                         get(
                             FileController::getFileNames,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                         post(
                             FileController::saveFile,
-                            SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                            roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                         )
                         path(":fileName") {
                             get(
                                 FileController::getFile,
-                                SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                             )
                             delete(
                                 FileController::deleteFile,
-                                SecurityUtil.roles(UserRole.ADMIN, UserRole.NON_ADMIN)
+                                roles(UserRole.ADMIN, UserRole.NON_ADMIN)
                             )
                         }
                     }

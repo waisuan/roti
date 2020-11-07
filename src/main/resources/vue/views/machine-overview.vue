@@ -45,8 +45,12 @@
         </div>
         <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
           <div style="text-align: right">
-            <a href="javascript:void(0)" v-on:click.prevent="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber)"><i class="fa fa-plus"></i></a>
-            <a href="javascript:void(0)" v-on:click.prevent="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber)"><i class="fa fa-minus"></i></a>
+            <a href="javascript:void(0)"><i class="fa fa-history"></i></a>
+            <a href="javascript:void(0)" v-on:click="edit(machine.serialNumber)" v-show="!isEditing(machine.serialNumber)"><i class="fa fa-pencil"></i></a>
+            <a href="javascript:void(0)" v-on:click="saveUpdate(machine)" v-show="isEditing(machine.serialNumber)"><i class="fa fa-save"></i></a>
+            <a href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
+            <a href="javascript:void(0)" v-on:click="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber)"><i class="fa fa-expand"></i></a>
+            <a href="javascript:void(0)" v-on:click="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber)"><i class="fa fa-compress"></i></a>
           </div>
           <div v-show="!isFormShown(machine.serialNumber)">
             <span style="color: dodgerblue">Serial No.: {{machine.serialNumber}}</span>
@@ -64,53 +68,53 @@
                 </div>
                 <div class="column">
                   <label :for="'customerField'+index">Customer</label>
-                  <input type="text" :id="'customerField'+index" v-model="machine.customer" disabled>
+                  <input type="text" :id="'customerField'+index" v-model="machine.customer" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'stateField'+index">State</label>
-                  <input type="text" :id="'stateField'+index" v-model="machine.state" disabled>
+                  <input type="text" :id="'stateField'+index" v-model="machine.state" :disabled="!isEditing(machine.serialNumber)">
                 </div>
               </div>
               <div class="row">
                 <div class="column">
                   <label :for="'accTypeField'+index">Acc. Type</label>
-                  <input type="text" :id="'accTypeField'+index" v-model="machine.accountType" disabled>
+                  <input type="text" :id="'accTypeField'+index" v-model="machine.accountType" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'modelField'+index">Model</label>
-                  <input type="text" :id="'modelField'+index" v-model="machine.model" disabled>
+                  <input type="text" :id="'modelField'+index" v-model="machine.model" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'statusField'+index">Status</label>
-                  <input type="text" :id="'statusField'+index" v-model="machine.status" disabled>
+                  <input type="text" :id="'statusField'+index" v-model="machine.status" :disabled="!isEditing(machine.serialNumber)">
                 </div>
               </div>
               <div class="row">
                 <div class="column">
                   <label :for="'brandField'+index">Brand</label>
-                  <input type="text" :id="'brandField'+index" v-model="machine.brand" disabled>
+                  <input type="text" :id="'brandField'+index" v-model="machine.brand" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'districtField'+index">District</label>
-                  <input type="text" :id="'districtField'+index" v-model="machine.district" disabled>
+                  <input type="text" :id="'districtField'+index" v-model="machine.district" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'assigneeField'+index">Assignee</label>
-                  <input type="text" :id="'assigneeField'+index" v-model="machine.personInCharge" disabled>
+                  <input type="text" :id="'assigneeField'+index" v-model="machine.personInCharge" :disabled="!isEditing(machine.serialNumber)">
                 </div>
               </div>
               <div class="row">
                 <div class="column">
                   <label :for="'reporterField'+index">Reporter</label>
-                  <input type="text" :id="'reporterField'+index" v-model="machine.reportedBy" disabled>
+                  <input type="text" :id="'reporterField'+index" v-model="machine.reportedBy" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'tncDateField'+index">TNC Date</label>
-                  <input type="text" :id="'tncDateField'+index" v-model="machine.tncDate" disabled>
+                  <input type="text" :id="'tncDateField'+index" v-model="machine.tncDate" :disabled="!isEditing(machine.serialNumber)">
                 </div>
                 <div class="column">
                   <label :for="'ppmDateField'+index">PPM Date</label>
-                  <input type="text" :id="'ppmDateField'+index" v-model="machine.ppmDate" disabled>
+                  <input type="text" :id="'ppmDateField'+index" v-model="machine.ppmDate" :disabled="!isEditing(machine.serialNumber)">
                 </div>
               </div>
               <div class="row">
@@ -143,9 +147,22 @@
       shownForms: {},
       searchFilterIsOn: false,
       totalNoOfMachines: 0,
-      sortFilterIsOn: false
+      sortFilterIsOn: false,
+      currentlyEditing: null
     }),
       methods: {
+        keyOf(machine) {
+          return machine["serialNumber"]
+        },
+        edit(recordId) {
+          if (!this.isFormShown(recordId)) {
+            this.showForm(recordId)
+          }
+          this.currentlyEditing = recordId
+        },
+        isEditing(recordId) {
+          return this.currentlyEditing === recordId
+        },
         toggleForm(formId) {
           if (this.isFormShown(formId)) {
             this.hideForm(formId)
@@ -155,12 +172,12 @@
         },
         expandAllForms() {
           this.machines.forEach(machine => {
-            this.showForm(machine['serialNumber'])
+            this.showForm(this.keyOf(machine))
           })
         },
         collapseAllForms() {
           this.machines.forEach(machine => {
-            this.hideForm(machine['serialNumber'])
+            this.hideForm(this.keyOf(machine))
           })
         },
         showForm(formId) {
@@ -210,6 +227,18 @@
           this.pageOffset = 0
           this.totalNoOfMachines = 0
         },
+        saveUpdate(record) {
+          this.updateMachine(this.keyOf(record), record)
+        },
+
+        updateMachine(key, machine) {
+          axios.put("api/machines/" + key, machine)
+              .then(_ => {
+                this.currentlyEditing = null
+              }, error => {
+                console.log(error)
+              })
+        },
         searchMachines() {
           axios.get("api/machines/search/" + this.searchFilter, {
             params: {
@@ -219,8 +248,8 @@
               sort_order: this.sortOrder
             }
           }).then(response => {
-            this.machines = this.machines.concat(response.data['machines'])
-            this.totalNoOfMachines = response.data['count']
+            this.machines = this.machines.concat(response.data["machines"])
+            this.totalNoOfMachines = response.data["count"]
           })
         },
         getMachines() {
@@ -233,7 +262,7 @@
                 sort_order: this.sortOrder
               }
             }).then(response => {
-              this.machines = this.machines.concat(response.data['machines'])
+              this.machines = this.machines.concat(response.data["machines"])
               this.totalNoOfMachines = response.data['count']
               this.pageOffset += this.pageLimit
               if (this.machines.length > 0 && this.fields.length === 0) {
@@ -261,7 +290,7 @@
         }
       },
       created() {
-        document.title += ' | Machines Overview'
+        document.title += " | Machines Overview"
         this.getMachines()
       },
       mounted() {

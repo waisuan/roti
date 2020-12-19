@@ -20,7 +20,7 @@ object Routes {
         // app.get("/register", VueComponent("<register-user></register-user>"), roles(UserRole.GUEST))
         // app.get("/login", VueComponent("<login-user></login-user>"), roles(UserRole.GUEST))
         app.get("/admin", VueComponent("<admin-room></admin-room>"), roles(UserRole.ADMIN))
-        app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
+        // app.get("/machines", VueComponent("<machine-overview></machine-overview>"), roles(UserRole.NON_ADMIN, UserRole.ADMIN))
         app.error(404, "html", VueComponent("<error-page></error-page>"))
 
         app.routes {

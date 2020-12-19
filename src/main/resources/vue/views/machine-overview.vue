@@ -46,9 +46,12 @@
         <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
           <div style="text-align: right">
             <a href="javascript:void(0)"><i class="fa fa-history"></i></a>
+
             <a href="javascript:void(0)" v-on:click="edit(machine.serialNumber)" v-show="!isEditing(machine.serialNumber)"><i class="fa fa-pencil"></i></a>
-            <a href="javascript:void(0)" v-on:click="saveUpdate(machine)" v-show="isEditing(machine.serialNumber)"><i class="fa fa-save"></i></a>
+            <a href="javascript:void(0)" v-on:click="saveUpdate(machine)" v-show="isEditing(machine.serialNumber)" style="color: blue"><i class="fa fa-save"></i></a>
+
             <a href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
+
             <a href="javascript:void(0)" v-on:click="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber)"><i class="fa fa-expand"></i></a>
             <a href="javascript:void(0)" v-on:click="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber)"><i class="fa fa-compress"></i></a>
           </div>

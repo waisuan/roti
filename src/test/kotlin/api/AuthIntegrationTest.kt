@@ -172,6 +172,21 @@ class AuthIntegrationTest {
     }
 
     @Test
+    fun `JWT should NOT be renewed if they are NOT almost expired`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        val token = Validator.generateToken(expiresAt = LocalDate.now().plusDays(365))
+
+        val response = Unirest.get("/machines")
+            .cookie(Constants.USER_TOKEN.name, token)
+            .cookie(Constants.USER_NAME.name, user.username)
+            .asString()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.cookies.isEmpty())
+    }
+
+    @Test
     fun `JWT should not be renewed if LOGOUT endpoint was called`() {
         val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
         UserService.createUser(user)
@@ -183,8 +198,8 @@ class AuthIntegrationTest {
             .cookie(Constants.USER_NAME.name, user.username)
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
-        val refreshedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
-        assertThat(refreshedCookie).isNullOrEmpty()
+        val destroyedCookie = response.cookies.getNamed(Constants.USER_TOKEN.name).value
+        assertThat(destroyedCookie).isNullOrEmpty()
     }
 
     @Test
@@ -201,5 +216,24 @@ class AuthIntegrationTest {
             .header("Authorization", "Bearer $token:${user.username}")
             .asString()
         assertThat(response.status).isEqualTo(200)
+    }
+
+    @Test
+    fun `cookies are destroyed upon logout`() {
+        val user = User(username = "TEST", password = "PASSWORD", email = "email@mail.com")
+        UserService.createUser(user)
+        UserService.approveUser(user.username!!, true)
+        Unirest.post("/users/login")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .asEmpty()
+
+        val response = Unirest.post("/users/logout").asEmpty()
+        assertThat(response.status).isEqualTo(200)
+        assertThat(response.cookies).isNotEmpty
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isEqualTo("")
+        assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).maxAge).isEqualTo(0)
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("")
+        assertThat(response.cookies.getNamed(Constants.USER_NAME.name).maxAge).isEqualTo(0)
     }
 }

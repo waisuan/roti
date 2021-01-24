@@ -6,6 +6,9 @@ object Config {
     val dbUrl = System.getenv("DB_URL") ?: "jdbc:postgresql://localhost/roti"
     val dbUser = System.getenv("DB_USER") ?: "postgres"
     val dbPwd = System.getenv("DB_PWD") ?: "password"
+    val testDbUrl = System.getenv("TEST_DB_URL") ?: "jdbc:postgresql://localhost/roti_test"
+    val testDbUser = System.getenv("DB_USER") ?: "postgres"
+    val testDbPwd = System.getenv("DB_PWD") ?: "password"
     val devMode: String? = System.getenv("DEV_MODE")
     val enableCache: String? = System.getenv("ENABLE_CACHE")
     val s3AccessKey = System.getenv("S3_ACCESS_KEY") ?: ""

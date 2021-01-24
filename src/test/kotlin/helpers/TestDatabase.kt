@@ -1,5 +1,6 @@
 package helpers
 
+import configs.Config
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -13,9 +14,9 @@ import tables.UserTable
 
 object TestDatabase {
     fun init() {
-        val dbUrl = System.getenv("TEST_DB_URL") ?: "jdbc:postgresql://localhost/roti_test"
-        val dbUser = System.getenv("DB_USER") ?: "postgres"
-        val dbPwd = System.getenv("DB_PWD") ?: "password"
+        val dbUrl = Config.testDbUrl
+        val dbUser = Config.testDbUser
+        val dbPwd = Config.testDbPwd
 
         Database.connect(
             url = dbUrl,

@@ -45,15 +45,17 @@ class MachineServiceTest {
 
     @Test
     fun `updateMachine() should update machine record successfully`() {
-        val newMachine = Machine(serialNumber = "TEST01")
-        MachineService.createMachine(newMachine)
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
 
-        val updatedMachine = Machine(serialNumber = "TEST01", reportedBy = "DR.CODE")
-        MachineService.updateMachine(serialNumber = "TEST01", updatedMachine = updatedMachine)
-
-        val createdMachine = MachineService.getAllMachines().firstOrNull()
+        var createdMachine = MachineService.getAllMachines().firstOrNull()
         assertThat(createdMachine).isNotNull
-        assertThat(createdMachine!!.reportedBy).isEqualTo("DR.CODE")
+        assertThat(createdMachine!!.reportedBy).isNull()
+
+        val updatedMachine = Machine(serialNumber = createdMachine.serialNumber, reportedBy = "DR.CODE", updatedAt = createdMachine.updatedAt)
+        MachineService.updateMachine(serialNumber = createdMachine.serialNumber!!, updatedMachine = updatedMachine)
+
+        createdMachine = MachineService.getAllMachines().first()
+        assertThat(createdMachine.reportedBy).isEqualTo("DR.CODE")
 
         assertThatThrownBy {
             MachineService.updateMachine(serialNumber = "TEST09", updatedMachine = updatedMachine)
@@ -232,5 +234,19 @@ class MachineServiceTest {
     @Test
     fun `getPpmDueMachines() returns no records if none are due for servicing`() {
         assertThat(MachineService.getPpmDueMachines(LocalDate.parse("2020-07-28"))).isEqualTo(emptyList<Machine>())
+    }
+
+    // TODO: Fix test
+    @Test
+    fun `Concurrent updates should not override one another`() {
+        MachineService.createMachine(Machine(serialNumber = "TEST01"))
+
+        val machines = MachineService.getAllMachines()
+        val machine1 = machines.first()
+        val machine2 = machines.first()
+
+        MachineService.updateMachine(machine1.serialNumber!!, machine1)
+        assertThatThrownBy { MachineService.updateMachine(machine2.serialNumber!!, machine2) }
+            .isInstanceOf(RecordNotFoundException::class.java)
     }
 }

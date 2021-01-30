@@ -44,7 +44,9 @@ data class Machine(
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val updatedAt: LocalDateTime? = null
+    val updatedAt: LocalDateTime? = null,
+
+    val version: Int = 1
 ) {
     @JsonIgnore
     fun isValid(): Boolean {

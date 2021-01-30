@@ -62,6 +62,7 @@ object MaintenanceService {
                 maintenance.workOrderType = updatedMaintenance.workOrderType
                 maintenance.attachment = updatedMaintenance.attachment
                 maintenance.updatedAt = LocalDateTime.now()
+                maintenance.version = updatedMaintenance.version + 1
             } else {
                 throw RecordNotFoundException()
             }

@@ -25,6 +25,7 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
     var ppmDate by MachineTable.ppmDate
     var createdAt by MachineTable.createdAt
     var updatedAt by MachineTable.updatedAt
+    var version by MachineTable.version
 
     fun toModel(ppmStatus: String? = null): Machine {
         return Machine(
@@ -44,7 +45,8 @@ class MachineDao(id: EntityID<Long>) : LongEntity(id) {
             tncDate,
             ppmDate,
             createdAt,
-            updatedAt
+            updatedAt,
+            version
         )
     }
 }

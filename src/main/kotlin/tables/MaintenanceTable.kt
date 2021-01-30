@@ -3,6 +3,7 @@ package tables
 import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.`java-time`.date
 import org.jetbrains.exposed.sql.`java-time`.datetime
+import tables.MachineTable.default
 import tables.MachineTable.nullable
 
 object MaintenanceTable : LongIdTable("Maintenance") {
@@ -16,6 +17,7 @@ object MaintenanceTable : LongIdTable("Maintenance") {
     val updatedAt = datetime("updatedAt")
     val document = text("document").nullable()
     val attachment = varchar("attachment", 200).nullable()
+    val version = integer("version").default(1)
 
     init {
         index(true, serialNumber, workOrderNumber)

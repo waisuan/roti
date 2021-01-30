@@ -8,6 +8,7 @@ import java.time.LocalDate
 import models.Machine
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -236,7 +237,6 @@ class MachineServiceTest {
         assertThat(MachineService.getPpmDueMachines(LocalDate.parse("2020-07-28"))).isEqualTo(emptyList<Machine>())
     }
 
-    // TODO: Fix test
     @Test
     fun `Concurrent updates should not override one another`() {
         MachineService.createMachine(Machine(serialNumber = "TEST01"))
@@ -247,6 +247,7 @@ class MachineServiceTest {
 
         MachineService.updateMachine(machine1.serialNumber!!, machine1)
         assertThatThrownBy { MachineService.updateMachine(machine2.serialNumber!!, machine2) }
-            .isInstanceOf(RecordNotFoundException::class.java)
+            .isInstanceOf(ExposedSQLException::class.java)
+            .hasMessageContaining("Updated record looks outdated.")
     }
 }

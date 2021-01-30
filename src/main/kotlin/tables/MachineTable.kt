@@ -22,4 +22,5 @@ object MachineTable : LongIdTable("Machines") {
     val updatedAt = datetime("updatedAt")
     val document = text("document").nullable()
     val attachment = varchar("attachment", 200).nullable()
+    val version = integer("version").default(1)
 }

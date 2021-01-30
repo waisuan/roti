@@ -18,6 +18,7 @@ class MaintenanceDao(id: EntityID<Long>) : LongEntity(id) {
     var attachment by MaintenanceTable.attachment
     var createdAt by MaintenanceTable.createdAt
     var updatedAt by MaintenanceTable.updatedAt
+    var version by MaintenanceTable.version
 
     fun toModel(): Maintenance {
         return Maintenance(
@@ -29,7 +30,8 @@ class MaintenanceDao(id: EntityID<Long>) : LongEntity(id) {
             workOrderType,
             attachment,
             createdAt,
-            updatedAt
+            updatedAt,
+            version
         )
     }
 }

@@ -78,6 +78,7 @@ object MachineService {
                 machine.tncDate = updatedMachine.tncDate
                 machine.ppmDate = updatedMachine.ppmDate
                 machine.updatedAt = LocalDateTime.now()
+                machine.version = updatedMachine.version + 1
             } else {
                 throw RecordNotFoundException()
             }

@@ -27,7 +27,7 @@
                         </td>
                         <td>
                             <input type="checkbox" name="userIsApprovedCheckBox"
-                                   v-model="user.is_approved"
+                                   v-model="user.isApproved"
                                    :disabled="isEditing !== user">
                         </td>
                         <td>
@@ -40,6 +40,9 @@
                                     {{ role }}
                                 </option>
                             </select>
+                        </td>
+                        <td>
+                          {{ user.createdAt }}
                         </td>
                         <td>
                             <a href="javascript:void(0)" v-on:click="edit(user)" v-show="isEditing !== user && isDeleting !== user">
@@ -142,24 +145,24 @@
                 this.isSaving = false
               })
             },
-          update() {
-            if (Object.keys(this.cachedChanges).length !== 0) {
-              return axios.put('api/users', Object.values(this.cachedChanges))
-            } else {
-              return Promise.resolve()
+            update() {
+              if (Object.keys(this.cachedChanges).length !== 0) {
+                return axios.put('api/users', Object.values(this.cachedChanges))
+              } else {
+                return Promise.resolve()
+              }
+            },
+            delete() {
+              if (Object.keys(this.cachedRemovals).length !== 0) {
+                const usernames = new URLSearchParams()
+                Object.keys(this.cachedRemovals).forEach(username => {
+                  usernames.append("users", username)
+                })
+                return axios.delete('api/users', { params: usernames })
+              } else {
+                return Promise.resolve()
+              }
             }
-          },
-          delete() {
-            if (Object.keys(this.cachedRemovals).length !== 0) {
-              const usernames = new URLSearchParams()
-              Object.keys(this.cachedRemovals).forEach(username => {
-                usernames.append("users", username)
-              })
-              return axios.delete('api/users', { params: usernames })
-            } else {
-              return Promise.resolve()
-            }
-          }
         },
         filters: {
             capitalize(str) {

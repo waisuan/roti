@@ -16,8 +16,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
+import tables.UserTable.createdAt
 import tables.UserTable.email
-import tables.UserTable.is_approved
+import tables.UserTable.isApproved
 import tables.UserTable.password
 import tables.UserTable.role
 import tables.UserTable.username
@@ -56,8 +57,8 @@ object UserService {
                 }
                 if (user.role != null)
                     it[role] = user.role.name
-                if (user.is_approved != null)
-                    it[is_approved] = user.is_approved
+                if (user.isApproved != null)
+                    it[isApproved] = user.isApproved
             }
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
@@ -91,7 +92,7 @@ object UserService {
             UserTable.select { username eq user.username!! }.firstOrNull()
         } ?: throw IllegalUserException()
 
-        if (!foundUser[is_approved])
+        if (!foundUser[isApproved])
             throw UnapprovedUserException()
 
         if (!BCrypt.checkpw(user.password, foundUser[password]))
@@ -103,7 +104,7 @@ object UserService {
     fun approveUser(username: String, approveFlag: Boolean = true) {
         transaction {
             val res = UserTable.update({ UserTable.username eq username }) {
-                it[is_approved] = approveFlag
+                it[isApproved] = approveFlag
             }
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
@@ -129,7 +130,7 @@ object UserService {
     }
 
     private fun toUserModel(row: ResultRow): User {
-        return User(username = row[username], email = row[email], is_approved = row[is_approved], role = UserRole.valueOf(row[role]))
+        return User(username = row[username], email = row[email], isApproved = row[isApproved], role = UserRole.valueOf(row[role]), createdAt = row[createdAt])
     }
 
     private fun generateHashAndSalt(password: String): Pair<String, String> {

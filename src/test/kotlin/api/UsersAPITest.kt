@@ -1,6 +1,8 @@
 package api
 
 import RotiApp
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import configs.Config
 import exceptions.IllegalUserException
 import helpers.TestDatabase
@@ -88,9 +90,16 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
-        assertThat(response.body).isEqualTo(
-            """{"username":"${user.username}","password":null,"email":"${user.email}","is_approved":true,"role":"NON_ADMIN","token":"${response.cookies.getNamed(Constants.USER_TOKEN.name).value}"}"""
-        )
+        assertThat(response.body).doesNotContain("password")
+        assertThat(jacksonObjectMapper().readValue<User>(response.body)).satisfies {
+            assertThat(it.username).isEqualTo(user.username)
+            assertThat(it.password).isNull()
+            assertThat(it.email).isEqualTo(user.email)
+            assertThat(it.isApproved).isTrue()
+            assertThat(it.role).isEqualTo(UserRole.NON_ADMIN)
+            assertThat(it.token).isEqualTo(response.cookies.getNamed(Constants.USER_TOKEN.name).value)
+            assertThat(it.createdAt).isNotNull()
+        }
 
         response = Unirest.post("/users/login")
             .header("Content-Type", "application/json")
@@ -129,9 +138,16 @@ class UsersAPITest {
         assertThat(response.status).isEqualTo(200)
         assertThat(response.cookies.getNamed(Constants.USER_TOKEN.name).value).isNotEmpty()
         assertThat(response.cookies.getNamed(Constants.USER_NAME.name).value).isEqualTo("TEST")
-        assertThat(response.body).isEqualTo(
-            """{"username":"${user.username}","password":null,"email":"${user.email}","is_approved":true,"role":"ADMIN","token":"${response.cookies.getNamed(Constants.USER_TOKEN.name).value}"}"""
-        )
+        assertThat(response.body).doesNotContain("password")
+        assertThat(jacksonObjectMapper().readValue<User>(response.body)).satisfies {
+            assertThat(it.username).isEqualTo(user.username)
+            assertThat(it.password).isNull()
+            assertThat(it.email).isEqualTo(user.email)
+            assertThat(it.isApproved).isTrue()
+            assertThat(it.role).isEqualTo(UserRole.ADMIN)
+            assertThat(it.token).isEqualTo(response.cookies.getNamed(Constants.USER_TOKEN.name).value)
+            assertThat(it.createdAt).isNotNull()
+        }
     }
 
     @Test
@@ -228,7 +244,7 @@ class UsersAPITest {
         var response = Unirest.put("/users")
             .header("Content-Type", "application/json")
             .body(JSONArray("""
-                [{"username":"TEST","password":"NEW_PASSWORD", "is_approved":"true"},
+                [{"username":"TEST","password":"NEW_PASSWORD", "isApproved":"true"},
                  {"username":"TEST2","email":"new_mail@mail.com"}]
             """.trimIndent()))
             .asEmpty()

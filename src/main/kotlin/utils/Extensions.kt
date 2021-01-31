@@ -7,4 +7,4 @@ import org.slf4j.LoggerFactory.getLogger
 
 inline fun <reified T : Any> T.logger(): Logger = getLogger(T::class.java)
 
-fun parseJsonString(json: String): Map<String, Any> = Gson().fromJson(json, object : TypeToken<Map<String, Any>>() {}.type)
+fun parseJsonStringToMap(json: String): Map<String, Any> = Gson().fromJson(json, object : TypeToken<Map<String, Any>>() {}.type)

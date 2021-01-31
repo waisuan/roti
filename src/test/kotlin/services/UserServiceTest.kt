@@ -40,8 +40,9 @@ class UserServiceTest {
             assertThat(foundUser!![UserTable.password]).isNotEmpty()
             assertThat(BCrypt.checkpw(user.password, foundUser[UserTable.password])).isTrue()
             assertThat(foundUser[UserTable.salt]).isNotEmpty()
-            assertThat(foundUser[UserTable.is_approved]).isFalse()
+            assertThat(foundUser[UserTable.isApproved]).isFalse()
             assertThat(foundUser[UserTable.role]).isEqualTo(UserRole.NON_ADMIN.name)
+            assertThat(foundUser[UserTable.createdAt]).isNotNull()
         }
     }
 
@@ -155,12 +156,12 @@ class UserServiceTest {
             assertThat(foundUser!![UserTable.role]).isEqualTo(UserRole.ADMIN.name)
         }
 
-        updatedUser = User(is_approved = true)
+        updatedUser = User(isApproved = true)
         UserService.updateUser("evan.s", updatedUser)
         transaction {
             val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
             assertThat(foundUser).isNotNull
-            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+            assertThat(foundUser!![UserTable.isApproved]).isTrue()
         }
     }
 
@@ -180,13 +181,13 @@ class UserServiceTest {
         UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
 
         UserService.updateUsers(listOf(
-            User(username = "evan.s", is_approved = true),
+            User(username = "evan.s", isApproved = true),
             User(username = "evan.s.2", role = UserRole.ADMIN),
             User(username = "evan.s.3", email = "new_mail@test.com")
         ))
         val foundUsers = UserService.getUsers()
         assertThat(foundUsers.size).isEqualTo(3)
-        assertThat(foundUsers.find { it.username.equals("evan.s") }!!.is_approved).isTrue()
+        assertThat(foundUsers.find { it.username.equals("evan.s") }!!.isApproved).isTrue()
         assertThat(foundUsers.find { it.username.equals("evan.s.2") }!!.role).isEqualTo(UserRole.ADMIN)
         assertThat(foundUsers.find { it.username.equals("evan.s.3") }!!.email).isEqualTo("new_mail@test.com")
     }
@@ -197,7 +198,7 @@ class UserServiceTest {
 
         assertThatThrownBy {
             UserService.updateUsers(listOf(
-                User(is_approved = true)
+                User(isApproved = true)
             ))
         }.isInstanceOf(BadOperationException::class.java)
     }
@@ -235,21 +236,21 @@ class UserServiceTest {
         transaction {
             val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
             assertThat(foundUser).isNotNull
-            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+            assertThat(foundUser!![UserTable.isApproved]).isTrue()
         }
 
         UserService.approveUser(user.username!!, false)
         transaction {
             val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
             assertThat(foundUser).isNotNull
-            assertThat(foundUser!![UserTable.is_approved]).isFalse()
+            assertThat(foundUser!![UserTable.isApproved]).isFalse()
         }
 
         UserService.approveUser(user.username!!)
         transaction {
             val foundUser = UserTable.select { UserTable.username eq user.username!! }.firstOrNull()
             assertThat(foundUser).isNotNull
-            assertThat(foundUser!![UserTable.is_approved]).isTrue()
+            assertThat(foundUser!![UserTable.isApproved]).isTrue()
         }
     }
 

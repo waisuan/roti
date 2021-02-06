@@ -97,9 +97,9 @@ class AuthControllerTest {
         val context = mockk<Context>()
         mockkObject(Config)
 
-        every { handler.handle(any()) } answers { Unit }
-        every { context.header(any()) } returns null
+        every { handler.handle(any()) } returns Unit
         every { context.cookie(any<String>()) } returns null
+        every { context.header(any()) } returns null
         every { Config.devMode } returns "1"
 
         assertThat(Config.devMode).isEqualTo("1")

@@ -16,7 +16,7 @@ object MaintenanceService {
     fun getMaintenanceHistory(serialNumber: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "desc"): List<Maintenance> {
         return transaction {
             MaintenanceDao.find { MaintenanceTable.serialNumber eq serialNumber }
-                .limit(limit, offset)
+                .let { it.limit(limit, offset).takeIf { limit > 0 } ?: it }
                 .orderBy(MaintenanceTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                 .map { it.toModel() }
         }
@@ -91,7 +91,7 @@ object MaintenanceService {
                     MaintenanceTable.document.lowerCase() like "%${keyword.toLowerCase()}%"
                 )
             }
-                .limit(limit, offset)
+                .let { it.limit(limit, offset).takeIf { limit > 0 } ?: it }
                 .orderBy(MaintenanceTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                 .map { it.toModel() }
         }

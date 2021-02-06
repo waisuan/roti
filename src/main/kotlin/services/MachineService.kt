@@ -21,7 +21,7 @@ object MachineService {
         } else {
             val machines = transaction {
                 MachineDao.all()
-                    .limit(limit, offset)
+                    .let { it.limit(limit, offset).takeIf { limit > 0 } ?: it }
                     .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                     .map { it.toModel() }
             }
@@ -101,7 +101,7 @@ object MachineService {
     fun searchMachine(keyword: String, limit: Int = 0, offset: Long = 0, sortFilter: String = "updatedAt", sortOrder: String = "desc"): List<Machine> {
         return transaction {
             MachineDao.find { MachineTable.document.lowerCase() like "%${keyword.toLowerCase()}%" }
-                .limit(limit, offset)
+                .let { it.limit(limit, offset).takeIf { limit > 0 } ?: it }
                 .orderBy(MachineTable.columns.first { it.name == sortFilter } to SortOrder.valueOf(sortOrder.toUpperCase()))
                 .map {
                     it.toModel()

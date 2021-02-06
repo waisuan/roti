@@ -13,12 +13,17 @@ import tables.MaintenanceTable
 import tables.UserTable
 
 object TestDatabase {
-    fun init() {
-        val dbUrl = Config.testDbUrl
-        val dbUser = Config.testDbUser
-        val dbPwd = Config.testDbPwd
+    private val dbUrl = Config.testDbUrl
+    private val dbUser = Config.testDbUser
+    private val dbPwd = Config.testDbPwd
+    private lateinit var database: Database
 
-        Database.connect(
+    fun init() {
+        if (::database.isInitialized) {
+            return
+        }
+
+        database = Database.connect(
             url = dbUrl,
             driver = "org.postgresql.Driver",
             user = dbUser,
@@ -40,9 +45,9 @@ object TestDatabase {
 
     fun purge() {
         transaction {
-            TransactionManager.current().exec("TRUNCATE TABLE ${UserTable.tableName};")
-            TransactionManager.current().exec("TRUNCATE TABLE ${MachineTable.tableName} CASCADE;")
-            TransactionManager.current().exec("TRUNCATE TABLE ${MaintenanceTable.tableName};")
+            TransactionManager.current().exec("TRUNCATE TABLE ${UserTable.tableName} RESTART IDENTITY;")
+            TransactionManager.current().exec("TRUNCATE TABLE ${MachineTable.tableName} RESTART IDENTITY CASCADE;")
+            TransactionManager.current().exec("TRUNCATE TABLE ${MaintenanceTable.tableName} RESTART IDENTITY;")
         }
     }
 }

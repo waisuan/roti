@@ -12,6 +12,7 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import utils.logger
 
 class MachineServiceTest {
     @BeforeEach
@@ -29,6 +30,7 @@ class MachineServiceTest {
         var newMachine = Machine(serialNumber = "TEST01")
         MachineService.createMachine(newMachine)
 
+        logger().info(MachineService.getAllMachines().toString())
         val createdMachine = MachineService.getAllMachines().firstOrNull()
         assertThat(createdMachine).isNotNull
         assertThat(createdMachine!!.serialNumber).isEqualTo("TEST01")
@@ -250,4 +252,14 @@ class MachineServiceTest {
             .isInstanceOf(ExposedSQLException::class.java)
             .hasMessageContaining("Updated record looks outdated.")
     }
+
+    // TODO test createdAt and updatedAt fields
+    // TODO change createdAt and updatedAt fields to auto-update?
+    // @Test
+    // fun `Version column for new Machines start at 1`() {
+    // }
+    //
+    // @Test
+    // fun `Version column on Machine record gets incremented at every update`() {
+    // }
 }

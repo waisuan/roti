@@ -93,12 +93,10 @@ class AuthControllerTest {
 
     @Test
     fun `skips auth if path is under dev mode`() {
-        val handler = mockk<Handler>()
-        val context = mockk<Context>()
+        val handler = mockk<Handler>(relaxUnitFun = true)
+        val context = mockk<Context>(relaxed = true)
         mockkObject(Config)
 
-        every { handler.handle(any()) } returns Unit
-        every { context.cookie(any<String>()) } returns null
         every { context.header(any()) } returns null
         every { Config.devMode } returns "1"
 
@@ -141,8 +139,8 @@ class AuthControllerTest {
 
     @Test
     fun `needs auth if role is NON_ADMIN`() {
-        val handler = mockk<Handler>()
-        val context = mockk<Context>()
+        val handler = mockk<Handler>(relaxUnitFun = true)
+        val context = mockk<Context>(relaxed = true)
 
         every { context.matchedPath() } returns "/some/path"
         every { context.method() } returns "POST"
@@ -157,8 +155,8 @@ class AuthControllerTest {
 
     @Test
     fun `needs auth if role is ADMIN`() {
-        val handler = mockk<Handler>()
-        val context = mockk<Context>()
+        val handler = mockk<Handler>(relaxUnitFun = true)
+        val context = mockk<Context>(relaxed = true)
 
         every { context.matchedPath() } returns "/some/path"
         every { context.method() } returns "POST"

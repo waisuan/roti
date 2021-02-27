@@ -12,7 +12,6 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import utils.logger
 
 class MachineServiceTest {
     @BeforeEach
@@ -30,7 +29,6 @@ class MachineServiceTest {
         var newMachine = Machine(serialNumber = "TEST01")
         MachineService.createMachine(newMachine)
 
-        logger().info(MachineService.getAllMachines().toString())
         val createdMachine = MachineService.getAllMachines().firstOrNull()
         assertThat(createdMachine).isNotNull
         assertThat(createdMachine!!.serialNumber).isEqualTo("TEST01")
@@ -253,13 +251,57 @@ class MachineServiceTest {
             .hasMessageContaining("Updated record looks outdated.")
     }
 
-    // TODO test createdAt and updatedAt fields
-    // TODO change createdAt and updatedAt fields to auto-update?
-    // @Test
-    // fun `Version column for new Machines start at 1`() {
-    // }
-    //
-    // @Test
-    // fun `Version column on Machine record gets incremented at every update`() {
-    // }
+    @Test
+    fun `createMachine() should stamp createdAt and updatedAt fields`() {
+        val newMachine = Machine(serialNumber = "TEST01")
+        MachineService.createMachine(newMachine)
+
+        MachineService.getAllMachines().first().let {
+            assertThat(it.createdAt).isNotNull
+            assertThat(it.updatedAt).isNotNull
+            assertThat(it.createdAt).isEqualTo(it.updatedAt)
+        }
+    }
+
+    @Test
+    fun `updateMachine() should refresh updatedAt field`() {
+        val newMachine = Machine(serialNumber = "TEST01")
+
+        MachineService.createMachine(newMachine)
+        val machine = MachineService.getAllMachines().first().let {
+            assertThat(it.createdAt).isEqualTo(it.updatedAt)
+            it
+        }
+
+        MachineService.updateMachine(machine.serialNumber!!, machine.copy(reportedBy = "ME"))
+        MachineService.getAllMachines().first().let {
+            assertThat(it.updatedAt).isNotNull
+            assertThat(it.createdAt).isNotEqualTo(it.updatedAt)
+        }
+    }
+
+    @Test
+    fun `Version column for new Machines start at 1`() {
+        val newMachine = Machine(serialNumber = "TEST01")
+        MachineService.createMachine(newMachine)
+
+        MachineService.getAllMachines().first().let {
+            assertThat(it.version).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun `Version column on Machine record gets incremented at every update`() {
+        val machine = Machine(serialNumber = "TEST01")
+
+        MachineService.createMachine(machine)
+        MachineService.getAllMachines().first().let {
+            assertThat(it.version).isEqualTo(1)
+        }
+
+        MachineService.updateMachine(machine.serialNumber!!, machine.copy(reportedBy = "ME"))
+        MachineService.getAllMachines().first().let {
+            assertThat(it.version).isEqualTo(2)
+        }
+    }
 }

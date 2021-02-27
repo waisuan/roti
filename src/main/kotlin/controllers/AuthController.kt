@@ -28,8 +28,8 @@ object AuthController {
         // Let's fix this and remove the fallback ASAP.
         val (tokenFromHeader, userFromHeader) = ctx.header("Authorization")?.removePrefix("Bearer ")?.split(":") ?: listOf("", "")
         return Pair(
-            CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name) ?: tokenFromHeader ?: "",
-            CookieMonster.getCookie(ctx, Constants.USER_NAME.name) ?: userFromHeader ?: ""
+            CookieMonster.getCookie(ctx, Constants.USER_TOKEN.name) ?: tokenFromHeader,
+            CookieMonster.getCookie(ctx, Constants.USER_NAME.name) ?: userFromHeader
         )
     }
 

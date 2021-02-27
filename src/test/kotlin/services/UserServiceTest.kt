@@ -259,7 +259,10 @@ class UserServiceTest {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
 
-        assertThat(UserService.getUser(user.username!!)).isNotNull
+        UserService.getUser(user.username!!).let {
+            assertThat(it).isNotNull
+            assertThat(it).isEqualTo(user.copy(password = null, isApproved = false, role = UserRole.NON_ADMIN, createdAt = it!!.createdAt))
+        }
     }
 
     @Test
@@ -276,5 +279,8 @@ class UserServiceTest {
         UserService.createUser(User("evan.s.3", "password", "evan.s.3@test.com"))
 
         assertThat(UserService.getUsers().size).isEqualTo(3)
+        UserService.getUsers().forEach {
+            assertThat(it).isEqualTo(User(username = it.username, email = it.email, password = null, isApproved = false, role = UserRole.NON_ADMIN, createdAt = it!!.createdAt))
+        }
     }
 }

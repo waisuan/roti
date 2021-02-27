@@ -221,4 +221,54 @@ class MaintenanceServiceTest {
             .isInstanceOf(ExposedSQLException::class.java)
             .hasMessageContaining("Updated record looks outdated.")
     }
+
+    @Test
+    fun `createMaintenanceHistory() should stamp createdAt and updatedAt fields`() {
+        MaintenanceService.createMaintenanceHistory(machineUnderTestSerialNumber, Maintenance(workOrderNumber = "W01", workOrderType = "C"))
+
+        MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.createdAt).isNotNull
+            assertThat(it.updatedAt).isNotNull
+            assertThat(it.createdAt).isEqualTo(it.updatedAt)
+        }
+    }
+
+    @Test
+    fun `updateMaintenanceHistory() should refresh updatedAt field`() {
+        MaintenanceService.createMaintenanceHistory(machineUnderTestSerialNumber, Maintenance(workOrderNumber = "W01", workOrderType = "C"))
+        val history = MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.createdAt).isEqualTo(it.updatedAt)
+            it
+        }
+
+        MaintenanceService.updateMaintenanceHistory(history.serialNumber!!, history.workOrderNumber!!, history.copy(reportedBy = "SOME DUDE"))
+        MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.updatedAt).isNotNull
+            assertThat(it.createdAt).isNotEqualTo(it.updatedAt)
+        }
+    }
+
+    @Test
+    fun `Version column for new maintenance records start at 1`() {
+        MaintenanceService.createMaintenanceHistory(machineUnderTestSerialNumber, Maintenance(workOrderNumber = "W01", workOrderType = "C"))
+
+        MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.version).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun `Version column on maintenance records gets incremented at every update`() {
+        MaintenanceService.createMaintenanceHistory(machineUnderTestSerialNumber, Maintenance(workOrderNumber = "W01", workOrderType = "C"))
+
+        val history = MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.version).isEqualTo(1)
+            it
+        }
+
+        MaintenanceService.updateMaintenanceHistory(history.serialNumber!!, history.workOrderNumber!!, history.copy(reportedBy = "SOME DUDE"))
+        MaintenanceService.getMaintenanceHistory(machineUnderTestSerialNumber).first().let {
+            assertThat(it.version).isEqualTo(2)
+        }
+    }
 }

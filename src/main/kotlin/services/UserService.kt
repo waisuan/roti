@@ -8,9 +8,14 @@ import exceptions.UnapprovedUserException
 import java.time.LocalDateTime
 import models.User
 import models.UserRole
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
 import tables.UserTable.createdAt

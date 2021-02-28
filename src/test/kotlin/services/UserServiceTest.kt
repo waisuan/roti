@@ -6,11 +6,13 @@ import exceptions.IllegalUserException
 import exceptions.RecordAlreadyExistsException
 import exceptions.UnapprovedUserException
 import helpers.TestDatabase
+import java.time.LocalDateTime
 import models.User
 import models.UserRole
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -281,6 +283,42 @@ class UserServiceTest {
         assertThat(UserService.getUsers().size).isEqualTo(3)
         UserService.getUsers().forEach {
             assertThat(it).isEqualTo(User(username = it.username, email = it.email, password = null, isApproved = false, role = UserRole.NON_ADMIN, createdAt = it!!.createdAt))
+        }
+    }
+
+    @Test
+    fun `getRejectedUsers() does not return users that are still within the designated grace period for approval`() {
+        val user = UserService.createUser(User("evan.s", "password", "evan.s@test.com")).let {
+            UserService.getUser(username = "evan.s")!!
+        }
+
+        UserService.getRejectedUsers().let {
+            assertThat(it).isEmpty()
+        }
+
+        transaction {
+            TransactionManager.current().exec("""
+                update users set created_at='${LocalDateTime.now().minusDays(4)}' where username='${user.username}'
+            """.trimIndent())
+        }
+        UserService.getRejectedUsers().let {
+            assertThat(it).isEmpty()
+        }
+    }
+
+    @Test
+    fun `getRejectedUsers() returns a list of users that have not been approved for more than 5 days`() {
+        val user = UserService.createUser(User("evan.s", "password", "evan.s@test.com")).let {
+            UserService.getUser(username = "evan.s")!!
+        }
+
+        transaction {
+            TransactionManager.current().exec("""
+                update users set created_at='${LocalDateTime.now().minusDays(6)}' where username='${user.username}'
+            """.trimIndent())
+        }
+        UserService.getRejectedUsers().let {
+            assertThat(it.map { user -> user.username }).isEqualTo(listOf(user.username))
         }
     }
 }

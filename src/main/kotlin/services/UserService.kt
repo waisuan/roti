@@ -5,15 +5,12 @@ import exceptions.BadOperationException
 import exceptions.IllegalUserException
 import exceptions.RecordAlreadyExistsException
 import exceptions.UnapprovedUserException
+import java.time.LocalDateTime
 import models.User
 import models.UserRole
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
 import tables.UserTable.createdAt
@@ -127,6 +124,14 @@ object UserService {
 
     fun getUserRoles(): List<UserRole> {
         return UserRole.values().toMutableList()
+    }
+
+    fun getRejectedUsers(): List<User> {
+        return transaction {
+            // 5.days is given as the grace period for when a user needs to be approved before considered as rejected.
+            UserTable.select { createdAt.less(LocalDateTime.now().minusDays(5)) and isApproved.eq(false) }
+                    .map { toUserModel(it) }
+        }
     }
 
     private fun toUserModel(row: ResultRow): User {

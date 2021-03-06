@@ -308,12 +308,22 @@ class UserServiceTest {
 
     @Test
     fun `getRejectedUsers() does not return users that have been approved`() {
-        UserService.createUser(User("evan.s", "password", "evan.s@test.com")).let {
+        val user = UserService.createUser(User("evan.s", "password", "evan.s@test.com")).let {
             UserService.getUser(username = "evan.s")!!
         }.let {
             UserService.approveUser(it.username!!)
+            UserService.getUser(it.username!!)!!
         }
 
+        UserService.getRejectedUsers().let {
+            assertThat(it).isEmpty()
+        }
+
+        transaction {
+            TransactionManager.current().exec("""
+                update users set created_at='${LocalDateTime.now().minusDays(100)}' where username='${user.username}'
+            """.trimIndent())
+        }
         UserService.getRejectedUsers().let {
             assertThat(it).isEmpty()
         }

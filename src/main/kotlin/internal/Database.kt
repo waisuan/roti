@@ -12,7 +12,7 @@ import tables.MaintenanceTable
 import tables.UserTable
 
 object Database {
-    fun init() {
+    fun init(enableMigrations: Boolean = true) {
         val dbUrl = Config.dbUrl
         val dbUser = Config.dbUser
         val dbPwd = Config.dbPwd
@@ -24,16 +24,18 @@ object Database {
             password = dbPwd
         )
 
-        transaction {
-            addLogger(StdOutSqlLogger)
-            SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
-        }
+        if (enableMigrations) {
+            transaction {
+                addLogger(StdOutSqlLogger)
+                SchemaUtils.create(UserTable, MachineTable, MaintenanceTable)
+            }
 
-        Flyway
-            .configure()
-            .dataSource(dbUrl, dbUser, dbPwd)
-            .baselineOnMigrate(true)
-            .load()
-            .migrate()
+            Flyway
+                .configure()
+                .dataSource(dbUrl, dbUser, dbPwd)
+                .baselineOnMigrate(true)
+                .load()
+                .migrate()
+        }
     }
 }

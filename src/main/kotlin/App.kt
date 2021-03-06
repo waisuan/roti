@@ -14,6 +14,7 @@ fun main(args: Array<String>): Unit = mainBody {
     ArgParser(args).parseInto(::CommandLineParser).run {
         if (executeTask) {
             logger().info(">>> Running task: $taskName $taskArguments")
+            Database.init(enableMigrations = false)
             TaskRunner.run(taskName, taskArguments)
         } else {
             RotiApp().init()

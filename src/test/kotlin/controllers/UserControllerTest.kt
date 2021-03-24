@@ -1,12 +1,12 @@
 package controllers
 
-import com.nhaarman.mockitokotlin2.verify
 import exceptions.IllegalUserException
 import helpers.TestDatabase
 import io.javalin.http.Context
 import io.javalin.http.context.body
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import models.Constants
 import models.User
 import org.assertj.core.api.Assertions.assertThatThrownBy

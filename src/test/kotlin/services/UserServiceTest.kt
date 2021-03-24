@@ -282,7 +282,7 @@ class UserServiceTest {
 
         assertThat(UserService.getUsers().size).isEqualTo(3)
         UserService.getUsers().forEach {
-            assertThat(it).isEqualTo(User(username = it.username, email = it.email, password = null, isApproved = false, role = UserRole.NON_ADMIN, createdAt = it!!.createdAt))
+            assertThat(it).isEqualTo(User(username = it.username, email = it.email, password = null, isApproved = false, role = UserRole.NON_ADMIN, createdAt = it.createdAt))
         }
     }
 

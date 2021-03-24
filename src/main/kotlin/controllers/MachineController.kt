@@ -1,6 +1,7 @@
 package controllers
 
 import io.javalin.http.Context
+import io.javalin.http.context.body
 import models.Machine
 import models.MachineContainer
 import services.MachineService

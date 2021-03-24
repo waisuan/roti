@@ -1,6 +1,7 @@
 package controllers
 
 import io.javalin.http.Context
+import io.javalin.http.context.body
 import models.Constants
 import models.User
 import services.UserService

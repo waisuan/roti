@@ -15,4 +15,5 @@ object Config {
     val s3SecretKey = System.getenv("S3_SECRET_KEY") ?: ""
     val s3Bucket = System.getenv("S3_BUCKET") ?: "dummy-bucket"
     val jwtSecret = System.getenv("JWT_SECRET") ?: "dummy_secret"
+    val allowedCorsOrigin = System.getenv("ALLOWED_CORS_ORIGIN") ?: ""
 }

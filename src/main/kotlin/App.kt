@@ -26,7 +26,7 @@ class RotiApp(private val port: Int = 7000, private val enableDB: Boolean = true
     fun init(): Javalin {
         val app = Javalin.create {
             it.accessManager(AuthController::accessManager)
-            it.enableCorsForAllOrigins()
+            it.enableCorsForOrigin(Config.allowedCorsOrigin)
             it.enforceSsl = true
             it.enableWebjars()
             it.addStaticFiles("vue/static")

@@ -45,15 +45,18 @@
         </div>
         <div class="machine-body" v-for="(machine, index) in machines" v-bind:key="machine.serialNumber">
           <div style="text-align: right">
-            <a href="javascript:void(0)"><i class="fa fa-history"></i></a>
+            <a href="javascript:void(0)" v-show="!isBeingChanged(machine.serialNumber)"><i class="fa fa-history"></i></a>
 
-            <a href="javascript:void(0)" v-on:click="edit(machine.serialNumber)" v-show="!isEditing(machine.serialNumber)"><i class="fa fa-pencil"></i></a>
+            <a href="javascript:void(0)" v-on:click="edit(machine.serialNumber)" v-show="!isBeingChanged(machine.serialNumber)"><i class="fa fa-pencil"></i></a>
             <a href="javascript:void(0)" v-on:click="saveUpdate(machine)" v-show="isEditing(machine.serialNumber)" style="color: blue"><i class="fa fa-save"></i></a>
+            <a href="javascript:void(0)" v-on:click="cancel()" v-show="isEditing(machine.serialNumber)" style="color: red"><i class="fa fa-times"></i></a>
 
-            <a href="javascript:void(0)"><i class="fa fa-trash-o"></i></a>
+            <a href="javascript:void(0)" v-on:click="del(machine.serialNumber)" v-show="!isBeingChanged(machine.serialNumber)"><i class="fa fa-trash-o"></i></a>
+            <a href="javascript:void(0)" v-on:click="persistDelete(machine.serialNumber)" v-show="isDeleting(machine.serialNumber)" style="color: green"><i class="fa fa-check"></i></a>
+            <a href="javascript:void(0)" v-on:click="cancel()" v-show="isDeleting(machine.serialNumber)" style="color: red"><i class="fa fa-times"></i></a>
 
-            <a href="javascript:void(0)" v-on:click="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber)"><i class="fa fa-expand"></i></a>
-            <a href="javascript:void(0)" v-on:click="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber)"><i class="fa fa-compress"></i></a>
+            <a href="javascript:void(0)" v-on:click="showForm(machine.serialNumber)" v-show="!isFormShown(machine.serialNumber) && !isBeingChanged(machine.serialNumber)"><i class="fa fa-expand"></i></a>
+            <a href="javascript:void(0)" v-on:click="hideForm(machine.serialNumber)" v-show="isFormShown(machine.serialNumber) && !isBeingChanged(machine.serialNumber)"><i class="fa fa-compress"></i></a>
           </div>
           <div v-show="!isFormShown(machine.serialNumber)">
             <span style="color: dodgerblue">Serial No.: {{machine.serialNumber}}</span>
@@ -151,7 +154,8 @@
       searchFilterIsOn: false,
       totalNoOfMachines: 0,
       sortFilterIsOn: false,
-      currentlyEditing: null
+      currentlyEditing: null,
+      currentlyDeleting: null,
     }),
       methods: {
         keyOf(machine) {
@@ -163,8 +167,15 @@
           }
           this.currentlyEditing = recordId
         },
+        cancel() {
+          this.currentlyEditing = null
+          this.currentlyDeleting = null
+        },
         isEditing(recordId) {
           return this.currentlyEditing === recordId
+        },
+        isBeingChanged(recordId) {
+          return this.currentlyEditing === recordId || this.currentlyDeleting === recordId
         },
         toggleForm(formId) {
           if (this.isFormShown(formId)) {
@@ -233,11 +244,33 @@
         saveUpdate(record) {
           this.updateMachine(this.keyOf(record), record)
         },
+        del(recordId) {
+          this.currentlyDeleting = recordId
+        },
+        isDeleting(recordId) {
+          return this.currentlyDeleting === recordId
+        },
+        persistDelete(recordId) {
+          this.deleteMachine(recordId)
+        },
 
         updateMachine(key, machine) {
           axios.put("api/machines/" + key, machine)
               .then(_ => {
                 this.currentlyEditing = null
+              }, error => {
+                console.log(error)
+              })
+        },
+        deleteMachine(key) {
+          axios.delete("api/machines/" + key)
+              .then(_ => {
+                this.currentlyDeleting = null
+                const index = this.machines.findIndex(machine => this.keyOf(machine) === key)
+                if (~index) {
+                  this.machines.splice(index, 1)
+                  this.totalNoOfMachines -= 1
+                }
               }, error => {
                 console.log(error)
               })

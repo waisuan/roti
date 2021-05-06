@@ -16,4 +16,5 @@ object Config {
     val s3Bucket = System.getenv("S3_BUCKET") ?: "dummy-bucket"
     val jwtSecret = System.getenv("JWT_SECRET") ?: "dummy_secret"
     val allowedCorsOrigin = System.getenv("ALLOWED_CORS_ORIGIN") ?: ""
+    val sendGridApiKey = System.getenv("SENDGRID_API_KEY") ?: "secret"
 }

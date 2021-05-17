@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import utils.FileMan
 
 class FileServiceTest {
@@ -111,6 +112,6 @@ class FileServiceTest {
         every { FileMan.deleteObject(any()) } throws Exception("Bad stuff happened.")
         every { FileMan.getObjects(any()) } returns(listOf("FileA", "FileB", "FileC"))
 
-        FileService.deleteFiles("SOME_DIR")
+        assertDoesNotThrow { FileService.deleteFiles("SOME_DIR") }
     }
 }

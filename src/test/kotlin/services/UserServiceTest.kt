@@ -344,4 +344,23 @@ class UserServiceTest {
             assertThat(it.map { user -> user.username }).isEqualTo(listOf(user.username))
         }
     }
+
+    @Test
+    fun `getUsersByRole() returns a list of users filtered by a specific role`() {
+        (1..10).forEach { idx ->
+            UserService.createUser(User(idx.toString(), "password$idx", "$idx@mail.com")).also {
+                // Even usernames will have an ADMIN role.
+                if (idx % 2 == 0)
+                    UserService.updateUser(idx.toString(), User(role = UserRole.ADMIN))
+                else
+                    UserService.updateUser(idx.toString(), User(role = UserRole.NON_ADMIN))
+            }
+        }
+        UserService.getUsersByRole(UserRole.ADMIN).let {
+            assertThat(it.map(User::username)).isEqualTo(listOf("2", "4", "6", "8", "10"))
+        }
+        UserService.getUsersByRole(UserRole.NON_ADMIN).let {
+            assertThat(it.map(User::username)).isEqualTo(listOf("1", "3", "5", "7", "9"))
+        }
+    }
 }

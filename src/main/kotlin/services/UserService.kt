@@ -127,6 +127,12 @@ object UserService {
         }
     }
 
+    fun getUsersByRole(role: UserRole): List<User> {
+        return transaction {
+            UserTable.select { UserTable.role eq role.name }.map { toUserModel(it) }
+        }
+    }
+
     fun getUserRoles(): List<UserRole> {
         return UserRole.values().toMutableList()
     }

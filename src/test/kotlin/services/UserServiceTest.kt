@@ -6,6 +6,9 @@ import exceptions.IllegalUserException
 import exceptions.RecordAlreadyExistsException
 import exceptions.UnapprovedUserException
 import helpers.TestDatabase
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.verify
 import java.time.LocalDateTime
 import models.User
 import models.UserRole
@@ -96,6 +99,18 @@ class UserServiceTest {
     }
 
     @Test
+    fun `createUser() should call email service at the end (if op was successful)`() {
+        mockkObject(EmailService)
+        every { EmailService.sendRegistrationSuccessful(any()) } returns Unit
+
+        val user = User("evan.s", "password", "evan.s@test.com")
+        UserService.createUser(user)
+        verify {
+            EmailService.sendRegistrationSuccessful(user)
+        }
+    }
+
+    @Test
     fun `deleteUser() should delete user successfully`() {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)
@@ -174,6 +189,20 @@ class UserServiceTest {
             UserService.updateUser("evan.s", updatedUser)
         }.isInstanceOf(BadOperationException::class.java)
             .hasMessageContaining("Unable to operate on User record")
+    }
+
+    @Test
+    fun `updateUser() should call email service at the end if user's approval status has been updated`() {
+        mockkObject(EmailService)
+        every { EmailService.sendUserApprovalStatus(any(), any()) } returns Unit
+
+        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
+
+        UserService.updateUser("evan.s", User(isApproved = true))
+        UserService.updateUser("evan.s", User(role = UserRole.ADMIN))
+        verify(exactly = 1) {
+            EmailService.sendUserApprovalStatus("evan.s", true)
+        }
     }
 
     @Test

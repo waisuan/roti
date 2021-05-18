@@ -30,7 +30,21 @@ object EmailService {
         }
     }
 
-    private fun send(from: String = "noreply@roti.com", to: String, subject: String, body: String) {
+    fun sendUserApprovalStatus(username: String, approveFlag: Boolean) {
+        UserService.getUser(username)!!.let { user ->
+            send(to = user.email!!, subject = "Your account has been updated", body = """
+                Hi ${user.username},
+            
+                Your account's approval status has been updated to: $approveFlag
+            """.trimIndent())
+        }
+    }
+
+    private fun send(from: String = Config.sysEmailAddress, to: String, subject: String, body: String) {
+        if (!Config.enableEmail) {
+            logger().warn("Sending of emails is currently DISABLED.")
+            return
+        }
         runCatching {
             val request = Request().also {
                 it.method = Method.POST
@@ -38,7 +52,7 @@ object EmailService {
                 it.body = Mail(Email(from), subject, Email(to), Content("text/plain", body)).build()
             }
             val response = SendGrid(Config.sendGridApiKey).api(request)
-            logger().info("${response.statusCode} - ${response.body}")
+            logger().info("${response.statusCode} - Email successfully sent to $to ${response.body}")
         }.onFailure {
             logger().error("Unable to send email: ${it.message}")
         }

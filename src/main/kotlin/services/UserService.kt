@@ -45,6 +45,7 @@ object UserService {
                 it[UserTable.salt] = salt
             }
         }
+        EmailService.sendRegistrationSuccessful(user)
     }
 
     fun updateUser(username: String, user: User) {
@@ -65,6 +66,8 @@ object UserService {
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
         }
+        if (user.isApproved != null)
+            EmailService.sendUserApprovalStatus(username, user.isApproved)
     }
 
     fun updateUsers(users: List<User>) {
@@ -111,6 +114,7 @@ object UserService {
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
         }
+        EmailService.sendUserApprovalStatus(username, approveFlag)
     }
 
     fun getUser(username: String): User? {

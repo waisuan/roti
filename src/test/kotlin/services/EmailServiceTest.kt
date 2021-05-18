@@ -2,6 +2,8 @@ package services
 
 import com.sendgrid.Response
 import com.sendgrid.SendGrid
+import configs.Config
+import io.mockk.Called
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockkConstructor
@@ -20,6 +22,9 @@ class EmailServiceTest {
     fun setUp() {
         mockkConstructor(SendGrid::class)
         every { anyConstructed<SendGrid>().api(any()) } returns Response(200, "", emptyMap())
+
+        mockkObject(Config)
+        every { Config.enableEmail } returns true
     }
 
     @AfterEach
@@ -45,8 +50,38 @@ class EmailServiceTest {
     }
 
     @Test
+    fun `sendUserApprovalStatus() should send an email out to the user on their current approval status`() {
+        mockkObject(UserService)
+        every { UserService.getUser(any()) } returns User("user", email = "user@mail.com")
+
+        EmailService.sendUserApprovalStatus("user", true)
+        verify {
+            anyConstructed<SendGrid>().api(withArg { request ->
+                assertThat(request.body).isEqualTo("""
+                    {"from":{"email":"noreply@roti.com"},"subject":"Your account has been updated","personalizations":[{"to":[{"email":"user@mail.com"}]}],"content":[{"type":"text/plain","value":"Hi user,\n\nYour account's approval status has been updated to: true"}]}
+                """.trimIndent())
+            })
+        }
+    }
+
+    @Test
     fun `should fail silently if email could not be sent out`() {
+        mockkObject(UserService)
+        every { UserService.getUsersByRole(UserRole.ADMIN) } returns emptyList()
         every { anyConstructed<SendGrid>().api(any()) } throws Exception("No emails for you today!")
+
         assertDoesNotThrow { EmailService.sendRegistrationSuccessful(User(username = "Evan", email = "evan@mail.com")) }
+    }
+
+    @Test
+    fun `no email is sent out if email service is disabled`() {
+        mockkObject(UserService)
+        every { UserService.getUsersByRole(UserRole.ADMIN) } returns emptyList()
+        every { Config.enableEmail } returns false
+
+        EmailService.sendRegistrationSuccessful(User(username = "Evan", email = "evan@mail.com"))
+        verify {
+            anyConstructed<SendGrid>().api(any()) wasNot Called
+        }
     }
 }

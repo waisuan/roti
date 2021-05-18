@@ -17,4 +17,6 @@ object Config {
     val jwtSecret = System.getenv("JWT_SECRET") ?: "dummy_secret"
     val allowedCorsOrigin = System.getenv("ALLOWED_CORS_ORIGIN") ?: ""
     val sendGridApiKey = System.getenv("SENDGRID_API_KEY") ?: "secret"
+    val sysEmailAddress = System.getenv("SYS_EMAIL_ADDRESS") ?: "noreply@roti.com"
+    val enableEmail = System.getenv("ENABLE_EMAIL")?.toBoolean() ?: false
 }

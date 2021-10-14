@@ -17,8 +17,6 @@ class CacheServiceTest {
     @BeforeEach
     fun beforeEachTest() {
         val mockJedis = MockJedis("dummy_host")
-        mockkObject(mockJedis)
-        every { mockJedis.shutdown() } answers { null }
 
         mockkObject(Config)
         every { Config.enableCache } returns "1"
@@ -62,12 +60,12 @@ class CacheServiceTest {
     fun `isMachinesCached() should return true if machines are cached`() {
         CacheService.setMachines("SOME_KEY", listOf(Machine(serialNumber = "S001")))
 
-        assertThat(CacheService.isMachinesCached("SOME_KEY")).isTrue()
+        assertThat(CacheService.isMachinesCached("SOME_KEY")).isTrue
     }
 
     @Test
     fun `isMachinesCached() should return false if machines are not cached`() {
-        assertThat(CacheService.isMachinesCached("SOME_KEY")).isFalse()
+        assertThat(CacheService.isMachinesCached("SOME_KEY")).isFalse
     }
 
     @Test
@@ -75,18 +73,18 @@ class CacheServiceTest {
         CacheService.setMachines("SOME_KEY_1", listOf(Machine(serialNumber = "S001")))
         CacheService.setMachineCount("SOME_KEY_2", 10)
 
-        assertThat(CacheService.isMachinesCached("SOME_KEY_1")).isTrue()
-        assertThat(CacheService.isMachinesCached("SOME_KEY_2")).isTrue()
+        assertThat(CacheService.isMachinesCached("SOME_KEY_1")).isTrue
+        assertThat(CacheService.isMachinesCached("SOME_KEY_2")).isTrue
 
         CacheService.purgeCachedMachines()
 
-        assertThat(CacheService.isMachinesCached("SOME_KEY_1")).isFalse()
-        assertThat(CacheService.isMachinesCached("SOME_KEY_2")).isFalse()
+        assertThat(CacheService.isMachinesCached("SOME_KEY_1")).isFalse
+        assertThat(CacheService.isMachinesCached("SOME_KEY_2")).isFalse
     }
 
     @Test
     fun `isCacheActive() returns true if jedis is defined and active`() {
-        assertThat(CacheService.isCacheActive()).isTrue()
+        assertThat(CacheService.isCacheActive()).isTrue
     }
 
     @Test
@@ -99,34 +97,30 @@ class CacheServiceTest {
 
         CacheService.start(mockJedis)
 
-        assertThat(CacheService.isCacheActive()).isFalse()
+        assertThat(CacheService.isCacheActive()).isFalse
     }
 
     @Test
     fun `isCacheActive() returns false if jedis is not defined`() {
         CacheService.stop()
-        assertThat(CacheService.isCacheActive()).isFalse()
+        assertThat(CacheService.isCacheActive()).isFalse
     }
 
     @Test
     fun `cacheIsEnabled() returns true if ENABLE_CACHE env var is defined`() {
-        assertThat(CacheService.cacheIsEnabled()).isTrue()
+        assertThat(CacheService.cacheIsEnabled()).isTrue
     }
 
     @Test
     fun `cacheIsEnabled() returns false if ENABLE_CACHE env var is not defined`() {
-        mockkObject(Config)
-
         every { Config.enableCache } returns("0")
-        assertThat(CacheService.cacheIsEnabled()).isFalse()
+        assertThat(CacheService.cacheIsEnabled()).isFalse
 
         every { Config.enableCache } returns("true")
-        assertThat(CacheService.cacheIsEnabled()).isFalse()
+        assertThat(CacheService.cacheIsEnabled()).isFalse
 
         every { Config.enableCache } returns(null)
-        assertThat(CacheService.cacheIsEnabled()).isFalse()
-
-        unmockkObject(Config)
+        assertThat(CacheService.cacheIsEnabled()).isFalse
     }
 
     @Test

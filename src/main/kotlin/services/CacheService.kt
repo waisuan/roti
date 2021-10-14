@@ -7,6 +7,7 @@ import java.lang.Exception
 import java.net.URI
 import models.Machine
 import redis.clients.jedis.Jedis
+import redis.clients.jedis.exceptions.JedisConnectionException
 import utils.logger
 
 object CacheService {
@@ -21,7 +22,12 @@ object CacheService {
     }
 
     fun stop() {
-        cache()?.shutdown()
+        try {
+            cache()?.shutdown()
+        } catch (e: JedisConnectionException) {
+            logger().warn("Unable to shutdown cache: ${e.message}")
+        }
+
         jedis = null
     }
 

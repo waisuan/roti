@@ -60,8 +60,8 @@ object MachineService {
         CacheService.purgeCachedMachines()
     }
 
-    fun updateMachine(serialNumber: String, updatedMachine: Machine) {
-        transaction {
+    fun updateMachine(serialNumber: String, updatedMachine: Machine): Machine {
+        val machine = transaction {
             val machine = MachineDao.find { MachineTable.serialNumber eq serialNumber }.firstOrNull()
             if (machine != null) {
                 machine.customer = updatedMachine.customer
@@ -82,8 +82,10 @@ object MachineService {
             } else {
                 throw RecordNotFoundException()
             }
+            machine.toModel()
         }
         CacheService.purgeCachedMachines()
+        return machine
     }
 
     fun deleteMachine(serialNumber: String) {

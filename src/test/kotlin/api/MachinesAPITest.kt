@@ -135,8 +135,9 @@ class MachinesAPITest {
             .body(JsonNode("{\"ppmDate\":\"2020-01-01\"}"))
             .asString()
         assertThat(response.status).isEqualTo(200)
-        assertThat(MachineService.getAllMachines().first().ppmDate)
-            .isEqualTo("2020-01-01")
+        assertThat(response.body).isEqualTo(JavalinJson.toJson(
+            MachineService.getAllMachines().first()
+        ))
 
         response = Unirest.put("/machines/TEST_")
             .header("Content-Type", "application/json")

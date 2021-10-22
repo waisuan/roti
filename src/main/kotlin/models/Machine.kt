@@ -2,6 +2,7 @@ package models
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+@JsonIgnoreProperties(value = ["createdAt", "updatedAt"], allowGetters = true)
 data class Machine(
     val serialNumber: String? = null,
     val customer: String? = null,

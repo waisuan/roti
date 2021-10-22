@@ -53,10 +53,16 @@ class MachineServiceTest {
         assertThat(createdMachine!!.reportedBy).isNull()
 
         val updatedMachine = Machine(serialNumber = createdMachine.serialNumber, reportedBy = "DR.CODE", updatedAt = createdMachine.updatedAt)
-        MachineService.updateMachine(serialNumber = createdMachine.serialNumber!!, updatedMachine = updatedMachine)
+        MachineService
+            .updateMachine(serialNumber = createdMachine.serialNumber!!, updatedMachine = updatedMachine)
+            .let { m ->
+                assertThat(m.updatedAt).isAfter(createdMachine!!.updatedAt)
+                assertThat(m.version).isEqualTo(2)
+            }
 
         createdMachine = MachineService.getAllMachines().first()
         assertThat(createdMachine.reportedBy).isEqualTo("DR.CODE")
+        assertThat(createdMachine.version).isEqualTo(2)
 
         assertThatThrownBy {
             MachineService.updateMachine(serialNumber = "TEST09", updatedMachine = updatedMachine)
@@ -274,10 +280,10 @@ class MachineServiceTest {
         }
 
         MachineService.updateMachine(machine.serialNumber!!, machine.copy(reportedBy = "ME"))
-        MachineService.getAllMachines().first().let {
-            assertThat(it.updatedAt).isNotNull
-            assertThat(it.createdAt).isNotEqualTo(it.updatedAt)
-        }
+            .let { m ->
+                assertThat(m.updatedAt).isNotNull
+                assertThat(m.createdAt).isBefore(m.updatedAt)
+            }
     }
 
     @Test
@@ -300,8 +306,8 @@ class MachineServiceTest {
         }
 
         MachineService.updateMachine(machine.serialNumber!!, machine.copy(reportedBy = "ME"))
-        MachineService.getAllMachines().first().let {
-            assertThat(it.version).isEqualTo(2)
-        }
+            .let { m ->
+                assertThat(m.version).isEqualTo(2)
+            }
     }
 }

@@ -38,6 +38,7 @@ object MachineService {
             if (MachineDao.find { MachineTable.serialNumber eq newMachine.serialNumber!! }.firstOrNull() != null)
                 throw RecordAlreadyExistsException()
 
+            val now = LocalDateTime.now()
             MachineDao.new {
                 serialNumber = newMachine.serialNumber!!
                 customer = newMachine.customer
@@ -53,8 +54,8 @@ object MachineService {
                 attachment = newMachine.attachment
                 tncDate = newMachine.tncDate
                 ppmDate = newMachine.ppmDate
-                createdAt = LocalDateTime.now()
-                updatedAt = LocalDateTime.now()
+                createdAt = now
+                updatedAt = now
             }.toModel()
         }
         CacheService.purgeCachedMachines()

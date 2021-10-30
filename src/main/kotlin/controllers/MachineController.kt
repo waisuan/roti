@@ -20,7 +20,7 @@ object MachineController {
     }
 
     fun createMachine(ctx: Context) {
-        MachineService.createMachine(ctx.body<Machine>())
+        ctx.json(MachineService.createMachine(ctx.body<Machine>()))
     }
 
     fun updateMachine(ctx: Context) {

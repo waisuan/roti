@@ -115,8 +115,11 @@ class MachinesAPITest {
         var response = Unirest.post("/machines")
             .header("Content-Type", "application/json")
             .body(JsonNode("{\"serialNumber\":\"TEST02\", \"tncDate\":\"2020-01-01\"}"))
-            .asEmpty()
+            .asString()
         assertThat(response.status).isEqualTo(200)
+        assertThat(response.body).isEqualTo(JavalinJson.toJson(
+            MachineService.getAllMachines().first()
+        ))
         assertThat(MachineService.getAllMachines().size).isEqualTo(1)
 
         response = Unirest.post("/machines")

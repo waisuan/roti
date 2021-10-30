@@ -27,7 +27,13 @@ class MachineServiceTest {
     @Test
     fun `createMachine() should create a new machine record successfully`() {
         var newMachine = Machine(serialNumber = "TEST01")
-        MachineService.createMachine(newMachine)
+
+        MachineService.createMachine(newMachine).let {
+            assertThat(it.serialNumber).isEqualTo("TEST01")
+            assertThat(it.createdAt).isNotNull
+            assertThat(it.updatedAt).isNotNull
+            assertThat(it.version).isEqualTo(1)
+        }
 
         val createdMachine = MachineService.getAllMachines().firstOrNull()
         assertThat(createdMachine).isNotNull
@@ -46,23 +52,18 @@ class MachineServiceTest {
 
     @Test
     fun `updateMachine() should update machine record successfully`() {
-        MachineService.createMachine(Machine(serialNumber = "TEST01"))
-
-        var createdMachine = MachineService.getAllMachines().firstOrNull()
+        val createdMachine = MachineService.createMachine(Machine(serialNumber = "TEST01"))
         assertThat(createdMachine).isNotNull
-        assertThat(createdMachine!!.reportedBy).isNull()
+        assertThat(createdMachine.reportedBy).isNull()
 
         val updatedMachine = Machine(serialNumber = createdMachine.serialNumber, reportedBy = "DR.CODE", updatedAt = createdMachine.updatedAt)
         MachineService
             .updateMachine(serialNumber = createdMachine.serialNumber!!, updatedMachine = updatedMachine)
             .let { m ->
-                assertThat(m.updatedAt).isAfter(createdMachine!!.updatedAt)
+                assertThat(m.updatedAt).isAfter(createdMachine.updatedAt)
                 assertThat(m.version).isEqualTo(2)
+                assertThat(m.reportedBy).isEqualTo("DR.CODE")
             }
-
-        createdMachine = MachineService.getAllMachines().first()
-        assertThat(createdMachine.reportedBy).isEqualTo("DR.CODE")
-        assertThat(createdMachine.version).isEqualTo(2)
 
         assertThatThrownBy {
             MachineService.updateMachine(serialNumber = "TEST09", updatedMachine = updatedMachine)
@@ -260,9 +261,8 @@ class MachineServiceTest {
     @Test
     fun `createMachine() should stamp createdAt and updatedAt fields`() {
         val newMachine = Machine(serialNumber = "TEST01")
-        MachineService.createMachine(newMachine)
 
-        MachineService.getAllMachines().first().let {
+        MachineService.createMachine(newMachine).let {
             assertThat(it.createdAt).isNotNull
             assertThat(it.updatedAt).isNotNull
             assertThat(it.createdAt).isEqualTo(it.updatedAt)
@@ -273,8 +273,7 @@ class MachineServiceTest {
     fun `updateMachine() should refresh updatedAt field`() {
         val newMachine = Machine(serialNumber = "TEST01")
 
-        MachineService.createMachine(newMachine)
-        val machine = MachineService.getAllMachines().first().let {
+        val machine = MachineService.createMachine(newMachine).let {
             assertThat(it.createdAt).isEqualTo(it.updatedAt)
             it
         }
@@ -289,9 +288,8 @@ class MachineServiceTest {
     @Test
     fun `Version column for new Machines start at 1`() {
         val newMachine = Machine(serialNumber = "TEST01")
-        MachineService.createMachine(newMachine)
 
-        MachineService.getAllMachines().first().let {
+        MachineService.createMachine(newMachine).let {
             assertThat(it.version).isEqualTo(1)
         }
     }
@@ -300,8 +298,7 @@ class MachineServiceTest {
     fun `Version column on Machine record gets incremented at every update`() {
         val machine = Machine(serialNumber = "TEST01")
 
-        MachineService.createMachine(machine)
-        MachineService.getAllMachines().first().let {
+        MachineService.createMachine(machine).let {
             assertThat(it.version).isEqualTo(1)
         }
 

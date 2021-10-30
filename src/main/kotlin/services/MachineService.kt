@@ -30,11 +30,11 @@ object MachineService {
         }
     }
 
-    fun createMachine(newMachine: Machine) {
+    fun createMachine(newMachine: Machine): Machine {
         if (!newMachine.isValid())
             throw BadOperationException(Machine::class.java.simpleName)
 
-        transaction {
+        val machine = transaction {
             if (MachineDao.find { MachineTable.serialNumber eq newMachine.serialNumber!! }.firstOrNull() != null)
                 throw RecordAlreadyExistsException()
 
@@ -55,9 +55,10 @@ object MachineService {
                 ppmDate = newMachine.ppmDate
                 createdAt = LocalDateTime.now()
                 updatedAt = LocalDateTime.now()
-            }
+            }.toModel()
         }
         CacheService.purgeCachedMachines()
+        return machine
     }
 
     fun updateMachine(serialNumber: String, updatedMachine: Machine): Machine {

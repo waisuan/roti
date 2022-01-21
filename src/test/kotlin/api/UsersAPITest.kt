@@ -8,9 +8,11 @@ import exceptions.IllegalUserException
 import helpers.TestDatabase
 import io.javalin.Javalin
 import io.javalin.plugin.json.JavalinJson
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import jobs.EmailJob
 import kong.unirest.JsonNode
 import kong.unirest.Unirest
 import kong.unirest.json.JSONArray
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import services.EmailService
 import services.UserService
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -75,6 +78,19 @@ class UsersAPITest {
             .asString()
         assertThat(response.status).isEqualTo(500)
         assertThat(response.body as String).contains("Unable to create new user.")
+    }
+
+    @Test
+    fun `POST register - sends out an email upon success`() {
+        mockkObject(EmailService)
+
+        val response = Unirest.post("/users/register")
+            .header("Content-Type", "application/json")
+            .body(JsonNode("{\"username\":\"TEST\", \"password\":\"PASSWORD\", \"email\":\"email@mail.com\"}"))
+            .asEmpty()
+        assertThat(response.status).isEqualTo(200)
+
+        coVerify { EmailJob.perform { EmailService.sendRegistrationSuccessful(any()) } }
     }
 
     @Test

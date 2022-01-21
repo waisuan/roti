@@ -27,7 +27,7 @@ import tables.UserTable.username
 import utils.Validator
 
 object UserService {
-    fun createUser(user: User) {
+    fun createUser(user: User): User {
         if (!user.isValid())
             throw BadNewUserException()
 
@@ -45,7 +45,7 @@ object UserService {
                 it[UserTable.salt] = salt
             }
         }
-        EmailService.sendRegistrationSuccessful(user)
+        return user
     }
 
     fun updateUser(username: String, user: User) {

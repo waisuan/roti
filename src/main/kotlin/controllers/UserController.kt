@@ -2,14 +2,22 @@ package controllers
 
 import io.javalin.http.Context
 import io.javalin.http.context.body
+import jobs.EmailJob
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import models.Constants
 import models.User
+import services.EmailService
 import services.UserService
 import utils.CookieMonster
 
 object UserController {
     fun createUser(ctx: Context) {
-        UserService.createUser(ctx.body<User>())
+        UserService.createUser(ctx.body<User>()).also {
+            GlobalScope.launch {
+                EmailJob.perform { EmailService.sendRegistrationSuccessful(it) }
+            }
+        }
     }
 
     fun updateUser(ctx: Context) {

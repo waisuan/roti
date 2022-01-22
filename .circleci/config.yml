@@ -55,7 +55,7 @@ jobs:
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
 
       # Set-up DB
-      - run: psql -c 'create database roti_test;' -U postgres
+      - run: sudo psql -c 'create database roti_test;' -U postgres
 
       # Run tests
       - run: gradle test

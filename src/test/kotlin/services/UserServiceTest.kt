@@ -99,18 +99,6 @@ class UserServiceTest {
     }
 
     @Test
-    fun `createUser() should call email service at the end (if op was successful)`() {
-        mockkObject(EmailService)
-        every { EmailService.sendRegistrationSuccessful(any()) } returns Unit
-
-        val user = User("evan.s", "password", "evan.s@test.com")
-        UserService.createUser(user)
-        verify {
-            EmailService.sendRegistrationSuccessful(user)
-        }
-    }
-
-    @Test
     fun `deleteUser() should delete user successfully`() {
         val user = User("evan.s", "password", "evan.s@test.com")
         UserService.createUser(user)

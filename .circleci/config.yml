@@ -53,9 +53,5 @@ jobs:
       #  Wait for Postgres to be ready before proceeding
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
 
-      # Set-up DB
-      - run: sudo psql -c 'drop database if exists roti_test;' -U postgres -h localhost
-      - run: sudo psql -c 'create database roti_test;' -U postgres -h localhost
-
       # Run tests
       - run: gradle test

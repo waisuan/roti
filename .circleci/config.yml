@@ -47,6 +47,9 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
+      # Instal psql cli dependency
+      - run: sudo apt install -y postgresql-client || true
+
       #  Wait for Postgres to be ready before proceeding
       - run: dockerize -wait tcp://localhost:5432 -timeout 1m
 

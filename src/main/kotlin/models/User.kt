@@ -3,6 +3,7 @@ package models
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
@@ -15,6 +16,7 @@ enum class UserRole : Role { ADMIN, NON_ADMIN, GUEST }
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class User(
     val username: String? = null,
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     val password: String? = null,
     val email: String? = null,
     val isApproved: Boolean? = null,

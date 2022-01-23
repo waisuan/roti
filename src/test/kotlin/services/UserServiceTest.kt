@@ -1,5 +1,6 @@
 package services
 
+import configs.Config
 import exceptions.BadNewUserException
 import exceptions.BadOperationException
 import exceptions.IllegalUserException
@@ -20,6 +21,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.mindrot.jbcrypt.BCrypt
 import tables.UserTable
 
@@ -177,20 +179,6 @@ class UserServiceTest {
             UserService.updateUser("evan.s", updatedUser)
         }.isInstanceOf(BadOperationException::class.java)
             .hasMessageContaining("Unable to operate on User record")
-    }
-
-    @Test
-    fun `updateUser() should call email service at the end if user's approval status has been updated`() {
-        mockkObject(EmailService)
-        every { EmailService.sendUserApprovalStatus(any(), any()) } returns Unit
-
-        UserService.createUser(User("evan.s", "password", "evan.s@test.com"))
-
-        UserService.updateUser("evan.s", User(isApproved = true))
-        UserService.updateUser("evan.s", User(role = UserRole.ADMIN))
-        verify(exactly = 1) {
-            EmailService.sendUserApprovalStatus("evan.s", true)
-        }
     }
 
     @Test
@@ -379,5 +367,22 @@ class UserServiceTest {
         UserService.getUsersByRole(UserRole.NON_ADMIN).let {
             assertThat(it.map(User::username)).isEqualTo(listOf("1", "3", "5", "7", "9"))
         }
+    }
+
+    @Test
+    fun `createUser() should throw an exception if max number of registered users has been reached`() {
+        mockkObject(Config)
+        every { Config.maxNumOfRegisteredUsers } returns 3
+
+        (1..3).forEach { idx ->
+            assertDoesNotThrow {
+                UserService.createUser(
+                    User(username = "ESia${idx}", password = "password_${idx}", email = "esia_${idx}@mail.com")
+                )
+            }
+        }
+        assertThatThrownBy { UserService.createUser(
+            User(username = "Esia4", password = "password_4", email = "esia_4@mail.com")
+        ) }.isInstanceOf(BadNewUserException::class.java)
     }
 }

@@ -19,4 +19,5 @@ object Config {
     val sendGridApiKey = System.getenv("SENDGRID_API_KEY") ?: "secret"
     val sysEmailAddress = System.getenv("SYS_EMAIL_ADDRESS") ?: "noreply@roti.com"
     val enableEmail = System.getenv("ENABLE_EMAIL")?.toBoolean() ?: false
+    val maxNumOfRegisteredUsers = System.getenv("MAX_REG_USERS")?.toLong()
 }

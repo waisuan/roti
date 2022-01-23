@@ -1,5 +1,6 @@
 package services
 
+import configs.Config
 import exceptions.BadNewUserException
 import exceptions.BadOperationException
 import exceptions.IllegalUserException
@@ -27,8 +28,8 @@ import tables.UserTable.username
 import utils.Validator
 
 object UserService {
-    fun createUser(user: User): User {
-        if (!user.isValid())
+    fun createUser(user: User) {
+        if (!user.isValid() || isMaxNumOfRegUsers())
             throw BadNewUserException()
 
         transaction {
@@ -45,10 +46,10 @@ object UserService {
                 it[UserTable.salt] = salt
             }
         }
-        return user
     }
 
     fun updateUser(username: String, user: User) {
+        // TODO reject updating invalid users (e.g. no email)
         transaction {
             val res = UserTable.update({ UserTable.username eq username }) {
                 if (user.email != null)
@@ -66,8 +67,6 @@ object UserService {
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
         }
-        if (user.isApproved != null)
-            EmailService.sendUserApprovalStatus(username, user.isApproved)
     }
 
     fun updateUsers(users: List<User>) {
@@ -114,7 +113,6 @@ object UserService {
             if (res == 0)
                 throw BadOperationException(User::class.java.simpleName)
         }
-        EmailService.sendUserApprovalStatus(username, approveFlag)
     }
 
     fun getUser(username: String): User? {
@@ -146,6 +144,13 @@ object UserService {
             // 5.days is given as the grace period for when a user needs to be approved before considered as rejected.
             UserTable.select { createdAt.less(LocalDateTime.now().minusDays(5)) and isApproved.eq(false) }
                     .map { toUserModel(it) }
+        }
+    }
+
+    private fun isMaxNumOfRegUsers(): Boolean {
+        val maxNum = Config.maxNumOfRegisteredUsers ?: return false
+        return transaction {
+            UserTable.selectAll().count() >= maxNum
         }
     }
 

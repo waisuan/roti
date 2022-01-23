@@ -12,9 +12,9 @@ import models.UserRole
 import utils.logger
 
 object EmailService {
-    fun sendRegistrationSuccessful(newUser: User) {
-        send(to = newUser.email!!, subject = "Registration Successful!", body = """
-            Hi ${newUser.username},
+    fun sendRegistrationSuccessful(username: String, email: String) {
+        send(to = email, subject = "Registration Successful!", body = """
+            Hi ${username},
             
             Your registration was successful.
             You'll need to be approved by an admin user before being able to log in.
@@ -25,17 +25,17 @@ object EmailService {
             send(to = adminUser.email!!, subject = "New user requires approval", body = """
                 Hi ${adminUser.username},
                 
-                ${newUser.username} is a new user and requires approval from you before they are able to log in.
+                $username is a new user and requires approval from you before they are able to log in.
             """.trimIndent())
         }
     }
 
-    fun sendUserApprovalStatus(username: String, approveFlag: Boolean) {
+    fun sendUserApprovalStatus(username: String) {
         UserService.getUser(username)!!.let { user ->
             send(to = user.email!!, subject = "Your account has been updated", body = """
                 Hi ${user.username},
             
-                Your account's approval status has been updated to: $approveFlag
+                Your account's approval status has been updated to: ${user.isApproved}
             """.trimIndent())
         }
     }

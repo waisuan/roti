@@ -90,7 +90,7 @@ class UsersAPITest {
             .asEmpty()
         assertThat(response.status).isEqualTo(200)
 
-        coVerify { EmailJob.perform { EmailService.sendRegistrationSuccessful(any()) } }
+        coVerify { EmailJob.perform { EmailService.sendRegistrationSuccessful(any(), any()) } }
     }
 
     @Test

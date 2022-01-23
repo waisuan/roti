@@ -37,7 +37,7 @@ class EmailServiceTest {
         mockkObject(UserService)
         every { UserService.getUsersByRole(UserRole.ADMIN) } returns listOf(User("admin", email = "admin@mail.com"))
 
-        EmailService.sendRegistrationSuccessful(User(username = "Evan", email = "evan@mail.com"))
+        EmailService.sendRegistrationSuccessful(username = "Evan", email = "evan@mail.com")
         verify {
             anyConstructed<SendGrid>().api(withArg { request ->
                 assertThat(request.body).isIn(listOf("""
@@ -52,9 +52,9 @@ class EmailServiceTest {
     @Test
     fun `sendUserApprovalStatus() should send an email out to the user on their current approval status`() {
         mockkObject(UserService)
-        every { UserService.getUser(any()) } returns User("user", email = "user@mail.com")
+        every { UserService.getUser(any()) } returns User("user", email = "user@mail.com", isApproved = true)
 
-        EmailService.sendUserApprovalStatus("user", true)
+        EmailService.sendUserApprovalStatus("user")
         verify {
             anyConstructed<SendGrid>().api(withArg { request ->
                 assertThat(request.body).isEqualTo("""
@@ -70,7 +70,7 @@ class EmailServiceTest {
         every { UserService.getUsersByRole(UserRole.ADMIN) } returns emptyList()
         every { anyConstructed<SendGrid>().api(any()) } throws Exception("No emails for you today!")
 
-        assertDoesNotThrow { EmailService.sendRegistrationSuccessful(User(username = "Evan", email = "evan@mail.com")) }
+        assertDoesNotThrow { EmailService.sendRegistrationSuccessful(username = "Evan", email = "evan@mail.com") }
     }
 
     @Test
@@ -79,7 +79,7 @@ class EmailServiceTest {
         every { UserService.getUsersByRole(UserRole.ADMIN) } returns emptyList()
         every { Config.enableEmail } returns false
 
-        EmailService.sendRegistrationSuccessful(User(username = "Evan", email = "evan@mail.com"))
+        EmailService.sendRegistrationSuccessful(username = "Evan", email = "evan@mail.com")
         verify {
             anyConstructed<SendGrid>().api(any()) wasNot Called
         }

@@ -13,9 +13,10 @@ import utils.CookieMonster
 
 object UserController {
     fun createUser(ctx: Context) {
-        UserService.createUser(ctx.body<User>()).also {
+        val userBody = ctx.body<User>()
+        UserService.createUser(userBody).also {
             GlobalScope.launch {
-                EmailJob.perform { EmailService.sendRegistrationSuccessful(it) }
+                EmailJob.perform { EmailService.sendRegistrationSuccessful(userBody.username!!, userBody.email!!) }
             }
         }
     }

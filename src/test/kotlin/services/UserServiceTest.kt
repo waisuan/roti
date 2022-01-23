@@ -9,6 +9,7 @@ import exceptions.UnapprovedUserException
 import helpers.TestDatabase
 import io.mockk.every
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.verify
 import java.time.LocalDateTime
 import models.User
@@ -384,5 +385,7 @@ class UserServiceTest {
         assertThatThrownBy { UserService.createUser(
             User(username = "Esia4", password = "password_4", email = "esia_4@mail.com")
         ) }.isInstanceOf(BadNewUserException::class.java)
+
+        unmockkObject(Config)
     }
 }

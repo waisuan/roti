@@ -10,7 +10,6 @@ import helpers.TestDatabase
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import io.mockk.verify
 import java.time.LocalDateTime
 import models.User
 import models.UserRole
@@ -378,7 +377,7 @@ class UserServiceTest {
         (1..3).forEach { idx ->
             assertDoesNotThrow {
                 UserService.createUser(
-                    User(username = "ESia${idx}", password = "password_${idx}", email = "esia_${idx}@mail.com")
+                    User(username = "ESia$idx", password = "password_$idx", email = "esia_$idx@mail.com")
                 )
             }
         }

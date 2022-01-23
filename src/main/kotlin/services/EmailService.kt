@@ -7,14 +7,13 @@ import com.sendgrid.Method
 import com.sendgrid.Request
 import com.sendgrid.SendGrid
 import configs.Config
-import models.User
 import models.UserRole
 import utils.logger
 
 object EmailService {
     fun sendRegistrationSuccessful(username: String, email: String) {
         send(to = email, subject = "Registration Successful!", body = """
-            Hi ${username},
+            Hi $username,
             
             Your registration was successful.
             You'll need to be approved by an admin user before being able to log in.

@@ -34,6 +34,7 @@ object MaintenanceService {
                 }.firstOrNull() != null)
                 throw RecordAlreadyExistsException()
 
+            val now = LocalDateTime.now()
             MaintenanceDao.new {
                 this.serialNumber = serialNumber
                 workOrderNumber = newMaintenance.workOrderNumber!!
@@ -42,8 +43,8 @@ object MaintenanceService {
                 reportedBy = newMaintenance.reportedBy
                 workOrderType = newMaintenance.workOrderType
                 attachment = newMaintenance.attachment
-                createdAt = LocalDateTime.now()
-                updatedAt = LocalDateTime.now()
+                createdAt = now
+                updatedAt = now
             }
         }
     }

@@ -64,7 +64,7 @@ class SeedDataLoader : Task {
     private fun seededMaintenanceData() {
         var success = 0; var failed = 0
         MachineService.getAllMachines(limit = 5).forEach { machine ->
-            for (i in 1 .. total) {
+            for (i in 1..total) {
                 val m = Maintenance(
                     workOrderNumber = UUID.randomUUID().toString().takeLast(8),
                     workOrderDate = LocalDate.now().minusDays(Random.nextLong(-365, 365)),
